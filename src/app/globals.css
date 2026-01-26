@@ -72,11 +72,27 @@
   --chart-3: 30 80% 55%;
   --chart-4: 280 65% 60%;
   --chart-5: 340 75% 55%;
-  
-  /* FaithTribe Custom Variables */
-  --kids-primary: 35 90% 60%; /* Orange */
-  --teens-primary: 150 100% 50%; /* Lime Green */
-  --teachers-primary: 190 80% 40%; /* Teal */
+
+  /* FaithTribe Pro Max Variables */
+  --deep-bg: 240 10% 4%;
+  /* Darker, richer background */
+  --glass-border: 240 5% 20%;
+
+  --kids-primary: 32 95% 60%;
+  /* Vibrant Orange */
+  --kids-secondary: 180 85% 45%;
+  /* Teal pop */
+
+  --teens-primary: 260 100% 65%;
+  /* Electric Purple */
+  --teens-accent: 160 100% 50%;
+  /* Neon Green */
+
+  --teachers-primary: 210 90% 50%;
+  /* Trustworthy Blue */
+  --teachers-secondary: 45 90% 55%;
+  /* Gold Accent */
+
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -125,6 +141,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
