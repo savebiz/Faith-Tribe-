@@ -136,26 +136,23 @@ const App: React.FC = () => {
     <div className="mesh-gradient min-h-screen text-gray-900">
       {/* Live Stream Banner */}
       <div 
-        className="bg-red-600 text-white px-4 py-3.5 flex justify-between items-center sm:px-6 lg:px-8 cursor-pointer hover:bg-red-700 transition-colors live-pulse-glow z-10" 
+        className="bg-red-600 text-white px-4 py-2 flex justify-between items-center sm:px-6 lg:px-8 cursor-pointer hover:bg-red-700 transition-colors z-10" 
         onClick={() => setIsLiveStreamOpen(true)}
       >
         <div className="flex items-center gap-3">
-          <span className="relative flex h-3.5 w-3.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-white"></span>
-          </span>
+          <span className="relative flex h-2 w-2 bg-white rounded-full"></span>
           <p className="font-extrabold text-xs sm:text-sm tracking-wide uppercase">
             LIVE NOW: Sunday Service - "Walking in Dominion"
           </p>
         </div>
-        <button className="text-[10px] bg-white text-red-600 hover:bg-red-50 px-3.5 py-1.5 rounded-full font-black tracking-wider transition-all hover:scale-105 active:scale-95 shadow-md">
+        <button className="text-[10px] bg-white text-red-600 hover:bg-red-50 px-3.5 py-1 rounded-full font-black tracking-wider transition-all hover:scale-105 active:scale-95 shadow-md">
           WATCH LIVE
         </button>
       </div>
 
       {/* Hero Section */}
       <div className="relative isolate overflow-hidden">
-        <div className="mx-auto max-w-7xl px-6 pb-24 pt-16 sm:pb-32 lg:flex lg:px-8 lg:py-32 items-center gap-12">
+        <div className="mx-auto max-w-7xl px-6 pb-12 pt-6 sm:pb-20 sm:pt-10 lg:flex lg:px-8 lg:pt-14 lg:pb-24 items-center gap-12">
           <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0">
             <div className="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-full px-3 py-1 text-xs font-semibold text-indigo-600 mb-6 shadow-sm">
               <Sparkles size={12} className="text-indigo-500" />
