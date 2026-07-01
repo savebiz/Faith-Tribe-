@@ -1,5 +1,6 @@
 {
   "name": "Faith Tribe",
   "description": "A modern digital ministry and soul-winning platform for RCCG Region 63 Junior Church, catering to Kids, Teens, and Teachers.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [],
+  "majorCapabilities": []
 }
