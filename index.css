@@ -1,0 +1,164 @@
+/* ==========================================================================
+   Faith Tribe Custom Premium Styles & Utility Classes
+   ========================================================================== */
+
+/* Custom Animations */
+@keyframes meshGlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px 5px rgba(79, 70, 229, 0.2);
+  }
+}
+
+@keyframes greenGlow {
+  0%, 100% {
+    box-shadow: 0 0 8px 0px rgba(16, 185, 129, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 16px 4px rgba(16, 185, 129, 0.6);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* Glassmorphism Styles */
+.glassmorphism {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.glassmorphism-dark {
+  background: rgba(17, 24, 39, 0.75);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Gradient Mesh Backgrounds */
+.mesh-gradient {
+  background: linear-gradient(-45deg, #e0e7ff, #eef2ff, #f5f3ff, #f3e8ff);
+  background-size: 400% 400%;
+  animation: meshGlow 15s ease infinite;
+}
+
+.mesh-gradient-kids {
+  background: linear-gradient(-45deg, #fef3c7, #fffbeb, #ffedd5, #fef08a);
+  background-size: 300% 300%;
+  animation: meshGlow 12s ease infinite;
+}
+
+.mesh-gradient-teens {
+  background: linear-gradient(-45deg, #0f172a, #1e1b4b, #111827, #311042);
+  background-size: 400% 400%;
+  animation: meshGlow 18s ease infinite;
+}
+
+/* Interactive States & Micro-animations */
+.hover-lift {
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.15);
+}
+
+.hover-lift-teens {
+  transition: transform 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.25s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.25s;
+}
+
+.hover-lift-teens:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.5);
+}
+
+.hover-bounce {
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.hover-bounce:hover {
+  transform: scale(1.04) translateY(-2px);
+}
+
+/* Kids Ticket/Card Design */
+.kids-ticket {
+  background: #ffffff;
+  border: 4px dashed #f59e0b;
+  border-radius: 24px;
+  position: relative;
+}
+
+.kids-ticket::before, .kids-ticket::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  background: #fef3c7; /* Match kids-bg */
+  border-radius: 50%;
+  transform: translateY(-50%);
+}
+
+.kids-ticket::before {
+  left: -12px;
+  border-right: 4px solid #f59e0b;
+}
+
+.kids-ticket::after {
+  right: -12px;
+  border-left: 4px solid #f59e0b;
+}
+
+/* Glow classes */
+.live-pulse-glow {
+  animation: pulseGlow 2s infinite;
+}
+
+.green-glow {
+  animation: greenGlow 2s infinite;
+}
+
+.float-animation {
+  animation: float 4s ease-in-out infinite;
+}
+
+/* Accessible focus ring style */
+.focus-ring:focus-visible {
+  outline: 3px solid #6366f1;
+  outline-offset: 2px;
+}
+
+/* Scrollbar tweaks */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
