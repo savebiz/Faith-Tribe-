@@ -2,6 +2,44 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <script>
+      window.addEventListener('error', function(event) {
+        const errorDiv = document.createElement('div');
+        errorDiv.style.position = 'fixed';
+        errorDiv.style.bottom = '10px';
+        errorDiv.style.left = '10px';
+        errorDiv.style.right = '10px';
+        errorDiv.style.backgroundColor = '#EF4444';
+        errorDiv.style.color = 'white';
+        errorDiv.style.padding = '16px';
+        errorDiv.style.zIndex = '999999';
+        errorDiv.style.fontSize = '12px';
+        errorDiv.style.borderRadius = '12px';
+        errorDiv.style.wordBreak = 'break-all';
+        errorDiv.style.fontFamily = 'monospace';
+        errorDiv.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+        errorDiv.innerText = 'Runtime Error: ' + event.message + '\nAt: ' + event.filename + ':' + event.lineno + ':' + event.colno + '\nStack: ' + (event.error ? event.error.stack : 'N/A');
+        document.body.appendChild(errorDiv);
+      });
+      window.addEventListener('unhandledrejection', function(event) {
+        const errorDiv = document.createElement('div');
+        errorDiv.style.position = 'fixed';
+        errorDiv.style.bottom = '10px';
+        errorDiv.style.left = '10px';
+        errorDiv.style.right = '10px';
+        errorDiv.style.backgroundColor = '#EF4444';
+        errorDiv.style.color = 'white';
+        errorDiv.style.padding = '16px';
+        errorDiv.style.zIndex = '999999';
+        errorDiv.style.fontSize = '12px';
+        errorDiv.style.borderRadius = '12px';
+        errorDiv.style.wordBreak = 'break-all';
+        errorDiv.style.fontFamily = 'monospace';
+        errorDiv.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+        errorDiv.innerText = 'Promise Rejection: ' + event.reason + '\nStack: ' + (event.reason && event.reason.stack ? event.reason.stack : 'N/A');
+        document.body.appendChild(errorDiv);
+      });
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Faith Tribe | Digital Ministry</title>
     <script src="https://cdn.tailwindcss.com"></script>
