@@ -176,10 +176,16 @@
 }
 
 .footer-wordmark {
-  font-size: clamp(2rem, 9.5vw, 11rem);
+  font-size: clamp(3rem, 14vw, 11rem);
   font-weight: 700; /* heaviest true weight of Fredoka */
   line-height: 1;
-  letter-spacing: 0.15em;
+  letter-spacing: normal;
   color: #ffffff;
   white-space: nowrap;
+}
+
+@media (min-width: 1024px) {
+  .footer-wordmark {
+    letter-spacing: 0.15em;
+  }
 }
