@@ -119,20 +119,21 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView, onWatchLive,
                </button>
              )}
 
-            <div className="flex items-center gap-4 lg:gap-8">
+            <div className="flex items-center gap-0">
               <button
                  onClick={() => onChangeView(Audience.HOME)}
                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${getLinkActiveStyle(Audience.HOME)}`}
               >
                 Home
               </button>
-               {navLinks.map((link) => {
-                const shouldReduceSpacing = link.label === "Teachers Hub" || link.label === "Read Bible";
+              {navLinks.map((link) => {
+                const spacing = (link.label === 'About' || link.label === 'Kids Zone') ? '10px' : '8px';
                 return (
                   <button
                     key={link.value}
                     onClick={() => onChangeView(link.value)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${getLinkActiveStyle(link.value)} ${shouldReduceSpacing ? '-ml-2 lg:-ml-4' : ''}`}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${getLinkActiveStyle(link.value)}`}
+                    style={{ marginLeft: spacing }}
                   >
                     {link.label}
                   </button>
