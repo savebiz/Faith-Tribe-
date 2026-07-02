@@ -1030,10 +1030,10 @@ const App: React.FC = () => {
           {/* Copyright & Attribution Row */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/50 pt-8 border-t border-[#4d4475] mb-8">
             <div>
-              &copy; {new Date().getFullYear()} RCCG Region 63 Junior Church / Faith Tribe. All rights reserved.
+              &copy; {new Date().getFullYear()} RCCG Faith Tribe
             </div>
             <div className="flex items-center gap-2">
-              <span>A ministry of DTCE Junior Church Global</span>
+              <span>A digital ministry of RCCG Region 63 Junior Church</span>
               <img src="/DTCE_Global_Circular.png" className="w-5 h-5 rounded-full object-cover border border-white/10" alt="DTCE logo" />
             </div>
           </div>
