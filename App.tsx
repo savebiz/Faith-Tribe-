@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { VerseOfTheWeek } from './lib/bible/VerseOfTheWeek';
 import { BibleReaderView } from './lib/bible/BibleReaderView';
+import { FullWidthWordmark } from './components/FullWidthWordmark';
 
 // --- Mock Data ---
 const KIDS_CONTENT: ContentItem[] = [
@@ -1029,12 +1030,12 @@ const App: React.FC = () => {
 
           {/* Copyright & Attribution Row */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/50 pt-8 border-t border-[#4d4475] mb-8">
-            <div>
-              &copy; {new Date().getFullYear()} RCCG Faith Tribe
-            </div>
             <div className="flex items-center gap-2">
-              <span>A digital ministry of RCCG Region 63 Junior Church</span>
-              <img src="/Faith_Tribe_Grey-rbg.png" className="w-5 h-5 rounded-full object-cover border border-white/10" alt="Faith Tribe logo" />
+              <span>&copy; {new Date().getFullYear()} RCCG Faith Tribe</span>
+              <img src="/Faith_Tribe_Circular.png" className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover border border-white/10" alt="Faith Tribe logo" />
+            </div>
+            <div>
+              A digital ministry of RCCG Region 63 Junior Church
             </div>
           </div>
           
@@ -1042,11 +1043,7 @@ const App: React.FC = () => {
           <hr className="border-[#4d4475] my-6 opacity-60" />
           
           {/* Giant Wordmark */}
-          <div className="w-full text-center overflow-hidden leading-none select-none mt-4">
-            <h2 className="font-display font-black text-white/95 tracking-tighter" style={{ fontSize: 'clamp(3rem, 15vw, 12rem)', letterSpacing: '-0.03em' }}>
-              FaithTribe
-            </h2>
-          </div>
+          <FullWidthWordmark text="FaithTribe" />
         </div>
       </footer>
 
