@@ -126,13 +126,13 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView, onWatchLive,
               >
                 Home
               </button>
-              {navLinks.map((link) => {
-                const isTeachersHub = link.label === "Teachers Hub";
+               {navLinks.map((link) => {
+                const shouldReduceSpacing = link.label === "Teachers Hub" || link.label === "Read Bible";
                 return (
                   <button
                     key={link.value}
                     onClick={() => onChangeView(link.value)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${getLinkActiveStyle(link.value)} ${isTeachersHub ? '-ml-2 lg:-ml-4' : ''}`}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${getLinkActiveStyle(link.value)} ${shouldReduceSpacing ? '-ml-2 lg:-ml-4' : ''}`}
                   >
                     {link.label}
                   </button>
