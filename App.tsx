@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import GeminiAssistant from './components/GeminiAssistant';
 import ContentSection from './components/ContentSection';
@@ -38,6 +38,35 @@ interface NewConvert {
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<Audience>(Audience.HOME);
+  
+  // -- State for Live Stream Status (conditional UI) --
+  const [broadcastStatus, setBroadcastStatus] = useState({
+    isLive: false,
+    title: "",
+    watchUrl: ""
+  });
+
+  useEffect(() => {
+    const fetchStatus = async () => {
+      try {
+        const res = await fetch('/broadcast_status.json');
+        if (res.ok) {
+          const data = await res.json();
+          setBroadcastStatus({
+            isLive: !!data.is_live,
+            title: data.title || "",
+            watchUrl: data.watch_url || ""
+          });
+        }
+      } catch (err) {
+        console.error("Failed to fetch broadcast status:", err);
+      }
+    };
+
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 60000); // Poll every 60s
+    return () => clearInterval(interval);
+  }, []);
   
   // -- State for Prayer Request --
   const [isPrayerModalOpen, setIsPrayerModalOpen] = useState(false);
@@ -135,64 +164,65 @@ const App: React.FC = () => {
   const HomeView = () => (
     <div className="mesh-gradient min-h-screen text-gray-900">
       {/* Live Stream Banner */}
-      <div 
-        className="bg-red-600 text-white px-4 py-2 flex justify-between items-center sm:px-6 lg:px-8 cursor-pointer hover:bg-red-700 transition-colors z-10" 
-        onClick={() => setIsLiveStreamOpen(true)}
-      >
-        <div className="flex items-center gap-3">
-          <span className="relative flex h-2 w-2 bg-white rounded-full"></span>
-          <p className="font-extrabold text-xs sm:text-sm tracking-wide uppercase">
-            LIVE NOW: Sunday Service - "Walking in Dominion"
-          </p>
+      {broadcastStatus.isLive && (
+        <div 
+          className="bg-[#EE3135] text-white px-4 py-2 flex justify-between items-center sm:px-6 lg:px-8 cursor-pointer hover:bg-[#d62529] transition-colors z-10" 
+          onClick={() => window.open(broadcastStatus.watchUrl, '_blank')}
+        >
+          <div className="flex items-center gap-3">
+            <span className="relative flex h-2 w-2 bg-white rounded-full"></span>
+            <p className="font-extrabold text-xs sm:text-sm tracking-wide uppercase">
+              LIVE NOW: {broadcastStatus.title}
+            </p>
+          </div>
+          <button 
+            onClick={(e) => {
+              e.stopPropagation();
+              window.open(broadcastStatus.watchUrl, '_blank');
+            }}
+            className="text-[10px] bg-white text-[#EE3135] hover:bg-red-50 px-3.5 py-1 rounded-full font-black tracking-wider transition-all hover:scale-105 active:scale-95 shadow-md"
+          >
+            WATCH LIVE
+          </button>
         </div>
-        <button className="text-[10px] bg-white text-red-600 hover:bg-red-50 px-3.5 py-1 rounded-full font-black tracking-wider transition-all hover:scale-105 active:scale-95 shadow-md">
-          WATCH LIVE
-        </button>
-      </div>
+      )}
 
       {/* Hero Section */}
       <div className="relative isolate overflow-hidden">
         <div className="mx-auto max-w-7xl px-6 pb-12 pt-6 sm:pb-20 sm:pt-10 lg:flex lg:px-8 lg:pt-14 lg:pb-24 items-center gap-12">
           <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0">
-            <div className="inline-flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-full px-3 py-1 text-xs font-semibold text-indigo-600 mb-6 shadow-sm">
-              <Sparkles size={12} className="text-indigo-500" />
-              <span>RCCG Region 63 Junior Church Portal</span>
-            </div>
-            
-            <h1 className="text-4xl font-black tracking-tight text-gray-900 sm:text-6xl leading-tight">
+            <h1 className="text-4xl font-black tracking-tight text-[#372f58] sm:text-6xl leading-tight">
               Faith Tribe
-              <span className="text-indigo-600 block text-2xl sm:text-3xl font-extrabold mt-3 tracking-wide">
+              <span className="text-[#1CABB9] block text-2xl sm:text-3xl font-extrabold mt-3 tracking-wide">
                 Win Souls. Raise Champions.
               </span>
             </h1>
-            <p className="mt-6 text-base sm:text-lg leading-relaxed text-gray-600">
+            <p className="mt-6 text-base sm:text-lg leading-relaxed text-[#372f58]/85">
               The digital heartbeat for our children and teenagers. A vibrant space to encounter the presence of God, grow strong in faith, and lead peers into Christ's brilliant light.
             </p>
             
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <button 
                 onClick={() => setIsSalvationModalOpen(true)}
-                className="rounded-full bg-indigo-600 px-6 py-3 text-sm font-bold text-white shadow-lg shadow-indigo-200 hover:bg-indigo-500 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                className="rounded-full bg-[#372f58] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#372f58]/10 hover:bg-[#1CABB9] hover:text-[#372f58] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#372f58]"
               >
                 Meet Jesus
               </button>
               <button 
                 onClick={() => setCurrentView(Audience.KIDS)}
-                className="rounded-full bg-amber-500 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-amber-100 hover:bg-amber-600 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                className="rounded-full bg-[#F8B229] px-5 py-3 text-sm font-bold text-[#372f58] shadow-lg shadow-[#F8B229]/15 hover:bg-[#1CABB9] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#F8B229]"
               >
                 Explore Zones
               </button>
               <button 
                 onClick={() => window.open('https://bible.com', '_blank')} 
-                className="text-sm font-bold leading-6 text-gray-800 hover:text-indigo-600 flex items-center gap-1 transition-colors px-3 py-2 cursor-pointer"
+                className="text-sm font-bold leading-6 text-[#372f58] hover:text-[#1CABB9] flex items-center gap-1 transition-colors px-3 py-2 cursor-pointer"
               >
-                Read Bible <ArrowRight size={16} />
+                Read Bible <ArrowRight size={16} className="text-[#1CABB9]" />
               </button>
             </div>
           </div>
-          
-          <div className="mx-auto mt-16 lg:mt-0 max-w-2xl lg:max-w-none flex-1 relative float-animation">
-            <div className="absolute inset-0 bg-gradient-to-tr from-indigo-300 to-purple-300 rounded-[2rem] filter blur-3xl opacity-30 -z-10"></div>
+          <div className="mt-16 sm:mt-24 lg:mt-0 lg:flex-shrink-0 lg:flex-grow flex justify-center">
             <div className="p-3 bg-white/40 backdrop-blur-md rounded-[2.5rem] border border-white/40 shadow-2xl">
               <img
                 src="https://picsum.photos/seed/worship/800/500"
@@ -205,19 +235,19 @@ const App: React.FC = () => {
       </div>
 
       {/* Soul Winning Block */}
-      <div className="bg-gradient-to-r from-indigo-600 to-indigo-800 py-16 shadow-xl relative overflow-hidden">
+      <div className="bg-gradient-to-r from-[#372f58] to-[#1CABB9] py-16 shadow-xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-white/5 rounded-full filter blur-2xl pointer-events-none"></div>
         <div className="mx-auto max-w-5xl px-6 lg:px-8 text-center relative">
           <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl mb-4">
             Looking for Purpose and Peace?
           </h2>
-          <p className="text-indigo-100 text-base sm:text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-white/90 text-base sm:text-lg mb-8 max-w-2xl mx-auto leading-relaxed">
             Whether you grew up in church or are seeking answers for the very first time, Jesus invites you to a life filled with purpose, freedom, and divine support.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <button 
               onClick={() => { setIsSalvationModalOpen(true); setSalvationStep(1); }}
-              className="bg-white text-indigo-700 px-6 py-3 rounded-full font-bold hover:bg-indigo-50 hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
+              className="bg-white text-[#372f58] px-6 py-3 rounded-full font-bold hover:bg-teal-50 hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
             >
               Start Salvation Guide
             </button>
@@ -232,11 +262,11 @@ const App: React.FC = () => {
       </div>
 
       {/* Audience Selection Grid */}
-      <div className="py-24 bg-white/30 backdrop-blur-md border-t border-indigo-100">
+      <div className="py-24 bg-white/30 backdrop-blur-md border-t border-teal-100/50">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center mb-16">
-            <h2 className="text-xs font-bold leading-7 text-indigo-600 uppercase tracking-widest">Discipleship Tracks</h2>
-            <p className="mt-2 text-3xl font-black tracking-tight text-gray-900 sm:text-4xl">
+            <h2 className="text-xs font-bold leading-7 text-[#1CABB9] uppercase tracking-widest">Discipleship Tracks</h2>
+            <p className="mt-2 text-3xl font-black tracking-tight text-[#372f58] sm:text-4xl">
               Find Your Place in the Tribe
             </p>
           </div>
@@ -266,18 +296,18 @@ const App: React.FC = () => {
             {/* Teens Card */}
             <div 
               onClick={() => setCurrentView(Audience.TEENS)}
-              className="group bg-white/70 backdrop-blur-sm border border-indigo-100 p-8 rounded-3xl cursor-pointer hover:bg-indigo-50/50 hover:border-indigo-300 transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/5 relative"
+              className="group bg-white/70 backdrop-blur-sm border border-[#1CABB9]/20 p-8 rounded-3xl cursor-pointer hover:bg-[#1CABB9]/5 hover:border-[#1CABB9] transition-all duration-300 hover:shadow-xl hover:shadow-[#1CABB9]/5 relative"
             >
-              <div className="h-12 w-12 flex items-center justify-center rounded-2xl bg-indigo-500 text-white shadow-md shadow-indigo-200 mb-6 group-hover:scale-110 transition-transform duration-300">
+              <div className="h-12 w-12 flex items-center justify-center rounded-2xl bg-[#372f58] text-white shadow-md shadow-[#372f58]/10 mb-6 group-hover:scale-110 transition-transform duration-300">
                 <Zap className="h-6 w-6 fill-current" />
               </div>
-              <h3 className="font-sans font-black text-xl text-indigo-900 mb-2">
+              <h3 className="font-sans font-black text-xl text-[#372f58] mb-2">
                 Faith Teens (13-19)
               </h3>
               <p className="text-gray-600 leading-relaxed text-sm">
                 A community to discuss life, navigate questions honestly, find solid truth, and share Christ confidently.
               </p>
-              <div className="mt-6 flex items-center gap-1.5 text-xs font-bold text-indigo-600 group-hover:translate-x-1.5 transition-transform duration-200">
+              <div className="mt-6 flex items-center gap-1.5 text-xs font-bold text-[#1CABB9] group-hover:translate-x-1.5 transition-transform duration-200">
                 <span>Join Tribe</span>
                 <ChevronRight size={14} />
               </div>
@@ -773,6 +803,7 @@ const App: React.FC = () => {
         currentView={currentView} 
         onChangeView={setCurrentView} 
         onWatchLive={() => setIsLiveStreamOpen(true)}
+        isLive={broadcastStatus.isLive}
       />
       
       <main className="flex-grow">

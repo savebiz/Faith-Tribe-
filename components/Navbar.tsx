@@ -6,9 +6,10 @@ interface NavbarProps {
   currentView: Audience;
   onChangeView: (view: Audience) => void;
   onWatchLive?: () => void;
+  isLive: boolean;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView, onWatchLive }) => {
+const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView, onWatchLive, isLive }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const getNavStyle = () => {
@@ -65,33 +66,59 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView, onWatchLive 
   return (
     <nav className={`w-full transition-all duration-300 ${getNavStyle()} sticky top-0 z-50`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo & Brand */}
+        <div className="flex items-center justify-between h-18 sm:h-20">
+          {/* Logo & Brand: Dual-brand lockup */}
           <div 
-            className="flex items-center cursor-pointer group transition-transform active:scale-95" 
+            className="flex items-center cursor-pointer group transition-transform active:scale-95 py-1.5" 
             onClick={() => { onChangeView(Audience.HOME); setIsOpen(false); }}
             aria-label="Navigate to Home"
           >
-            <div className={`p-2 rounded-full mr-2.5 transition-all duration-300 ${getLogoColors()} group-hover:rotate-12`}>
-              <Heart size={20} fill={currentView === Audience.KIDS ? "none" : "currentColor"} className="transition-transform" />
+            <div className="flex items-center">
+              {/* DTCE Global logo */}
+              <img 
+                src="/DTCE_Junior_Church.png" 
+                alt="DTCE Global" 
+                className="h-7 sm:h-9 object-contain"
+              />
+              
+              {/* Vertical divider */}
+              <div className="w-px h-6 sm:h-8 bg-[#372f58]/20 mx-2.5 sm:mx-3" />
+              
+              {/* Faith Tribe Logo (tree flame) */}
+              <img 
+                src="/Faith_Tribe_Logo.png" 
+                alt="Faith Tribe" 
+                className="h-7 sm:h-9 object-contain mr-3"
+              />
             </div>
-            <span className={`font-extrabold text-xl tracking-tight transition-colors duration-300
-              ${currentView === Audience.KIDS ? 'font-display text-white' : 
-                currentView === Audience.TEENS ? 'text-white font-sans' : 'text-gray-900 font-sans'}`}>
-              Faith Tribe
-            </span>
+            
+            {/* Stacked Wordmark & Subtitle */}
+            <div className="flex flex-col justify-center">
+              <span className={`font-extrabold text-base sm:text-lg leading-none tracking-tight transition-colors duration-300
+                ${currentView === Audience.KIDS ? 'font-display text-white' : 
+                  currentView === Audience.TEENS ? 'text-white font-sans' : 'text-[#372f58] font-sans'}`}>
+                Faith Tribe
+              </span>
+              <span className={`text-[8px] sm:text-[9px] font-medium tracking-tight mt-0.5 sm:mt-1 leading-none transition-colors duration-300
+                ${currentView === Audience.KIDS ? 'text-white/80' : 
+                  currentView === Audience.TEENS ? 'text-gray-400' : 'text-[#372f58]/65'}`}>
+                <span className="hidden sm:inline">RCCG </span>Region 63 Junior Church<span className="hidden sm:inline"> Portal</span>
+              </span>
+            </div>
           </div>
           
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-2">
              {/* Live Button Desktop */}
-             <button 
-                onClick={onWatchLive}
-                className="mr-4 flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-full text-xs font-black transition-all hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(220,38,38,0.4)] hover:shadow-[0_0_20px_rgba(220,38,38,0.6)]"
-             >
-                <Radio size={14} className="animate-pulse" />
-                <span className="tracking-wide">LIVE NOW</span>
-             </button>
+             {isLive && (
+               <button 
+                  onClick={onWatchLive}
+                  className="mr-4 flex items-center gap-2 bg-[#EE3135] hover:bg-[#d62529] text-white px-4 py-2 rounded-full text-xs font-black transition-all hover:scale-105 active:scale-95 shadow-[0_0_15px_rgba(238,49,53,0.4)] hover:shadow-[0_0_20px_rgba(238,49,53,0.6)]"
+               >
+                  <Radio size={14} className="animate-pulse" />
+                  <span className="tracking-wide">LIVE NOW</span>
+               </button>
+             )}
 
             <div className="flex items-center space-x-2">
               <button
@@ -136,13 +163,15 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView, onWatchLive 
             currentView === Audience.TEENS ? 'bg-gray-900 border-t border-gray-800' : 
             'bg-white border-t border-teal-50'}`}>
           
-          <button
-              onClick={() => { onWatchLive?.(); setIsOpen(false); }}
-              className="w-full text-left px-4 py-2.5 rounded-lg text-sm font-bold text-red-500 hover:bg-black/5 flex items-center gap-2 transition-colors cursor-pointer"
-          >
-              <Radio size={16} className="animate-pulse" />
-              <span>Watch Live Stream</span>
-          </button>
+          {isLive && (
+            <button
+                onClick={() => { onWatchLive?.(); setIsOpen(false); }}
+                className="w-full text-left px-4 py-2.5 rounded-lg text-sm font-bold text-[#EE3135] hover:bg-black/5 flex items-center gap-2 transition-colors cursor-pointer"
+            >
+                <Radio size={16} className="animate-pulse" />
+                <span>Watch Live Stream</span>
+            </button>
+          )}
           
           <button
               onClick={() => { onChangeView(Audience.HOME); setIsOpen(false); }}
