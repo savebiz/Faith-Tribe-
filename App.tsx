@@ -1034,7 +1034,7 @@ const App: React.FC = () => {
             </div>
             <div className="flex items-center gap-2">
               <span>A digital ministry of RCCG Region 63 Junior Church</span>
-              <img src="/DTCE_Global_Circular.png" className="w-5 h-5 rounded-full object-cover border border-white/10" alt="DTCE logo" />
+              <img src="/Faith_Tribe_Grey-rbg.png" className="w-5 h-5 rounded-full object-cover border border-white/10" alt="Faith Tribe logo" />
             </div>
           </div>
           
