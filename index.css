@@ -168,3 +168,18 @@
   --yv-background: #ffffff;
   --yv-reader-font-size: 18px;
 }
+
+.footer-wordmark-wrapper {
+  padding-left: clamp(1.5rem, 5vw, 4rem);
+  padding-right: clamp(1.5rem, 5vw, 4rem);
+  overflow: hidden;
+}
+
+.footer-wordmark {
+  font-size: clamp(3rem, 14vw, 11rem);
+  font-weight: 700; /* heaviest true weight of Fredoka */
+  line-height: 1;
+  letter-spacing: normal;
+  color: #ffffff;
+  white-space: nowrap;
+}
