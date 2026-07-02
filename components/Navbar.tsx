@@ -62,6 +62,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView, onWatchLive,
     { label: 'Kids Zone', value: Audience.KIDS },
     { label: 'Teens Tribe', value: Audience.TEENS },
     { label: 'Teachers Hub', value: Audience.TEACHERS },
+    { label: 'Read Bible', value: Audience.BIBLE },
   ];
 
   return (

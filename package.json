@@ -12,7 +12,10 @@
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "@google/genai": "^1.37.0",
-    "lucide-react": "^0.562.0"
+    "lucide-react": "^0.562.0",
+    "@youversion/platform-react-ui": "^2.2.0",
+    "@youversion/platform-react-hooks": "^2.2.0",
+    "@youversion/platform-core": "^2.2.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

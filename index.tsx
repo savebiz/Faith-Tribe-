@@ -1,6 +1,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import { YouVersionProvider } from '@youversion/platform-react-ui';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -10,6 +11,8 @@ if (!rootElement) {
 const root = createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <App />
+    <YouVersionProvider appKey={import.meta.env.VITE_YOUVERSION_APP_KEY || "DUMMY_APP_KEY"} theme="light">
+      <App />
+    </YouVersionProvider>
   </React.StrictMode>
 );

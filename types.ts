@@ -3,7 +3,8 @@ export enum Audience {
   ABOUT = 'ABOUT',
   KIDS = 'KIDS',
   TEENS = 'TEENS',
-  TEACHERS = 'TEACHERS'
+  TEACHERS = 'TEACHERS',
+  BIBLE = 'BIBLE'
 }
 
 export interface ContentItem {

@@ -9,6 +9,8 @@ import {
   Smile, Shield, Calendar, ChevronRight, Plus, CheckCircle2, ClipboardList, 
   Send, Sparkles, Trophy, PlusCircle, Check
 } from 'lucide-react';
+import { VerseOfTheWeek } from './lib/bible/VerseOfTheWeek';
+import { BibleReaderView } from './lib/bible/BibleReaderView';
 
 // --- Mock Data ---
 const KIDS_CONTENT: ContentItem[] = [
@@ -201,26 +203,18 @@ const App: React.FC = () => {
               The digital heartbeat for our children and teenagers. A vibrant space to encounter the presence of God, grow strong in faith, and lead peers into Christ's brilliant light.
             </p>
             
-            <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-4 w-full sm:w-auto">
-              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                <button 
-                  onClick={() => setIsSalvationModalOpen(true)}
-                  className="w-full sm:w-auto rounded-full bg-[#372f58] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#372f58]/10 hover:bg-[#1CABB9] hover:text-[#372f58] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#372f58] text-center"
-                >
-                  Meet Jesus
-                </button>
-                <button 
-                  onClick={() => setCurrentView(Audience.KIDS)}
-                  className="w-full sm:w-auto rounded-full bg-[#F8B229] px-6 py-3 text-sm font-bold text-[#372f58] shadow-lg shadow-[#F8B229]/15 hover:bg-[#1CABB9] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#F8B229] text-center"
-                >
-                  Explore Tribes
-                </button>
-              </div>
+            <div className="mt-8 flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
               <button 
-                onClick={() => window.open('https://bible.com', '_blank')} 
-                className="text-sm font-bold leading-6 text-[#372f58] hover:text-[#1CABB9] flex items-center gap-1 transition-colors px-1 py-1 cursor-pointer mt-3 sm:mt-0 self-start"
+                onClick={() => setIsSalvationModalOpen(true)}
+                className="w-full sm:w-auto rounded-full bg-[#372f58] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#372f58]/10 hover:bg-[#1CABB9] hover:text-[#372f58] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#372f58] text-center"
               >
-                Read Bible <ArrowRight size={16} className="text-[#1CABB9]" />
+                Meet Jesus
+              </button>
+              <button 
+                onClick={() => setCurrentView(Audience.KIDS)}
+                className="w-full sm:w-auto rounded-full bg-[#F8B229] px-6 py-3 text-sm font-bold text-[#372f58] shadow-lg shadow-[#F8B229]/15 hover:bg-[#1CABB9] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#F8B229] text-center"
+              >
+                Explore Tribes
               </button>
             </div>
           </div>
@@ -548,17 +542,12 @@ const App: React.FC = () => {
           <ContentSection title="This Week's Fun" items={KIDS_CONTENT} colorTheme="text-amber-500" />
           
           {/* Bible Verse Spotlight */}
-          <div className="bg-white p-8 rounded-[2rem] shadow-sm border-4 border-amber-200/60 relative overflow-hidden">
+          <div className="bg-white p-8 rounded-[2rem] shadow-sm border-4 border-amber-200/60 relative overflow-hidden text-gray-700">
             <div className="absolute top-0 right-0 p-3 bg-amber-400 text-white rounded-bl-2xl">
               <Trophy size={18} />
             </div>
             <h3 className="text-2xl text-amber-600 mb-4">Verse of the Week</h3>
-            <p className="text-2xl md:text-3xl text-gray-700 italic leading-relaxed font-semibold">
-              "For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life."
-            </p>
-            <p className="text-right font-black text-amber-500 mt-4 text-lg font-sans">
-              - John 3:16
-            </p>
+            <VerseOfTheWeek versionId={1932} />
           </div>
         </div>
 
@@ -634,6 +623,15 @@ const App: React.FC = () => {
           </div>
 
           <ContentSection title="Latest Drops" items={TEENS_CONTENT} colorTheme="text-emerald-400" />
+
+          {/* Bible Verse Spotlight */}
+          <div className="bg-white p-8 rounded-[2rem] shadow-sm border-4 border-emerald-200/60 relative overflow-hidden text-gray-700 animate-in fade-in duration-300">
+            <div className="absolute top-0 right-0 p-3 bg-emerald-400 text-white rounded-bl-2xl">
+              <Trophy size={18} />
+            </div>
+            <h3 className="text-2xl text-emerald-600 mb-4 font-sans font-bold">Verse of the Week</h3>
+            <VerseOfTheWeek versionId={1588} />
+          </div>
         </div>
 
         <div className="lg:col-span-1">
@@ -842,6 +840,15 @@ const App: React.FC = () => {
             </div>
 
             <ContentSection title="Evangelism Resources" items={TEACHERS_CONTENT} colorTheme="text-teal-700" />
+
+            {/* Bible Verse Spotlight */}
+            <div className="bg-white p-8 rounded-[2rem] shadow-sm border-4 border-teal-200/60 relative overflow-hidden text-gray-700 animate-in fade-in duration-300">
+              <div className="absolute top-0 right-0 p-3 bg-teal-600 text-white rounded-bl-2xl">
+                <Trophy size={18} />
+              </div>
+              <h3 className="text-2xl text-teal-700 mb-4 font-sans font-bold">Scripture for the Week</h3>
+              <VerseOfTheWeek versionId={1} />
+            </div>
           </div>
           
           {/* Right Column (AI Assistant) */}
@@ -974,6 +981,7 @@ const App: React.FC = () => {
         {currentView === Audience.KIDS && <KidsView />}
         {currentView === Audience.TEENS && <TeensView />}
         {currentView === Audience.TEACHERS && <TeachersView />}
+        {currentView === Audience.BIBLE && <BibleReaderView onBack={() => setCurrentView(Audience.HOME)} />}
       </main>
 
       <footer className="bg-gray-900 text-white py-14 border-t border-gray-800">

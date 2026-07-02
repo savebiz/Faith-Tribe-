@@ -162,3 +162,9 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+[data-yv-sdk] {
+  --yv-primary: #372f58;
+  --yv-background: #ffffff;
+  --yv-reader-font-size: 18px;
+}
