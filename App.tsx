@@ -352,54 +352,52 @@ const App: React.FC = () => {
       </div>
 
       {/* Who We Are & Story */}
-      <div className="mx-auto max-w-7xl px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+      <div className="mx-auto max-w-7xl px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:items-stretch items-start">
         {/* Left Column: Who We Are & Sub-ministries */}
-        <div className="lg:col-span-7 space-y-8">
-          <div className="bg-white/60 backdrop-blur-md p-8 rounded-3xl border border-white/50 shadow-sm">
-            <h2 className="text-2xl font-black text-[#372f58] mb-4">Who We Are</h2>
-            <p className="text-sm leading-relaxed text-[#372f58]/85 mb-6">
-              Faith Tribe is the Junior Church of RCCG Region 63 — a single, unified identity for everything we do with children and teenagers across the region. Under one name, Faith Tribe brings together three ministries with one shared purpose:
-            </p>
-            
-            {/* Simplified Editorial Sub-ministries list */}
-            <div className="space-y-4">
-              <div className="flex items-start gap-3 p-3.5 rounded-2xl hover:bg-[#1CABB9]/5 transition-colors duration-200">
-                <div className="h-8 w-8 rounded-lg bg-amber-100 flex items-center justify-center text-amber-600 mt-0.5">
-                  <Star size={16} className="fill-current" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm text-[#372f58]">Faith Tribe Kids</h4>
-                  <p className="text-xs text-gray-600 mt-0.5">Our children's ministry, serving ages 2 to 12.</p>
-                </div>
+        <div className="lg:col-span-7 bg-white/60 backdrop-blur-md p-8 rounded-3xl border border-white/50 shadow-sm flex flex-col h-full">
+          <h2 className="text-2xl font-black text-[#372f58] mb-4">Who We Are</h2>
+          <p className="text-sm leading-relaxed text-[#372f58]/85 mb-6">
+            Faith Tribe is the Junior Church of RCCG Region 63 — a single, unified identity for everything we do with children and teenagers across the region. Under one name, Faith Tribe brings together three ministries with one shared purpose:
+          </p>
+          
+          {/* Simplified Editorial Sub-ministries list */}
+          <div className="space-y-4">
+            <div className="flex items-start gap-3 p-3.5 rounded-2xl hover:bg-[#1CABB9]/5 transition-colors duration-200">
+              <div className="h-8 w-8 rounded-lg bg-amber-100 flex items-center justify-center text-amber-600 mt-0.5">
+                <Star size={16} className="fill-current" />
               </div>
-              <div className="flex items-start gap-3 p-3.5 rounded-2xl hover:bg-[#1CABB9]/5 transition-colors duration-200">
-                <div className="h-8 w-8 rounded-lg bg-[#372f58]/10 flex items-center justify-center text-[#372f58] mt-0.5">
-                  <Zap size={16} className="fill-current" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm text-[#372f58]">Faith Tribe Teens</h4>
-                  <p className="text-xs text-gray-600 mt-0.5">Our teenagers' ministry, serving ages 13 to 15.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 p-3.5 rounded-2xl hover:bg-[#1CABB9]/5 transition-colors duration-200">
-                <div className="h-8 w-8 rounded-lg bg-teal-100 flex items-center justify-center text-teal-700 mt-0.5">
-                  <BookOpen size={16} />
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm text-[#372f58]">Faith Tribe Teachers</h4>
-                  <p className="text-xs text-gray-600 mt-0.5">The dedicated team who leads and disciples them both.</p>
-                </div>
+              <div>
+                <h4 className="font-bold text-sm text-[#372f58]">Faith Tribe Kids</h4>
+                <p className="text-xs text-gray-600 mt-0.5">Our children's ministry, serving ages 2 to 12.</p>
               </div>
             </div>
-
-            <p className="text-sm font-bold text-[#372f58] mt-6 border-t border-gray-100 pt-4 text-center sm:text-left">
-              We are one tribe, made up of different ages and roles, united by the same faith and the same mission: raising a generation rooted in Christ.
-            </p>
+            <div className="flex items-start gap-3 p-3.5 rounded-2xl hover:bg-[#1CABB9]/5 transition-colors duration-200">
+              <div className="h-8 w-8 rounded-lg bg-[#372f58]/10 flex items-center justify-center text-[#372f58] mt-0.5">
+                <Zap size={16} className="fill-current" />
+              </div>
+              <div>
+                <h4 className="font-bold text-sm text-[#372f58]">Faith Tribe Teens</h4>
+                <p className="text-xs text-gray-600 mt-0.5">Our teenagers' ministry, serving ages 13 to 15.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-3.5 rounded-2xl hover:bg-[#1CABB9]/5 transition-colors duration-200">
+              <div className="h-8 w-8 rounded-lg bg-teal-100 flex items-center justify-center text-teal-700 mt-0.5">
+                <BookOpen size={16} />
+              </div>
+              <div>
+                <h4 className="font-bold text-sm text-[#372f58]">Faith Tribe Teachers</h4>
+                <p className="text-xs text-gray-600 mt-0.5">The dedicated team who leads and disciples them both.</p>
+              </div>
+            </div>
           </div>
+
+          <p className="text-sm font-bold text-[#372f58] mt-auto border-t border-gray-100 pt-4 text-center sm:text-left">
+            We are one tribe, made up of different ages and roles, united by the same faith and the same mission: raising a generation rooted in Christ.
+          </p>
         </div>
 
         {/* Right Column: Logo Story */}
-        <div className="lg:col-span-5 bg-white/60 backdrop-blur-md p-8 rounded-3xl border border-white/50 shadow-sm flex flex-col items-center text-center">
+        <div className="lg:col-span-5 bg-white/60 backdrop-blur-md p-8 rounded-3xl border border-white/50 shadow-sm flex flex-col items-center text-center h-full">
           <img 
             src="/Faith_Tribe_Circular.png" 
             alt="Faith Tribe Circular Emblem" 
