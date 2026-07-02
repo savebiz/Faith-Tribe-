@@ -79,25 +79,22 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView, onWatchLive,
               <img 
                 src="/DTCE_Global_Circular.png" 
                 alt="DTCE Global" 
-                className="h-7 w-7 sm:h-9 sm:w-9 rounded-full object-cover border border-[#372f58]/10 shadow-[0_1px_3px_rgba(55,47,88,0.08)]"
+                className="h-7 w-7 sm:h-9 sm:w-9 rounded-full object-cover border border-[#372f58]/10 shadow-[0_1px_3px_rgba(55,47,88,0.15)] z-10"
               />
-              
-              {/* Vertical divider */}
-              <div className="w-px h-6 sm:h-8 bg-[#372f58]/20 mx-2.5 sm:mx-3" />
               
               {/* Faith Tribe Circular logo */}
               <img 
                 src="/Faith_Tribe_Circular.png" 
                 alt="Faith Tribe" 
-                className="h-7 w-7 sm:h-9 sm:w-9 rounded-full object-cover border border-[#372f58]/10 shadow-[0_1px_3px_rgba(55,47,88,0.08)] mr-3"
+                className="h-7 w-7 sm:h-9 sm:w-9 rounded-full object-cover border border-[#372f58]/10 shadow-[0_1px_3px_rgba(55,47,88,0.15)] ml-1 sm:ml-1.5 mr-3 sm:mr-4 z-0"
               />
             </div>
             
             {/* Stacked Wordmark & Subtitle */}
             <div className="flex flex-col justify-center">
-              <span className={`font-extrabold text-base sm:text-lg leading-none tracking-tight transition-colors duration-300
-                ${currentView === Audience.KIDS ? 'font-display text-white' : 
-                  currentView === Audience.TEENS ? 'text-white font-sans' : 'text-[#372f58] font-sans'}`}>
+              <span className={`font-display font-bold text-base sm:text-lg leading-none tracking-tight transition-colors duration-300
+                ${currentView === Audience.KIDS ? 'text-white' : 
+                  currentView === Audience.TEENS ? 'text-white' : 'text-[#372f58]'}`}>
                 Faith Tribe
               </span>
               <span className={`text-[8px] sm:text-[9px] font-medium tracking-tight mt-0.5 sm:mt-1 leading-none transition-colors duration-300
@@ -121,10 +118,10 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView, onWatchLive,
                </button>
              )}
 
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center gap-4 lg:gap-8">
               <button
                  onClick={() => onChangeView(Audience.HOME)}
-                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${getLinkActiveStyle(Audience.HOME)}`}
+                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${getLinkActiveStyle(Audience.HOME)}`}
               >
                 Home
               </button>
@@ -132,7 +129,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView, onWatchLive,
                 <button
                   key={link.value}
                   onClick={() => onChangeView(link.value)}
-                  className={`px-3.5 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${getLinkActiveStyle(link.value)}`}
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 cursor-pointer ${getLinkActiveStyle(link.value)}`}
                 >
                   {link.label}
                 </button>

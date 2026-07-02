@@ -201,28 +201,30 @@ const App: React.FC = () => {
               The digital heartbeat for our children and teenagers. A vibrant space to encounter the presence of God, grow strong in faith, and lead peers into Christ's brilliant light.
             </p>
             
-            <div className="mt-8 flex flex-wrap items-center gap-4">
-              <button 
-                onClick={() => setIsSalvationModalOpen(true)}
-                className="rounded-full bg-[#372f58] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#372f58]/10 hover:bg-[#1CABB9] hover:text-[#372f58] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#372f58]"
-              >
-                Meet Jesus
-              </button>
-              <button 
-                onClick={() => setCurrentView(Audience.KIDS)}
-                className="rounded-full bg-[#F8B229] px-5 py-3 text-sm font-bold text-[#372f58] shadow-lg shadow-[#F8B229]/15 hover:bg-[#1CABB9] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#F8B229]"
-              >
-                Explore Zones
-              </button>
+            <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-4 w-full sm:w-auto">
+              <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                <button 
+                  onClick={() => setIsSalvationModalOpen(true)}
+                  className="w-full sm:w-auto rounded-full bg-[#372f58] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#372f58]/10 hover:bg-[#1CABB9] hover:text-[#372f58] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#372f58] text-center"
+                >
+                  Meet Jesus
+                </button>
+                <button 
+                  onClick={() => setCurrentView(Audience.KIDS)}
+                  className="w-full sm:w-auto rounded-full bg-[#F8B229] px-6 py-3 text-sm font-bold text-[#372f58] shadow-lg shadow-[#F8B229]/15 hover:bg-[#1CABB9] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#F8B229] text-center"
+                >
+                  Explore Tribes
+                </button>
+              </div>
               <button 
                 onClick={() => window.open('https://bible.com', '_blank')} 
-                className="text-sm font-bold leading-6 text-[#372f58] hover:text-[#1CABB9] flex items-center gap-1 transition-colors px-3 py-2 cursor-pointer"
+                className="text-sm font-bold leading-6 text-[#372f58] hover:text-[#1CABB9] flex items-center gap-1 transition-colors px-1 py-1 cursor-pointer mt-3 sm:mt-0 self-start"
               >
                 Read Bible <ArrowRight size={16} className="text-[#1CABB9]" />
               </button>
             </div>
           </div>
-          <div className="w-full flex justify-center lg:justify-end mt-12 lg:mt-0">
+          <div className="w-full flex justify-center lg:justify-end mt-6 sm:mt-12 lg:mt-0">
             <div className="w-full max-w-md sm:max-w-lg p-3 bg-white/40 backdrop-blur-md rounded-[2.5rem] border border-white/40 shadow-2xl flex">
               <img
                 src="https://picsum.photos/seed/worship/800/500"
