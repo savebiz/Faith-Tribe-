@@ -189,8 +189,8 @@ const App: React.FC = () => {
 
       {/* Hero Section */}
       <div className="relative isolate overflow-hidden">
-        <div className="mx-auto max-w-7xl px-6 pb-12 pt-6 sm:pb-20 sm:pt-10 lg:flex lg:px-8 lg:pt-14 lg:pb-24 items-center gap-12">
-          <div className="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0">
+        <div className="mx-auto max-w-7xl px-6 pb-12 pt-6 sm:pb-20 sm:pt-10 lg:px-8 lg:pt-14 lg:pb-24 grid grid-cols-1 lg:grid-cols-2 items-center gap-12">
+          <div className="w-full">
             <h1 className="text-4xl font-black tracking-tight text-[#372f58] sm:text-6xl leading-tight">
               Faith Tribe
               <span className="text-[#1CABB9] block text-2xl sm:text-3xl font-extrabold mt-3 tracking-wide">
@@ -222,12 +222,12 @@ const App: React.FC = () => {
               </button>
             </div>
           </div>
-          <div className="mt-16 sm:mt-24 lg:mt-0 lg:flex-shrink-0 lg:flex-grow flex justify-center">
-            <div className="p-3 bg-white/40 backdrop-blur-md rounded-[2.5rem] border border-white/40 shadow-2xl">
+          <div className="w-full flex justify-center lg:justify-end mt-12 lg:mt-0">
+            <div className="w-full max-w-md sm:max-w-lg p-3 bg-white/40 backdrop-blur-md rounded-[2.5rem] border border-white/40 shadow-2xl flex">
               <img
                 src="https://picsum.photos/seed/worship/800/500"
                 alt="Worship screenshot"
-                className="w-full rounded-[2rem] shadow-xl object-cover"
+                className="w-full aspect-[4/3] rounded-[2rem] shadow-xl object-cover"
               />
             </div>
           </div>
@@ -282,7 +282,7 @@ const App: React.FC = () => {
                 <Star className="h-6 w-6 fill-current" />
               </div>
               <h3 className="font-display font-bold text-2xl text-amber-700 mb-2">
-                Faith Kids (2-12)
+                Faith Tribe Kids (2-12)
               </h3>
               <p className="text-gray-600 leading-relaxed text-sm">
                 Exciting Bible stories, sing-alongs, and fun activities designed to introduce young hearts to Jesus's love.
@@ -302,7 +302,7 @@ const App: React.FC = () => {
                 <Zap className="h-6 w-6 fill-current" />
               </div>
               <h3 className="font-sans font-black text-xl text-[#372f58] mb-2">
-                Faith Teens (13-19)
+                Faith Tribe Teens (13-15)
               </h3>
               <p className="text-gray-600 leading-relaxed text-sm">
                 A community to discuss life, navigate questions honestly, find solid truth, and share Christ confidently.
@@ -322,7 +322,7 @@ const App: React.FC = () => {
                 <BookOpen className="h-6 w-6" />
               </div>
               <h3 className="font-sans font-black text-xl text-teal-800 mb-2">
-                Faith Teachers
+                Faith Tribe Teachers
               </h3>
               <p className="text-gray-600 leading-relaxed text-sm">
                 Curriculums, tracking dashboards, follow-up modules, and spiritual resources to lead classes effectively.
@@ -334,6 +334,168 @@ const App: React.FC = () => {
             </div>
 
           </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const AboutView = () => (
+    <div className="mesh-gradient min-h-screen text-gray-900 pb-20">
+      {/* Hero Section */}
+      <div className="mx-auto max-w-7xl px-6 pt-16 pb-12 sm:pt-24 sm:pb-16 text-center">
+        <h2 className="text-xs font-bold leading-7 text-[#1CABB9] uppercase tracking-widest mb-3">
+          ABOUT FAITH TRIBE
+        </h2>
+        <h1 className="text-4xl font-black tracking-tight text-[#372f58] sm:text-5xl leading-tight">
+          Empowering the Next Generation <br className="hidden sm:inline"/>Through Faith
+        </h1>
+      </div>
+
+      {/* Who We Are & Story */}
+      <div className="mx-auto max-w-7xl px-6 grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        {/* Left Column: Who We Are & Sub-ministries */}
+        <div className="lg:col-span-7 space-y-8">
+          <div className="bg-white/60 backdrop-blur-md p-8 rounded-3xl border border-white/50 shadow-sm">
+            <h2 className="text-2xl font-black text-[#372f58] mb-4">Who We Are</h2>
+            <p className="text-sm leading-relaxed text-[#372f58]/85 mb-6">
+              Faith Tribe is the Junior Church of RCCG Region 63 — a single, unified identity for everything we do with children and teenagers across the region. Under one name, Faith Tribe brings together three ministries with one shared purpose:
+            </p>
+            
+            {/* Simplified Editorial Sub-ministries list */}
+            <div className="space-y-4">
+              <div className="flex items-start gap-3 p-3.5 rounded-2xl hover:bg-[#1CABB9]/5 transition-colors duration-200">
+                <div className="h-8 w-8 rounded-lg bg-amber-100 flex items-center justify-center text-amber-600 mt-0.5">
+                  <Star size={16} className="fill-current" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm text-[#372f58]">Faith Tribe Kids</h4>
+                  <p className="text-xs text-gray-600 mt-0.5">Our children's ministry, serving ages 2 to 12.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 p-3.5 rounded-2xl hover:bg-[#1CABB9]/5 transition-colors duration-200">
+                <div className="h-8 w-8 rounded-lg bg-[#372f58]/10 flex items-center justify-center text-[#372f58] mt-0.5">
+                  <Zap size={16} className="fill-current" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm text-[#372f58]">Faith Tribe Teens</h4>
+                  <p className="text-xs text-gray-600 mt-0.5">Our teenagers' ministry, serving ages 13 to 15.</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 p-3.5 rounded-2xl hover:bg-[#1CABB9]/5 transition-colors duration-200">
+                <div className="h-8 w-8 rounded-lg bg-teal-100 flex items-center justify-center text-teal-700 mt-0.5">
+                  <BookOpen size={16} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm text-[#372f58]">Faith Tribe Teachers</h4>
+                  <p className="text-xs text-gray-600 mt-0.5">The dedicated team who leads and disciples them both.</p>
+                </div>
+              </div>
+            </div>
+
+            <p className="text-sm font-bold text-[#372f58] mt-6 border-t border-gray-100 pt-4 text-center sm:text-left">
+              We are one tribe, made up of different ages and roles, united by the same faith and the same mission: raising a generation rooted in Christ.
+            </p>
+          </div>
+        </div>
+
+        {/* Right Column: Logo Story */}
+        <div className="lg:col-span-5 bg-white/60 backdrop-blur-md p-8 rounded-3xl border border-white/50 shadow-sm flex flex-col items-center text-center">
+          <img 
+            src="/Faith_Tribe_Circular.png" 
+            alt="Faith Tribe Circular Emblem" 
+            className="w-32 h-32 sm:w-40 sm:h-40 object-contain rounded-full border border-[#372f58]/10 shadow-lg mb-6"
+          />
+          <h3 className="text-xl font-black text-[#372f58] mb-3">The Story Behind Our Name and Logo</h3>
+          <p className="text-xs leading-relaxed text-[#372f58]/80 text-justify">
+            The name "Faith Tribe" reflects who we are becoming — a connected community united by faith, bringing together the diverse, vibrant family of children, teenagers, and teachers across Region 63.
+          </p>
+          <p className="text-xs leading-relaxed text-[#372f58]/80 text-justify mt-3">
+            Our logo tells that story visually. At its center is a growing tree, its branches quietly forming the shape of a flame — a picture of the Holy Spirit's guidance, and of growth that never stops. Woven into the tree are small human figures, standing in as leaves and roots: children, teenagers, and teachers, each one valued, each one growing together as part of the same tree. At the core of it all is a light — a reminder that everything we do is centered on Christ. The tree itself is the whole point: faith isn't a single moment, it's a lifelong journey, and we're walking it together.
+          </p>
+        </div>
+      </div>
+
+      {/* Vision & Mission (side by side on desktop, stacked on mobile) */}
+      <div className="mx-auto max-w-7xl px-6 mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
+        {/* Vision Block */}
+        <div className="bg-gradient-to-br from-[#372f58]/5 to-white/60 border border-white/40 p-8 rounded-3xl shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-[#1CABB9]/10 rounded-full filter blur-xl pointer-events-none"></div>
+          <h3 className="text-xs font-bold text-[#1CABB9] uppercase tracking-widest mb-2">OUR VISION</h3>
+          <h4 className="text-xl font-black text-[#372f58] mb-3">A Welcoming Discipleship Space</h4>
+          <p className="text-sm leading-relaxed text-[#372f58]/85">
+            To cultivate a vibrant, welcoming community where children and teenagers grow in faith, develop strong relationships, and become empowered to live out the teachings of Christ in their everyday lives. We envision a space where every young person feels valued, inspired to explore their faith, and equipped to serve others — fostering a lifelong journey of love, compassion, and discipleship.
+          </p>
+        </div>
+
+        {/* Mission Block */}
+        <div className="bg-gradient-to-br from-[#1CABB9]/5 to-white/60 border border-white/40 p-8 rounded-3xl shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-[#F8B229]/10 rounded-full filter blur-xl pointer-events-none"></div>
+          <h3 className="text-xs font-bold text-[#1CABB9] uppercase tracking-widest mb-2">OUR MISSION</h3>
+          <h4 className="text-xl font-black text-[#372f58] mb-3">Nurture and Disciple</h4>
+          <p className="text-sm leading-relaxed text-[#372f58]/85">
+            To nurture and disciple children and teenagers through Christ-centered teaching, purposeful mentorship, and meaningful fellowship. We aim to equip them with spiritual strength, moral integrity, and leadership skills to live out their faith boldly and impact their communities for Christ.
+          </p>
+        </div>
+      </div>
+
+      {/* What We're Building Toward (3 priorities) */}
+      <div className="mx-auto max-w-7xl px-6 mt-16">
+        <div className="text-center mb-10">
+          <h3 className="text-xs font-bold text-[#1CABB9] uppercase tracking-widest mb-2">OUR FUTURE</h3>
+          <h2 className="text-3xl font-black text-[#372f58]">What We're Building Toward</h2>
+          <p className="text-sm text-gray-500 mt-2">Three priorities guide the construction of the Faith Tribe digital environment.</p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="bg-white/40 border border-white/30 p-6 rounded-2xl hover:bg-white/60 transition-colors duration-200">
+            <div className="h-2 w-12 bg-[#F8B229] rounded-full mb-4" />
+            <h4 className="font-bold text-base text-[#372f58] mb-2">Capacity Building & Expansion</h4>
+            <p className="text-xs leading-relaxed text-gray-600">
+              Growing our team and reaching more parishes, so every child and teenager in Region 63 has access to a Junior Church, not just some of them.
+            </p>
+          </div>
+          <div className="bg-white/40 border border-white/30 p-6 rounded-2xl hover:bg-white/60 transition-colors duration-200">
+            <div className="h-2 w-12 bg-[#1CABB9] rounded-full mb-4" />
+            <h4 className="font-bold text-base text-[#372f58] mb-2">Infrastructure & Welfare</h4>
+            <p className="text-xs leading-relaxed text-gray-600">
+              Strengthening the everyday experience of being part of Faith Tribe: better facilities, better support, better care during conventions, camps, and regular programming.
+            </p>
+          </div>
+          <div className="bg-white/40 border border-white/30 p-6 rounded-2xl hover:bg-white/60 transition-colors duration-200">
+            <div className="h-2 w-12 bg-[#372f58] rounded-full mb-4" />
+            <h4 className="font-bold text-base text-[#372f58] mb-2">Innovative Programming & Engagement</h4>
+            <p className="text-xs leading-relaxed text-gray-600">
+              Creative, relevant events and formats that meet teenagers and children where they are, and hold their attention long enough to change their lives.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Closing CTA row */}
+      <div className="mx-auto max-w-4xl px-6 mt-20 text-center border-t border-gray-150 pt-16">
+        <h2 className="text-3xl font-black text-[#372f58] mb-4">Join the Tribe</h2>
+        <p className="text-sm text-gray-600 max-w-2xl mx-auto mb-8 leading-relaxed">
+          Whether you're a child taking your first steps in faith, a teenager navigating real questions with real stakes, or a teacher called to shape the next generation — there's a place for you here.
+        </p>
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+          <button 
+            onClick={() => setCurrentView(Audience.KIDS)}
+            className="w-full sm:w-auto rounded-full bg-[#F8B229] px-6 py-3 text-sm font-bold text-[#372f58] shadow-md hover:bg-[#1CABB9] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#F8B229]"
+          >
+            Enter Zone — Faith Tribe Kids
+          </button>
+          <button 
+            onClick={() => setCurrentView(Audience.TEENS)}
+            className="w-full sm:w-auto rounded-full bg-[#1CABB9] px-6 py-3 text-sm font-bold text-white shadow-md hover:bg-[#372f58] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#1CABB9]"
+          >
+            Join Tribe — Faith Tribe Teens
+          </button>
+          <button 
+            onClick={() => setCurrentView(Audience.TEACHERS)}
+            className="w-full sm:w-auto rounded-full bg-[#372f58] px-6 py-3 text-sm font-bold text-white shadow-md hover:bg-[#1CABB9] hover:text-[#372f58] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#372f58]"
+          >
+            Access Hub — Faith Tribe Teachers
+          </button>
         </div>
       </div>
     </div>
@@ -808,6 +970,7 @@ const App: React.FC = () => {
       
       <main className="flex-grow">
         {currentView === Audience.HOME && <HomeView />}
+        {currentView === Audience.ABOUT && <AboutView />}
         {currentView === Audience.KIDS && <KidsView />}
         {currentView === Audience.TEENS && <TeensView />}
         {currentView === Audience.TEACHERS && <TeachersView />}
@@ -827,6 +990,8 @@ const App: React.FC = () => {
           <div>
             <h4 className="text-sm font-black uppercase tracking-wider text-gray-200 mb-4">Quick Zones</h4>
             <ul className="space-y-2 text-sm text-gray-400">
+              <li><button onClick={() => setCurrentView(Audience.HOME)} className="hover:text-indigo-400 transition-colors cursor-pointer">Home</button></li>
+              <li><button onClick={() => setCurrentView(Audience.ABOUT)} className="hover:text-teal-400 transition-colors cursor-pointer">About Us</button></li>
               <li><button onClick={() => setCurrentView(Audience.KIDS)} className="hover:text-amber-400 transition-colors cursor-pointer">Kids Zone</button></li>
               <li><button onClick={() => setCurrentView(Audience.TEENS)} className="hover:text-emerald-400 transition-colors cursor-pointer">Teens Tribe</button></li>
               <li><button onClick={() => setCurrentView(Audience.TEACHERS)} className="hover:text-teal-400 transition-colors cursor-pointer">Teachers Hub</button></li>

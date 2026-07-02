@@ -1,5 +1,6 @@
 export enum Audience {
   HOME = 'HOME',
+  ABOUT = 'ABOUT',
   KIDS = 'KIDS',
   TEENS = 'TEENS',
   TEACHERS = 'TEACHERS'

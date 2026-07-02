@@ -21,7 +21,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView, onWatchLive,
       case Audience.TEACHERS: 
         return 'glassmorphism text-teal-800 border-b border-teal-100 shadow-[0_2px_10px_rgba(15,118,110,0.05)]';
       default: 
-        return 'glassmorphism text-indigo-950 shadow-sm';
+        return 'glassmorphism text-[#372f58] shadow-sm';
     }
   };
 
@@ -30,7 +30,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView, onWatchLive,
       case Audience.KIDS: return 'bg-white text-amber-500 shadow-sm';
       case Audience.TEENS: return 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20';
       case Audience.TEACHERS: return 'bg-teal-50 text-teal-700 border border-teal-100';
-      default: return 'bg-indigo-600 text-white shadow-md shadow-indigo-200';
+      default: return 'bg-[#372f58] text-white shadow-md shadow-[#372f58]/10';
     }
   };
 
@@ -44,7 +44,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView, onWatchLive,
         case Audience.TEACHERS: 
           return 'bg-teal-700 text-white font-bold rounded-lg shadow-sm';
         default: 
-          return 'bg-indigo-600 text-white font-semibold rounded-lg shadow-sm shadow-indigo-100';
+          return 'bg-[#372f58] text-white font-semibold rounded-lg shadow-sm shadow-[#372f58]/10';
       }
     }
     
@@ -53,11 +53,12 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView, onWatchLive,
       case Audience.KIDS: return 'text-white hover:bg-white/20 hover:scale-105 rounded-2xl';
       case Audience.TEENS: return 'text-gray-300 hover:text-emerald-300 hover:bg-emerald-500/10 rounded-lg';
       case Audience.TEACHERS: return 'text-teal-900 hover:text-teal-700 hover:bg-teal-50 rounded-lg';
-      default: return 'text-indigo-900 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg';
+      default: return 'text-[#372f58] hover:text-[#1CABB9] hover:bg-teal-50/50 rounded-lg';
     }
   };
 
   const navLinks = [
+    { label: 'About', value: Audience.ABOUT },
     { label: 'Kids Zone', value: Audience.KIDS },
     { label: 'Teens Tribe', value: Audience.TEENS },
     { label: 'Teachers Hub', value: Audience.TEACHERS },
@@ -74,21 +75,21 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView, onWatchLive,
             aria-label="Navigate to Home"
           >
             <div className="flex items-center">
-              {/* DTCE Global logo */}
+              {/* DTCE Global Circular logo */}
               <img 
-                src="/DTCE_Junior_Church.png" 
+                src="/DTCE_Global_Circular.png" 
                 alt="DTCE Global" 
-                className="h-7 sm:h-9 object-contain"
+                className="h-7 w-7 sm:h-9 sm:w-9 rounded-full object-cover border border-[#372f58]/10 shadow-[0_1px_3px_rgba(55,47,88,0.08)]"
               />
               
               {/* Vertical divider */}
               <div className="w-px h-6 sm:h-8 bg-[#372f58]/20 mx-2.5 sm:mx-3" />
               
-              {/* Faith Tribe Logo (tree flame) */}
+              {/* Faith Tribe Circular logo */}
               <img 
-                src="/Faith_Tribe_Logo.png" 
+                src="/Faith_Tribe_Circular.png" 
                 alt="Faith Tribe" 
-                className="h-7 sm:h-9 object-contain mr-3"
+                className="h-7 w-7 sm:h-9 sm:w-9 rounded-full object-cover border border-[#372f58]/10 shadow-[0_1px_3px_rgba(55,47,88,0.08)] mr-3"
               />
             </div>
             
@@ -102,7 +103,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView, onWatchLive,
               <span className={`text-[8px] sm:text-[9px] font-medium tracking-tight mt-0.5 sm:mt-1 leading-none transition-colors duration-300
                 ${currentView === Audience.KIDS ? 'text-white/80' : 
                   currentView === Audience.TEENS ? 'text-gray-400' : 'text-[#372f58]/65'}`}>
-                <span className="hidden sm:inline">RCCG </span>Region 63 Junior Church<span className="hidden sm:inline"> Portal</span>
+                <span className="hidden sm:inline">RCCG </span>Region 63 Junior Church
               </span>
             </div>
           </div>
