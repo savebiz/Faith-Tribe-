@@ -7,7 +7,7 @@ import { Audience, ContentItem } from './types';
 import { 
   ArrowRight, Star, Zap, BookOpen, Users, Heart, Share2, X, Lock, Radio, 
   Smile, Shield, Calendar, ChevronRight, Plus, CheckCircle2, ClipboardList, 
-  Send, Sparkles, Trophy, PlusCircle, Check
+  Send, Sparkles, Trophy, PlusCircle, Check, Instagram, Facebook, Youtube
 } from 'lucide-react';
 import { VerseOfTheWeek } from './lib/bible/VerseOfTheWeek';
 import { BibleReaderView } from './lib/bible/BibleReaderView';
@@ -984,41 +984,69 @@ const App: React.FC = () => {
         {currentView === Audience.BIBLE && <BibleReaderView onBack={() => setCurrentView(Audience.HOME)} />}
       </main>
 
-      <footer className="bg-gray-900 text-white py-14 border-t border-gray-800">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div>
-            <h4 className="text-xl font-bold tracking-tight text-white mb-4">Faith Tribe</h4>
-            <p className="text-gray-400 text-sm leading-relaxed">
-              RCCG Region 63 Junior Church Portal.
-            </p>
-            <p className="text-gray-400 text-sm mt-2 leading-relaxed">
-              Winning souls, raising kingdom champions, and establishing teen disciples.
-            </p>
-          </div>
-          <div>
-            <h4 className="text-sm font-black uppercase tracking-wider text-gray-200 mb-4">Quick Zones</h4>
-            <ul className="space-y-2 text-sm text-gray-400">
-              <li><button onClick={() => setCurrentView(Audience.HOME)} className="hover:text-indigo-400 transition-colors cursor-pointer">Home</button></li>
-              <li><button onClick={() => setCurrentView(Audience.ABOUT)} className="hover:text-teal-400 transition-colors cursor-pointer">About Us</button></li>
-              <li><button onClick={() => setCurrentView(Audience.KIDS)} className="hover:text-amber-400 transition-colors cursor-pointer">Kids Zone</button></li>
-              <li><button onClick={() => setCurrentView(Audience.TEENS)} className="hover:text-emerald-400 transition-colors cursor-pointer">Teens Tribe</button></li>
-              <li><button onClick={() => setCurrentView(Audience.TEACHERS)} className="hover:text-teal-400 transition-colors cursor-pointer">Teachers Hub</button></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="text-sm font-black uppercase tracking-wider text-gray-200 mb-4">Connect</h4>
-            <div className="flex space-x-3">
-              <div className="w-8 h-8 bg-gray-800 rounded-full cursor-pointer hover:bg-indigo-600 transition-all hover:scale-110 flex items-center justify-center text-gray-400 hover:text-white">
-                <Heart size={14} fill="currentColor" />
-              </div>
-              <div className="w-8 h-8 bg-gray-800 rounded-full cursor-pointer hover:bg-indigo-600 transition-all hover:scale-110 flex items-center justify-center text-gray-400 hover:text-white">
-                <Sparkles size={14} />
+      <footer className="bg-[#372f58] text-white py-14 border-t border-[#4d4475] overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6">
+          {/* Links Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+            <div>
+              <h4 className="text-xl font-bold tracking-tight text-white mb-4">Faith Tribe</h4>
+              <p className="text-white/70 text-sm leading-relaxed">
+                RCCG Region 63 Junior Church Portal.
+              </p>
+              <p className="text-white/70 text-sm mt-2 leading-relaxed">
+                Winning souls, raising kingdom champions, and establishing teen disciples.
+              </p>
+            </div>
+            <div>
+              <h4 className="text-sm font-black uppercase tracking-wider text-white mb-4">Quick Links</h4>
+              <ul className="space-y-2 text-sm text-white/70">
+                <li><button onClick={() => setCurrentView(Audience.HOME)} className="hover:text-[#1CABB9] transition-colors cursor-pointer">Home</button></li>
+                <li><button onClick={() => setCurrentView(Audience.ABOUT)} className="hover:text-[#1CABB9] transition-colors cursor-pointer">About Us</button></li>
+                <li><button onClick={() => setCurrentView(Audience.KIDS)} className="hover:text-[#1CABB9] transition-colors cursor-pointer">Kids Zone</button></li>
+                <li><button onClick={() => setCurrentView(Audience.TEENS)} className="hover:text-[#1CABB9] transition-colors cursor-pointer">Teens Tribe</button></li>
+                <li><button onClick={() => setCurrentView(Audience.TEACHERS)} className="hover:text-[#1CABB9] transition-colors cursor-pointer">Teachers Hub</button></li>
+                <li><button onClick={() => setCurrentView(Audience.BIBLE)} className="hover:text-[#1CABB9] transition-colors cursor-pointer">Read Bible</button></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-sm font-black uppercase tracking-wider text-white mb-4">Connect</h4>
+              <p className="text-white/70 text-sm leading-relaxed mb-4">
+                RCCG Region 63 Junior Church.
+              </p>
+              <div className="flex space-x-3 mb-6">
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/10 rounded-full cursor-pointer hover:bg-[#1CABB9] transition-all hover:scale-110 flex items-center justify-center text-white" aria-label="Instagram">
+                  <Instagram size={16} />
+                </a>
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/10 rounded-full cursor-pointer hover:bg-[#1CABB9] transition-all hover:scale-110 flex items-center justify-center text-white" aria-label="Facebook">
+                  <Facebook size={16} />
+                </a>
+                <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/10 rounded-full cursor-pointer hover:bg-[#1CABB9] transition-all hover:scale-110 flex items-center justify-center text-white" aria-label="YouTube">
+                  <Youtube size={16} />
+                </a>
               </div>
             </div>
           </div>
-        </div>
-        <div className="mt-12 text-center text-xs text-gray-500 border-t border-gray-800 pt-8">
-          &copy; {new Date().getFullYear()} RCCG Region 63 Faith Tribe. All rights reserved.
+
+          {/* Copyright & Attribution Row */}
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/50 pt-8 border-t border-[#4d4475] mb-8">
+            <div>
+              &copy; {new Date().getFullYear()} RCCG Region 63 Junior Church / Faith Tribe. All rights reserved.
+            </div>
+            <div className="flex items-center gap-2">
+              <span>A ministry of DTCE Junior Church Global</span>
+              <img src="/DTCE_Global_Circular.png" className="w-5 h-5 rounded-full object-cover border border-white/10" alt="DTCE logo" />
+            </div>
+          </div>
+          
+          {/* Thin Horizontal Divider Line above the giant wordmark */}
+          <hr className="border-[#4d4475] my-6 opacity-60" />
+          
+          {/* Giant Wordmark */}
+          <div className="w-full text-center overflow-hidden leading-none select-none mt-4">
+            <h2 className="font-display font-black text-white/95 tracking-tighter" style={{ fontSize: 'clamp(3rem, 15vw, 12rem)', letterSpacing: '-0.03em' }}>
+              FaithTribe
+            </h2>
+          </div>
         </div>
       </footer>
 
