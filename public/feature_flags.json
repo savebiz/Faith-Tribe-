@@ -1,4 +1,6 @@
 {
   "enableCurriculumPhase1": true,
-  "enableCurriculumPhase2": true
+  "enableCurriculumPhase2": true,
+  "lessonsApiBaseUrl": "https://api.lessons.church",
+  "lessonsApiKey": ""
 }

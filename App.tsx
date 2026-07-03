@@ -712,10 +712,18 @@ const App: React.FC = () => {
     useEffect(() => {
       const fetchFlagsAndCurriculum = async () => {
         setIsLoadingLive(true);
+        let activeFlags = { 
+          enableCurriculumPhase1: true, 
+          enableCurriculumPhase2: true, 
+          lessonsApiBaseUrl: 'https://api.lessons.church', 
+          lessonsApiKey: '' 
+        };
+
         try {
           const res = await fetch('/feature_flags.json');
           if (res.ok) {
             const data = await res.json();
+            activeFlags = data;
             setFlags(data);
           }
         } catch (err) {
@@ -731,12 +739,15 @@ const App: React.FC = () => {
             return;
           }
 
-          const apiKey = import.meta.env.VITE_LESSONS_API_KEY || 'cak_86f46978.916a8a5a5c0c706d2e3e8b10c42dad0f8d4b0d4c9d9bcf61';
-          const response = await fetch('https://api.staging.lessons.church/programs/public', {
-            headers: {
-              'Authorization': `Bearer ${apiKey}`
-            }
-          });
+          const apiBase = activeFlags.lessonsApiBaseUrl || 'https://api.lessons.church';
+          const apiKey = activeFlags.lessonsApiKey || import.meta.env.VITE_LESSONS_API_KEY || '';
+
+          const headers: Record<string, string> = {};
+          if (apiKey) {
+            headers['Authorization'] = `Bearer ${apiKey}`;
+          }
+
+          const response = await fetch(`${apiBase}/programs/public`, { headers });
           if (response.ok) {
             const data = await response.json();
             if (Array.isArray(data) && data.length > 0) {
