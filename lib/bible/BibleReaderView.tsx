@@ -3,6 +3,9 @@ import { createPortal } from 'react-dom';
 import { BibleReader } from '@youversion/platform-react-ui';
 import { ArrowLeft, Book, Flame, Share2, MoreVertical, Copy, AlertTriangle, Check, Award, Download, Highlighter, Trash2, X, ArrowRight } from 'lucide-react';
 import { fetchReactionCount, incrementReactionCount, hasReacted } from '../supabase';
+import { useReadingPreferences } from './useReadingPreferences';
+import { ChapterSelector } from './ChapterSelector';
+import { ReaderSettings } from './ReaderSettings';
 
 const APPROVED_VERSIONS = [
   { id: 3034, label: 'Berean Standard Bible (BSB)' },
@@ -197,6 +200,23 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
   const [chapter, setChapter] = useState(initial.chapter);
   const [versionId, setVersionId] = useState(initial.versionId);
   const [isBottomPickerOpen, setIsBottomPickerOpen] = useState(false);
+
+  const {
+    isKidsMode,
+    setIsKidsMode,
+    fontSize,
+    setFontSize,
+    fontFamily,
+    setFontFamily,
+    lineHeight,
+    setLineHeight,
+    effectiveFontSize,
+    effectiveFontFamily,
+    effectiveLineHeight,
+  } = useReadingPreferences();
+
+  const [isChapterSelectorOpen, setIsChapterSelectorOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   // Selection and Highlight Layer
   const [selectedVerses, setSelectedVerses] = useState<number[]>([]);
@@ -942,8 +962,22 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
             versionId={versionId}
             onVersionChange={handleVersionChange}
             onVersionPickerPress={() => setIsBottomPickerOpen(true)}
+            onChapterPickerPress={() => setIsChapterSelectorOpen(true)}
+            fontSize={effectiveFontSize}
+            fontFamily={effectiveFontFamily as any}
+            lineSpacing={effectiveLineHeight}
           >
-            <BibleReader.Content />
+            <div 
+              className="bible-text-content-area"
+              style={{
+                '--reader-font-family': effectiveFontFamily,
+                '--reader-font-size': `${effectiveFontSize}px`,
+                '--reader-line-height': effectiveLineHeight,
+                '--reader-letter-spacing': isKidsMode ? '0.04em' : 'normal'
+              } as React.CSSProperties}
+            >
+              <BibleReader.Content />
+            </div>
 
             {/* Custom Engagement Layer */}
             <div className="mt-8 pt-6 border-t border-[#372f58]/15 flex flex-wrap items-center justify-between gap-4">
@@ -1012,7 +1046,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
                 }`}
               >
                 <div className="max-w-md mx-auto">
-                  <BibleReader.Toolbar />
+                  <BibleReader.Toolbar onOpenBibleThemeSettings={() => setIsSettingsOpen(true)} />
                 </div>
               </div>
 
@@ -1023,7 +1057,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
                 }`}
               >
                 <div className="flex items-center justify-center min-w-[320px]">
-                  <BibleReader.Toolbar />
+                  <BibleReader.Toolbar onOpenBibleThemeSettings={() => setIsSettingsOpen(true)} />
                 </div>
               </div>
             </>,
@@ -1032,6 +1066,36 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
         </BibleReader.Root>
         </div>
       </div>
+
+      {/* Custom Chapter Selector Bottom Sheet */}
+      <ChapterSelector
+        isOpen={isChapterSelectorOpen}
+        onClose={() => setIsChapterSelectorOpen(false)}
+        currentBook={book}
+        currentChapter={chapter}
+        onSelect={(b, c) => {
+          setBook(b);
+          setChapter(c);
+        }}
+        isKidsMode={isKidsMode}
+      />
+
+      {/* Custom Reader Settings Bottom Sheet */}
+      <ReaderSettings
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        isKidsMode={isKidsMode}
+        setIsKidsMode={setIsKidsMode}
+        fontSize={fontSize}
+        setFontSize={setFontSize}
+        fontFamily={fontFamily}
+        setFontFamily={setFontFamily}
+        lineHeight={lineHeight}
+        setLineHeight={setLineHeight}
+        effectiveFontSize={effectiveFontSize}
+        effectiveFontFamily={effectiveFontFamily}
+        effectiveLineHeight={effectiveLineHeight}
+      />
 
       {/* Sentinel to detect bottom of reader container */}
       <div ref={cardBottomRef} className="h-px w-full pointer-events-none" />
@@ -1361,6 +1425,18 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
           pointer-events: auto;
           transition: opacity 280ms cubic-bezier(0.16, 1, 0.3, 1),
                       transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Custom Reader Typography Inheritance & Overrides */
+        .bible-text-content-area,
+        .bible-text-content-area p,
+        .bible-text-content-area span,
+        .bible-text-content-area div,
+        .bible-text-content-area .yv-verse-text {
+          font-family: var(--reader-font-family) !important;
+          font-size: var(--reader-font-size) !important;
+          line-height: var(--reader-line-height) !important;
+          letter-spacing: var(--reader-letter-spacing) !important;
         }
       `}</style>
     </div>
