@@ -1048,8 +1048,8 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
 
       {/* Floating Verse Action Bar (Portaled to body) */}
       {mounted && selectedVerses.length > 0 && createPortal(
-        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-[#372f58]/95 backdrop-blur-md border border-white/10 rounded-full py-3.5 px-6 shadow-2xl flex items-center gap-6 text-white text-xs font-black animate-in fade-in slide-in-from-bottom duration-300">
-          <span className="text-[#1CABB9] border-r border-white/15 pr-4 select-none">
+        <div className="fixed bottom-6 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-auto z-50 bg-[#372f58]/95 backdrop-blur-md border border-white/10 rounded-2xl sm:rounded-full py-3 px-4 sm:py-3.5 sm:px-6 shadow-2xl flex items-center justify-between sm:justify-start gap-4 sm:gap-6 text-white text-xs font-black animate-in fade-in slide-in-from-bottom duration-300">
+          <span className="text-[#1CABB9] border-r border-white/15 pr-4 select-none whitespace-nowrap">
             {selectedVerses.length} {selectedVerses.length === 1 ? 'verse' : 'verses'} selected
           </span>
 
@@ -1059,7 +1059,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
               className="hover:text-[#1CABB9] transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <Highlighter size={14} />
-              <span>HIGHLIGHT</span>
+              <span className="hidden sm:inline">HIGHLIGHT</span>
             </button>
 
             {/* Highlights Submenu */}
@@ -1102,7 +1102,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
             className="hover:text-[#1CABB9] transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <Copy size={14} />
-            <span>COPY</span>
+            <span className="hidden sm:inline">COPY</span>
           </button>
 
           <button
@@ -1110,14 +1110,15 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
             className="hover:text-[#1CABB9] transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <Share2 size={14} />
-            <span>SHARE</span>
+            <span className="hidden sm:inline">SHARE</span>
           </button>
 
           <button
             onClick={() => setSelectedVerses([])}
-            className="text-gray-455 hover:text-white transition-colors cursor-pointer text-[10px] pl-2 border-l border-white/15"
+            className="text-gray-400 hover:text-white transition-colors cursor-pointer text-[10px] pl-2 border-l border-white/15 flex items-center gap-1"
           >
-            CANCEL
+            <X size={14} className="sm:hidden" />
+            <span className="hidden sm:inline">CANCEL</span>
           </button>
         </div>,
         document.body
