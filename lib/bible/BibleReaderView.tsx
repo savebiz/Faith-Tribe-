@@ -20,158 +20,7 @@ const APPROVED_VERSIONS = [
   { id: 1614, label: 'Hausa Contemporary Bible' },
 ];
 
-const BOOK_NAMES: Record<string, string> = {
-  GEN: 'Genesis', EXOD: 'Exodus', LEV: 'Leviticus', NUM: 'Numbers', DEUT: 'Deuteronomy',
-  JOSH: 'Joshua', JUDG: 'Judges', RUTH: 'Ruth', '1SAM': '1 Samuel', '2SAM': '2 Samuel',
-  '1KGS': '1 Kings', '2KGS': '2 Kings', '1CHR': '1 Chronicles', '2CHR': '2 Chronicles',
-  EZRA: 'Ezra', NEH: 'Nehemiah', ESTH: 'Esther', JOB: 'Job', PSALM: 'Psalms',
-  PROV: 'Proverbs', ECCL: 'Ecclesiastes', SONG: 'Song of Solomon', ISA: 'Isaiah',
-  JER: 'Jeremiah', LAM: 'Lamentations', EZEK: 'Ezekiel', DAN: 'Daniel', HOS: 'Hosea',
-  JOEL: 'Joel', AMOS: 'Amos', OBAD: 'Obadiah', JONAH: 'Jonah', MIC: 'Micah',
-  NAH: 'Nahum', HAB: 'Habakkuk', ZEPH: 'Zephaniah', HAG: 'Haggai', ZECH: 'Zechariah',
-  MAL: 'Malachi', MATT: 'Matthew', MARK: 'Mark', LUKE: 'Luke', JOHN: 'John',
-  ACTS: 'Acts', ROM: 'Romans', '1COR': '1 Corinthians', '2COR': '2 Corinthians',
-  GAL: 'Galatians', EPH: 'Ephesians', PHIL: 'Philippians', COL: 'Colossians',
-  '1THESS': '1 Thessalonians', '2THESS': '2 Thessalonians', '1TIM': '1 Timothy',
-  '2TIM': '2 Timothy', TITUS: 'Titus', PHILEM: 'Philemon', HEB: 'Hebrews',
-  JAS: 'James', '1PET': '1 Peter', '2PET': '2 Peter', '1JOHN': '1 John',
-  '2JOHN': '2 John', '3JOHN': '3 John', JUDE: 'Jude', REV: 'Revelation'
-};
-
-const BOOK_ABBREVIATIONS: Record<string, string> = {
-  // Genesis
-  'genesis': 'GEN', 'gen': 'GEN', 'ge': 'GEN',
-  // Exodus
-  'exodus': 'EXOD', 'exo': 'EXOD', 'ex': 'EXOD',
-  // Leviticus
-  'leviticus': 'LEV', 'lev': 'LEV', 'le': 'LEV',
-  // Numbers
-  'numbers': 'NUM', 'num': 'NUM', 'nu': 'NUM',
-  // Deuteronomy
-  'deuteronomy': 'DEUT', 'deu': 'DEUT', 'dt': 'DEUT',
-  // Joshua
-  'joshua': 'JOSH', 'jos': 'JOSH', 'josh': 'JOSH',
-  // Judges
-  'judges': 'JUDG', 'judg': 'JUDG', 'jdg': 'JUDG',
-  // Ruth
-  'ruth': 'RUTH', 'rut': 'RUTH', 'ru': 'RUTH',
-  // 1 Samuel
-  '1 samuel': '1SAM', '1sam': '1SAM', '1 sam': '1SAM', '1 sa': '1SAM', '1s': '1SAM',
-  // 2 Samuel
-  '2 samuel': '2SAM', '2sam': '2SAM', '2 sam': '2SAM', '2 sa': '2SAM', '2s': '2SAM',
-  // 1 Kings
-  '1 kings': '1KGS', '1kgs': '1KGS', '1 ki': '1KGS', '1k': '1KGS',
-  // 2 Kings
-  '2 kings': '2KGS', '2kgs': '2KGS', '2 ki': '2KGS', '2k': '2KGS',
-  // 1 Chronicles
-  '1 chronicles': '1CHR', '1chr': '1CHR', '1 ch': '1CHR',
-  // 2 Chronicles
-  '2 chronicles': '2CHR', '2chr': '2CHR', '2 ch': '2CHR',
-  // Ezra
-  'ezra': 'EZRA', 'ezr': 'EZRA',
-  // Nehemiah
-  'nehemiah': 'NEH', 'neh': 'NEH', 'ne': 'NEH',
-  // Esther
-  'esther': 'ESTH', 'est': 'ESTH', 'es': 'ESTH',
-  // Job
-  'job': 'JOB', 'jb': 'JOB',
-  // Psalms
-  'psalms': 'PSALM', 'psalm': 'PSALM', 'psal': 'PSALM', 'ps': 'PSALM', 'psa': 'PSALM',
-  // Proverbs
-  'proverbs': 'PROV', 'prov': 'PROV', 'pr': 'PROV',
-  // Ecclesiastes
-  'ecclesiastes': 'ECCL', 'eccl': 'ECCL', 'ecc': 'ECCL', 'ec': 'ECCL',
-  // Song of Solomon
-  'song of solomon': 'SONG', 'song of songs': 'SONG', 'song': 'SONG', 'so': 'SONG',
-  // Isaiah
-  'isaiah': 'ISA', 'isa': 'ISA', 'is': 'ISA',
-  // Jeremiah
-  'jeremiah': 'JER', 'jer': 'JER', 'je': 'JER',
-  // Lamentations
-  'lamentations': 'LAM', 'lam': 'LAM', 'la': 'LAM',
-  // Ezekiel
-  'ezekiel': 'EZEK', 'ezek': 'EZEK', 'eze': 'EZEK',
-  // Daniel
-  'daniel': 'DAN', 'dan': 'DAN', 'da': 'DAN',
-  // Hosea
-  'hosea': 'HOS', 'hos': 'HOS', 'ho': 'HOS',
-  // Joel
-  'joel': 'JOEL', 'joe': 'JOEL',
-  // Amos
-  'amos': 'AMOS', 'amo': 'AMOS', 'am': 'AMOS',
-  // Obadiah
-  'obadiah': 'OBAD', 'obad': 'OBAD', 'ob': 'OBAD',
-  // Jonah
-  'jonah': 'JONAH', 'jon': 'JONAH',
-  // Micah
-  'micah': 'MIC', 'mic': 'MIC', 'mi': 'MIC',
-  // Nahum
-  'nahum': 'NAH', 'nah': 'NAH', 'na': 'NAH',
-  // Habakkuk
-  'habakkuk': 'HAB', 'hab': 'HAB',
-  // Zephaniah
-  'zephaniah': 'ZEPH', 'zep': 'ZEPH',
-  // Haggai
-  'haggai': 'HAG', 'hag': 'HAG',
-  // Zechariah
-  'zechariah': 'ZECH', 'zec': 'ZECH',
-  // Malachi
-  'malachi': 'MAL', 'mal': 'MAL',
-  // Matthew
-  'matthew': 'MATT', 'matt': 'MATT', 'mat': 'MATT', 'mt': 'MATT',
-  // Mark
-  'mark': 'MARK', 'mrk': 'MARK', 'mk': 'MARK',
-  // Luke
-  'luke': 'LUKE', 'luk': 'LUKE', 'lk': 'LUKE',
-  // John
-  'john': 'JOHN', 'jhn': 'JOHN', 'joh': 'JOHN', 'jn': 'JOHN',
-  // Acts
-  'acts': 'ACTS', 'act': 'ACTS', 'ac': 'ACTS',
-  // Romans
-  'romans': 'ROM', 'rom': 'ROM', 'ro': 'ROM',
-  // 1 Corinthians
-  '1 corinthians': '1COR', '1cor': '1COR', '1 cor': '1COR', '1 co': '1COR',
-  // 2 Corinthians
-  '2 corinthians': '2COR', '2cor': '2COR', '2 cor': '2COR', '2 co': '2COR',
-  // Galatians
-  'galatians': 'GAL', 'gal': 'GAL', 'ga': 'GAL',
-  // Ephesians
-  'ephesians': 'EPH', 'eph': 'EPH', 'ep': 'EPH',
-  // Philippians
-  'philippians': 'PHIL', 'phil': 'PHIL', 'phi': 'PHIL', 'php': 'PHIL',
-  // Colossians
-  'colossians': 'COL', 'col': 'COL', 'co': 'COL',
-  // 1 Thessalonians
-  '1 thessalonians': '1THESS', '1thess': '1THESS', '1 thess': '1THESS', '1 th': '1THESS',
-  // 2 Thessalonians
-  '2 thessalonians': '2THESS', '2thess': '2THESS', '2 thess': '2THESS', '2 th': '2THESS',
-  // 1 Timothy
-  '1 timothy': '1TIM', '1tim': '1TIM', '1 tim': '1TIM', '1 ti': '1TIM',
-  // 2 Timothy
-  '2 timothy': '2TIM', '2tim': '2TIM', '2 tim': '2TIM', '2 ti': '2TIM',
-  // Titus
-  'titus': 'TITUS', 'tit': 'TITUS', 'ti': 'TITUS',
-  // Philemon
-  'philemon': 'PHILEM', 'philem': 'PHILEM', 'phm': 'PHILEM',
-  // Hebrews
-  'hebrew': 'HEB', 'hebrews': 'HEB', 'heb': 'HEB',
-  // James
-  'james': 'JAS', 'jas': 'JAS', 'jam': 'JAS', 'jm': 'JAS',
-  // 1 Peter
-  '1 peter': '1PET', '1pet': '1PET', '1 pet': '1PET', '1 pe': '1PET',
-  // 2 Peter
-  '2 peter': '2PET', '2pet': '2PET', '2 pet': '2PET', '2 pe': '2PET',
-  // 1 John
-  '1 john': '1JOHN', '1john': '1JOHN', '1 jn': '1JOHN', '1 jhn': '1JOHN', '1j': '1JOHN',
-  // 2 John
-  '2 john': '2JOHN', '2john': '2JOHN', '2 jn': '2JOHN', '2 jhn': '2JOHN', '2j': '2JOHN',
-  // 3 John
-  '3 john': '3JOHN', '3john': '3JOHN', '3 jn': '3JOHN', '3 jhn': '3JOHN', '3j': '3JOHN',
-  // Jude
-  'jude': 'JUDE', 'jud': 'JUDE',
-  // Revelation
-  'revelation': 'REV', 'rev': 'REV', 're': 'REV', 'revelations': 'REV'
-};
+import { BOOK_NAMES, BOOK_ABBREVIATIONS } from './bookCodes';
 
 
 export function BibleReaderView({ onBack }: { onBack: () => void }) {
@@ -183,8 +32,26 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
     const versionId = versionParam ? Number(versionParam) : null;
 
     const match = path.match(/^\/bible\/([A-Za-z0-9]+)\/([0-9]+)/);
-    const book = match ? match[1].toUpperCase() : 'GEN';
+    let book = match ? match[1].toUpperCase() : 'GEN';
     const chapter = match ? match[2] : '1';
+
+    // Normalize legacy/long/lowercase book codes to the canonical 3-letter USFM codes
+    const normalizationMap: Record<string, string> = {
+      EXOD: 'EXO', DEUT: 'DEU', JOSH: 'JOS', JUDG: 'JDG', RUTH: 'RUT',
+      '1SAM': '1SA', '2SAM': '2SA', '1KGS': '1KI', '2KGS': '2KI',
+      '1CHR': '1CH', '2CHR': '2CH', ESTH: 'EST', PSALM: 'PSA',
+      ECCL: 'ECC', SONG: 'SNG', EZEK: 'EZK', JOEL: 'JOL', AMOS: 'AMO',
+      OBAD: 'OBA', JONAH: 'JON', MIC: 'MIC', NAH: 'NAM', ZEPH: 'ZEP',
+      ZECH: 'ZEC', MATT: 'MAT', MARK: 'MRK', LUKE: 'LUK', JOHN: 'JHN',
+      ACTS: 'ACT', '1COR': '1CO', '2COR': '2CO', '1THESS': '1TH',
+      '2THESS': '2TH', '1TIM': '1TI', '2TIM': '2TI', PHILEM: 'PHM',
+      '1PET': '1PE', '2PET': '2PE', '1JOHN': '1JN', '2JOHN': '2JN',
+      '3JOHN': '3JN', JUDE: 'JUD'
+    };
+
+    if (normalizationMap[book]) {
+      book = normalizationMap[book];
+    }
     
     const savedVersion = localStorage.getItem('yv_version_id');
     const defaultVersion = savedVersion ? Number(savedVersion) : 3034;
