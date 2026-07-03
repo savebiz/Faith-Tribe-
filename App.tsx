@@ -134,8 +134,8 @@ const App: React.FC = () => {
 
   // -- State for Teacher Auth --
   const [isTeacherLoggedIn, setIsTeacherLoggedIn] = useState(false);
-  const [teacherEmail, setTeacherEmail] = useState('');
-  const [teacherPassword, setTeacherPassword] = useState('');
+  const [teacherEmail, setTeacherEmail] = useState('teacher@faithtribe.org');
+  const [teacherPassword, setTeacherPassword] = useState('password');
 
   // -- State for Live Stream --
   const [isLiveStreamOpen, setIsLiveStreamOpen] = useState(false);
@@ -720,6 +720,9 @@ const App: React.FC = () => {
             <p className="mt-2 text-center text-sm text-gray-500">
               Access curriculum plans and manage discipleship tracking.
             </p>
+            <div className="mt-4 bg-teal-50/70 border border-teal-100 p-3 rounded-2xl text-center text-xs text-teal-850 font-bold max-w-xs mx-auto">
+              🔑 Demo Access: Pre-filled below. Just click Sign In!
+            </div>
           </div>
 
           <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
