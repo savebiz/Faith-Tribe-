@@ -1087,8 +1087,8 @@ const App: React.FC = () => {
 
           {/* Copyright & Attribution Row */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/50 pt-8 border-t border-[#4d4475] mb-8">
-            <div className="flex items-center gap-2">
-              <span>&copy; {new Date().getFullYear()} RCCG Faith Tribe</span>
+            <div className="flex items-center gap-1.5">
+              <span>&copy; {new Date().getFullYear()} Faith Tribe</span>
               <img src="/Faith_Tribe_Grey-rbg.png" className="w-8 h-8 sm:w-9 sm:h-9 object-contain" alt="Faith Tribe logo" />
             </div>
             <div>
