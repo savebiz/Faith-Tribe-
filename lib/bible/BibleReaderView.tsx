@@ -209,6 +209,23 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
   const [pendingScrollVerse, setPendingScrollVerse] = useState<number | null>(null);
   const lastScrollY = useRef(0);
+  const translationRef = useRef<HTMLDivElement>(null);
+  const [translationInView, setTranslationInView] = useState(true);
+
+  // Monitor when the top Translation control enters or leaves the viewport
+  useEffect(() => {
+    const el = translationRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setTranslationInView(entry.isIntersecting);
+      },
+      { threshold: 0 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -746,7 +763,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
         </div>
 
         {/* Search & Translation Row */}
-        <div className="flex items-end justify-between gap-6 mb-8 pb-2">
+        <div ref={translationRef} className="flex items-end justify-between gap-6 mb-8 pb-2">
           {/* Translation Dropdown */}
           <div className="flex flex-col gap-2 w-full sm:max-w-xs">
             <label htmlFor="version-select" className="text-xs font-bold text-[#372f58]/80 uppercase tracking-wider">
@@ -909,8 +926,8 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
           {/* Floating Bottom Navigation Bars (Inside YouVersion Context) */}
           {/* Mobile bottom full-width bar */}
           <div 
-            className={`fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200/80 px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgba(0,0,0,0.06)] transition-transform duration-300 sm:hidden ${
-              isNavVisible ? 'translate-y-0' : 'translate-y-full'
+            className={`mobile-floating-nav bg-white/95 backdrop-blur-md border-t border-gray-200/80 px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgba(0,0,0,0.06)] sm:hidden ${
+              (!translationInView && isNavVisible) ? 'visible' : ''
             }`}
           >
             <div className="max-w-md mx-auto">
@@ -920,8 +937,8 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
 
           {/* Center floating bottom pill (Tablet/Desktop) */}
           <div 
-            className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-white/95 backdrop-blur-md border border-gray-250/85 px-6 py-2 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.12)] transition-transform duration-300 hidden sm:block ${
-              isNavVisible ? 'translate-y-0' : 'translate-y-[calc(100%+36px)]'
+            className={`desktop-floating-nav bg-white/95 backdrop-blur-md border border-gray-250/85 px-6 py-2 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.12)] hidden sm:block ${
+              (!translationInView && isNavVisible) ? 'visible' : ''
             }`}
           >
             <div className="flex items-center justify-center min-w-[320px]">
@@ -1184,7 +1201,6 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
         </div>
       )}
 
-      {/* Inline styles for pulse animations and progress bars */}
       <style>{`
         @keyframes pulse-highlight {
           0% { background-color: rgba(251, 191, 36, 0.5); border-radius: 0.375rem; }
@@ -1209,6 +1225,47 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
         .progress-bar-fill {
           height: 100%;
           transition: width 0.1s ease-out;
+        }
+
+        /* Mobile bottom bar transition */
+        .mobile-floating-nav {
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          z-index: 40;
+          transform: translateY(100%);
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 200ms cubic-bezier(0.4, 0, 1, 1),
+                      transform 200ms cubic-bezier(0.4, 0, 1, 1);
+        }
+        .mobile-floating-nav.visible {
+          transform: translateY(0);
+          opacity: 1;
+          pointer-events: auto;
+          transition: opacity 280ms cubic-bezier(0.16, 1, 0.3, 1),
+                      transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Desktop/Tablet Floating bottom pill transition */
+        .desktop-floating-nav {
+          position: fixed;
+          bottom: 1.5rem;
+          left: 50%;
+          z-index: 40;
+          transform: translateX(-50%) translateY(16px);
+          opacity: 0;
+          pointer-events: none;
+          transition: opacity 200ms cubic-bezier(0.4, 0, 1, 1),
+                      transform 200ms cubic-bezier(0.4, 0, 1, 1);
+        }
+        .desktop-floating-nav.visible {
+          transform: translateX(-50%) translateY(0);
+          opacity: 1;
+          pointer-events: auto;
+          transition: opacity 280ms cubic-bezier(0.16, 1, 0.3, 1),
+                      transform 280ms cubic-bezier(0.16, 1, 0.3, 1);
         }
       `}</style>
     </div>
