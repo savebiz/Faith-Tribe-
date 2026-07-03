@@ -839,10 +839,10 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
         </div>
 
         {/* Search & Translation Row */}
-        <div ref={translationRef} className="flex items-end justify-between gap-6 mb-8 pb-2">
+        <div ref={translationRef} className="flex items-end gap-3 sm:gap-6 w-full justify-between mb-8 pb-2">
           {/* Translation Dropdown */}
-          <div className="flex flex-col gap-2 w-full sm:max-w-xs">
-            <label htmlFor="version-select-button" className="text-xs font-bold text-[#372f58]/80 uppercase tracking-wider">
+          <div className="flex flex-col gap-2 flex-1 min-w-0 sm:flex-none sm:w-full sm:max-w-xs">
+            <label htmlFor="version-select-button" className="text-xs font-bold text-[#372f58]/80 uppercase tracking-wider truncate">
               Translation
             </label>
             <div ref={topDropdownRef} className="relative w-full">
@@ -850,9 +850,9 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
                 type="button"
                 id="version-select-button"
                 onClick={handleTopSelectorClick}
-                className="w-full flex items-center justify-between bg-white/80 border border-gray-200 text-[#372f58] font-bold text-sm px-4 py-2.5 rounded-2xl shadow-sm hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#1CABB9] cursor-pointer transition-colors"
+                className="w-full flex items-center justify-between bg-white/80 border border-gray-200 text-[#372f58] font-bold text-sm px-4 py-2.5 rounded-2xl shadow-sm hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#1CABB9] cursor-pointer transition-colors min-w-0"
               >
-                <span className="truncate">{currentVersion.label}</span>
+                <span className="truncate pr-1">{currentVersion.label}</span>
                 <svg className={`fill-[#372f58]/60 h-4 w-4 transition-transform duration-200 shrink-0 ml-2 ${isTopDropdownOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                   <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
                 </svg>
@@ -939,10 +939,10 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
           </div>
 
           {/* Search Trigger Icon for Mobile */}
-          <div className="sm:hidden">
+          <div className="sm:hidden shrink-0">
             <button
               onClick={() => setIsSearchOverlayOpen(true)}
-              className="bg-white border border-gray-200 text-[#372f58] hover:text-[#1CABB9] p-2.5 rounded-2xl shadow-sm cursor-pointer transition-colors"
+              className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 text-[#372f58] hover:text-[#1CABB9] rounded-2xl shadow-sm cursor-pointer transition-colors shrink-0"
               aria-label="Search scripture"
             >
               <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
