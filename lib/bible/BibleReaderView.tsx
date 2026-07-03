@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { BibleReader } from '@youversion/platform-react-ui';
 import { ArrowLeft, Book, Flame, Share2, MoreVertical, Copy, AlertTriangle, Check, Award, Download, Highlighter, Trash2, X, ArrowRight } from 'lucide-react';
 import { fetchReactionCount, incrementReactionCount, hasReacted } from '../supabase';
@@ -211,6 +212,11 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
   const lastScrollY = useRef(0);
   const [translationInView, setTranslationInView] = useState(true);
   const observerRef = useRef<IntersectionObserver | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const translationRef = useCallback((node: HTMLDivElement | null) => {
     if (observerRef.current) {
@@ -926,28 +932,33 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
               </div>
             </div>
 
-          {/* Floating Bottom Navigation Bars (Inside YouVersion Context) */}
-          {/* Mobile bottom full-width bar */}
-          <div 
-            className={`mobile-floating-nav bg-white/95 backdrop-blur-md border-t border-gray-200/80 px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgba(0,0,0,0.06)] sm:hidden ${
-              (!translationInView && isNavVisible) ? 'visible' : ''
-            }`}
-          >
-            <div className="max-w-md mx-auto">
-              <BibleReader.Toolbar />
-            </div>
-          </div>
+          {/* Floating Bottom Navigation Bars (Inside YouVersion Context & Portaled to body) */}
+          {mounted && createPortal(
+            <>
+              {/* Mobile bottom full-width bar */}
+              <div 
+                className={`mobile-floating-nav bg-white/95 backdrop-blur-md border-t border-gray-200/80 px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgba(0,0,0,0.06)] sm:hidden ${
+                  (!translationInView && isNavVisible) ? 'visible' : ''
+                }`}
+              >
+                <div className="max-w-md mx-auto">
+                  <BibleReader.Toolbar />
+                </div>
+              </div>
 
-          {/* Center floating bottom pill (Tablet/Desktop) */}
-          <div 
-            className={`desktop-floating-nav bg-white/95 backdrop-blur-md border border-gray-250/85 px-6 py-2 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.12)] hidden sm:block ${
-              (!translationInView && isNavVisible) ? 'visible' : ''
-            }`}
-          >
-            <div className="flex items-center justify-center min-w-[320px]">
-              <BibleReader.Toolbar />
-            </div>
-          </div>
+              {/* Center floating bottom pill (Tablet/Desktop) */}
+              <div 
+                className={`desktop-floating-nav bg-white/95 backdrop-blur-md border border-gray-250/85 px-6 py-2 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.12)] hidden sm:block ${
+                  (!translationInView && isNavVisible) ? 'visible' : ''
+                }`}
+              >
+                <div className="flex items-center justify-center min-w-[320px]">
+                  <BibleReader.Toolbar />
+                </div>
+              </div>
+            </>,
+            document.body
+          )}
         </BibleReader.Root>
         </div>
       </div>
@@ -1027,15 +1038,16 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
         </div>
       )}
 
-      {/* Toast Notification */}
-      {toastMessage && (
+      {/* Toast Notification (Portaled to body) */}
+      {mounted && toastMessage && createPortal(
         <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[100] bg-slate-900 text-white text-xs font-bold px-5 py-3 rounded-2xl shadow-xl animate-bounce">
           {toastMessage}
-        </div>
+        </div>,
+        document.body
       )}
 
-      {/* Floating Verse Action Bar */}
-      {selectedVerses.length > 0 && (
+      {/* Floating Verse Action Bar (Portaled to body) */}
+      {mounted && selectedVerses.length > 0 && createPortal(
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-[#372f58]/95 backdrop-blur-md border border-white/10 rounded-full py-3.5 px-6 shadow-2xl flex items-center gap-6 text-white text-xs font-black animate-in fade-in slide-in-from-bottom duration-300">
           <span className="text-[#1CABB9] border-r border-white/15 pr-4 select-none">
             {selectedVerses.length} {selectedVerses.length === 1 ? 'verse' : 'verses'} selected
@@ -1107,7 +1119,8 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
           >
             CANCEL
           </button>
-        </div>
+        </div>,
+        document.body
       )}
 
 
