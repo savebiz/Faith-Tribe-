@@ -260,7 +260,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
     if (node) {
       const observer = new IntersectionObserver(
         ([entry]) => {
-          setCardBottomInView(entry.isIntersecting);
+          setCardBottomInView(entry.isIntersecting || entry.boundingClientRect.top < 0);
         },
         { 
           threshold: 0,
