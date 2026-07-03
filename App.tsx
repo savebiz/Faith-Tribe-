@@ -1089,7 +1089,7 @@ const App: React.FC = () => {
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/50 pt-8 border-t border-[#4d4475] mb-8">
             <div className="flex items-center gap-2">
               <span>&copy; {new Date().getFullYear()} RCCG Faith Tribe</span>
-              <img src="/Faith_Tribe_Grey-rbg.png" className="w-6 h-6 sm:w-7 sm:h-7 rounded-full object-cover border border-white/10" alt="Faith Tribe logo" />
+              <img src="/Faith_Tribe_Grey-rbg.png" className="w-8 h-8 sm:w-9 sm:h-9 object-contain" alt="Faith Tribe logo" />
             </div>
             <div>
               A digital ministry of RCCG Region 63 Junior Church
