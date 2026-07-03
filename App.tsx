@@ -1147,8 +1147,9 @@ const App: React.FC = () => {
 
                       return filtered.map((lesson) => {
                         const targetSlug = lesson.slug || '';
-                        const fallbackUrl = 'https://staging.lessons.church/curriculums';
-                        const lessonsUrl = targetSlug ? `https://staging.lessons.church/${targetSlug}` : fallbackUrl;
+                        const isStagingSlug = targetSlug.endsWith('-staging') || targetSlug === 'second' || targetSlug === 'taras';
+                        const fallbackUrl = 'https://lessons.church/';
+                        const lessonsUrl = (targetSlug && !isStagingSlug) ? `https://lessons.church/${targetSlug}` : fallbackUrl;
                         const isPreTeen = lesson.name?.toLowerCase().includes('loop') || lesson.name?.toLowerCase().includes('elementary');
 
                         return (
