@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { VerseOfTheWeek } from './lib/bible/VerseOfTheWeek';
 import { BibleReaderView } from './lib/bible/BibleReaderView';
-import { getCurriculumCache, saveCurriculumCache } from './lib/supabase';
+import { getCurriculumCache, saveCurriculumCache, fetchCustomVerse, updateCustomVerse } from './lib/supabase';
 
 // --- Mock Data ---
 const KIDS_CONTENT: ContentItem[] = [
@@ -709,6 +709,42 @@ const App: React.FC = () => {
     const [useFallback, setUseFallback] = useState(false);
     const [flags, setFlags] = useState({ enableCurriculumPhase1: true, enableCurriculumPhase2: true });
 
+    // Scripture Admin Override States
+    const [customVerseInput, setCustomVerseInput] = useState('');
+    const [isSavingCustomVerse, setIsSavingCustomVerse] = useState(false);
+
+    useEffect(() => {
+      const loadCurrentCustom = async () => {
+        try {
+          const current = await fetchCustomVerse();
+          if (current) {
+            setCustomVerseInput(current);
+          }
+        } catch (err) {
+          console.warn("Failed to load current custom verse override:", err);
+        }
+      };
+      if (isTeacherLoggedIn) {
+        loadCurrentCustom();
+      }
+    }, [isTeacherLoggedIn]);
+
+    const handleSaveCustomVerse = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!customVerseInput.trim()) return;
+
+      setIsSavingCustomVerse(true);
+      try {
+        await updateCustomVerse(customVerseInput.trim());
+        alert('Verse of the Week updated successfully! Check the homepage spotlight card to see the changes.');
+      } catch (err) {
+        console.error(err);
+        alert('Failed to update custom verse.');
+      } finally {
+        setIsSavingCustomVerse(false);
+      }
+    };
+
     useEffect(() => {
       const fetchFlagsAndCurriculum = async () => {
         setIsLoadingLive(true);
@@ -1231,6 +1267,34 @@ const App: React.FC = () => {
               </div>
               <h3 className="text-2xl text-teal-700 mb-4 font-sans font-bold">Scripture for the Week</h3>
               <VerseOfTheWeek versionId={12} />
+            </div>
+
+            {/* Admin: Scripture Override Control Card */}
+            <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-150 relative overflow-hidden text-gray-700 animate-in fade-in duration-300">
+              <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <Sparkles size={16} className="text-teal-650" /> Admin Verse of the Week Control
+              </h3>
+              <p className="text-xs text-gray-500 mb-4">
+                Input any YouVersion Bible reference code (e.g. <code className="bg-gray-100 px-1.5 py-0.5 rounded text-teal-700 font-bold">JHN.3.16</code> or <code className="bg-gray-100 px-1.5 py-0.5 rounded text-teal-700 font-bold">ROM.12.1-2</code>) to override the homepage scripture spotlight.
+              </p>
+              
+              <form onSubmit={handleSaveCustomVerse} className="flex gap-2">
+                <input 
+                  type="text" 
+                  required
+                  value={customVerseInput}
+                  onChange={e => setCustomVerseInput(e.target.value)}
+                  placeholder="e.g. JHN.3.16"
+                  className="flex-grow text-xs border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
+                />
+                <button 
+                  type="submit" 
+                  disabled={isSavingCustomVerse}
+                  className="bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all cursor-pointer shadow-sm flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  {isSavingCustomVerse ? 'Saving...' : 'Update Spotlight'}
+                </button>
+              </form>
             </div>
           </div>
           

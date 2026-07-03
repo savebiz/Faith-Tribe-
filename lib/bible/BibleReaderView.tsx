@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BibleReader } from '@youversion/platform-react-ui';
-import { ArrowLeft, Book, Flame, Share2, MoreVertical, Copy, AlertTriangle, Check, Award, Download } from 'lucide-react';
+import { ArrowLeft, Book, Flame, Share2, MoreVertical, Copy, AlertTriangle, Check, Award, Download, Highlighter, Trash2 } from 'lucide-react';
 import { fetchReactionCount, incrementReactionCount, hasReacted } from '../supabase';
 
 const APPROVED_VERSIONS = [
@@ -10,6 +10,24 @@ const APPROVED_VERSIONS = [
   { id: 12, label: 'American Standard Version (ASV)' },
   { id: 111, label: 'New International Version (NIV)' },
 ];
+
+const BOOK_NAMES: Record<string, string> = {
+  GEN: 'Genesis', EXOD: 'Exodus', LEV: 'Leviticus', NUM: 'Numbers', DEUT: 'Deuteronomy',
+  JOSH: 'Joshua', JUDG: 'Judges', RUTH: 'Ruth', '1SAM': '1 Samuel', '2SAM': '2 Samuel',
+  '1KGS': '1 Kings', '2KGS': '2 Kings', '1CHR': '1 Chronicles', '2CHR': '2 Chronicles',
+  EZRA: 'Ezra', NEH: 'Nehemiah', ESTH: 'Esther', JOB: 'Job', PSALM: 'Psalms',
+  PROV: 'Proverbs', ECCL: 'Ecclesiastes', SONG: 'Song of Solomon', ISA: 'Isaiah',
+  JER: 'Jeremiah', LAM: 'Lamentations', EZEK: 'Ezekiel', DAN: 'Daniel', HOS: 'Hosea',
+  JOEL: 'Joel', AMOS: 'Amos', OBAD: 'Obadiah', JONAH: 'Jonah', MIC: 'Micah',
+  NAH: 'Nahum', HAB: 'Habakkuk', ZEPH: 'Zephaniah', HAG: 'Haggai', ZECH: 'Zechariah',
+  MAL: 'Malachi', MATT: 'Matthew', MARK: 'Mark', LUKE: 'Luke', JOHN: 'John',
+  ACTS: 'Acts', ROM: 'Romans', '1COR': '1 Corinthians', '2COR': '2 Corinthians',
+  GAL: 'Galatians', EPH: 'Ephesians', PHIL: 'Philippians', COL: 'Colossians',
+  '1THESS': '1 Thessalonians', '2THESS': '2 Thessalonians', '1TIM': '1 Timothy',
+  '2TIM': '2 Timothy', TITUS: 'Titus', PHILEM: 'Philemon', HEB: 'Hebrews',
+  JAS: 'James', '1PET': '1 Peter', '2PET': '2 Peter', '1JOHN': '1 John',
+  '2JOHN': '2 John', '3JOHN': '3 John', JUDE: 'Jude', REV: 'Revelation'
+};
 
 export function BibleReaderView({ onBack }: { onBack: () => void }) {
   // 1. Read initial values from URL path and search params
@@ -38,6 +56,16 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
   const [chapter, setChapter] = useState(initial.chapter);
   const [versionId, setVersionId] = useState(initial.versionId);
   const [isBottomPickerOpen, setIsBottomPickerOpen] = useState(false);
+
+  // Selection and Highlight Layer
+  const [selectedVerses, setSelectedVerses] = useState<number[]>([]);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isHighlightMenuOpen, setIsHighlightMenuOpen] = useState(false);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 2500);
+  };
 
   // Engagement Layer States
   const [reactionsCount, setReactionsCount] = useState(0);
@@ -116,6 +144,118 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
     setStreak(currentStreak);
   }, [book, chapter]);
 
+  // Reset selection on chapter change
+  useEffect(() => {
+    setSelectedVerses([]);
+  }, [book, chapter, versionId]);
+
+  // Apply Highlight and Selection Styling via MutationObserver
+  const applyHighlightsAndStyles = () => {
+    const verses = document.querySelectorAll('.yv-v');
+    verses.forEach((el) => {
+      const verseNumStr = el.getAttribute('v');
+      if (!verseNumStr) return;
+      const verseNum = Number(verseNumStr);
+
+      // Make clickable
+      el.classList.add('cursor-pointer', 'transition-all', 'duration-200');
+
+      // Load cached highlights
+      const cacheKey = `highlight:${book}.${chapter}.${verseNum}:${versionId}`;
+      const savedColor = localStorage.getItem(cacheKey);
+
+      // Reset classes
+      el.classList.remove(
+        'bg-[#1CABB9]/25', 
+        'bg-amber-400/35', 
+        'bg-pink-400/30', 
+        'bg-violet-400/30', 
+        'border-b-2', 
+        'border-[#1CABB9]/40',
+        'border-amber-400/50',
+        'border-pink-400/40',
+        'border-violet-400/40',
+        'bg-[#372f58]/15',
+        'ring-2',
+        'ring-[#372f58]/20',
+        'rounded-md',
+        'px-1'
+      );
+
+      // Render highlights
+      if (savedColor) {
+        if (savedColor === 'teal') {
+          el.classList.add('bg-[#1CABB9]/25', 'border-b-2', 'border-[#1CABB9]/40');
+        } else if (savedColor === 'gold') {
+          el.classList.add('bg-amber-400/35', 'border-b-2', 'border-amber-400/50');
+        } else if (savedColor === 'pink') {
+          el.classList.add('bg-pink-400/30', 'border-b-2', 'border-pink-400/40');
+        } else if (savedColor === 'purple') {
+          el.classList.add('bg-violet-400/30', 'border-b-2', 'border-violet-400/40');
+        }
+      }
+
+      // Render selections (selected status wins visual priority)
+      if (selectedVerses.includes(verseNum)) {
+        el.classList.add('bg-[#372f58]/15', 'ring-2', 'ring-[#372f58]/20', 'rounded-md', 'px-1');
+      }
+    });
+  };
+
+  useEffect(() => {
+    applyHighlightsAndStyles();
+
+    const target = document.querySelector('.yv-reader-wrapper');
+    if (!target) return;
+
+    const observer = new MutationObserver(() => {
+      applyHighlightsAndStyles();
+    });
+
+    observer.observe(target, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [book, chapter, versionId, selectedVerses]);
+
+  // Click Event Delegation for Verse Selection
+  useEffect(() => {
+    const container = document.querySelector('.yv-reader-wrapper');
+    if (!container) return;
+
+    const handleContainerClick = (e: Event) => {
+      const target = e.target as HTMLElement;
+      const verseEl = target.closest('.yv-v');
+      if (!verseEl) return;
+
+      const verseNumStr = verseEl.getAttribute('v');
+      if (!verseNumStr) return;
+
+      const num = Number(verseNumStr);
+
+      setSelectedVerses((prev) => {
+        if (prev.includes(num)) {
+          if (prev.length === 1) return [];
+          return [num];
+        }
+
+        if (prev.length === 1) {
+          const start = prev[0];
+          const minVal = Math.min(start, num);
+          const maxVal = Math.max(start, num);
+          const range: number[] = [];
+          for (let i = minVal; i <= maxVal; i++) {
+            range.push(i);
+          }
+          return range;
+        }
+
+        return [num];
+      });
+    };
+
+    container.addEventListener('click', handleContainerClick);
+    return () => container.removeEventListener('click', handleContainerClick);
+  }, [book, chapter, versionId]);
+
   const handleVersionChange = (id: number) => {
     // Only accept approved versions (Part B)
     if (APPROVED_VERSIONS.some((v) => v.id === id)) {
@@ -132,6 +272,54 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
   };
 
   const currentVersionLabel = APPROVED_VERSIONS.find((v) => v.id === versionId)?.label || 'Berean Standard Bible (BSB)';
+
+  // Highlights handler (persisted locally)
+  const handleHighlightColor = (color: 'teal' | 'gold' | 'pink' | 'purple' | 'clear') => {
+    selectedVerses.forEach((vNum) => {
+      const cacheKey = `highlight:${book}.${chapter}.${vNum}:${versionId}`;
+      if (color === 'clear') {
+        localStorage.removeItem(cacheKey);
+      } else {
+        localStorage.setItem(cacheKey, color);
+      }
+    });
+    applyHighlightsAndStyles();
+    setSelectedVerses([]);
+    showToast(color === 'clear' ? 'Highlight cleared!' : 'Highlight saved!');
+    setIsHighlightMenuOpen(false);
+  };
+
+  // Formatted copy handler (Appends reference & translation label)
+  const handleCopy = () => {
+    if (selectedVerses.length === 0) return;
+    const sorted = [...selectedVerses].sort((a, b) => a - b);
+    const textParts: string[] = [];
+
+    sorted.forEach((vNum) => {
+      const el = document.querySelector(`.yv-v[v="${vNum}"]`);
+      if (el) {
+        const clone = el.cloneNode(true) as HTMLElement;
+        const label = clone.querySelector('.label, .v-num, sup, .verse-num');
+        if (label) {
+          label.remove();
+        }
+        textParts.push(clone.textContent?.trim() || '');
+      }
+    });
+
+    const fullText = textParts.join(' ');
+    const versionLabel = APPROVED_VERSIONS.find((v) => v.id === versionId)?.label.split('(')[1]?.replace(')', '') || 'BSB';
+    const bookName = BOOK_NAMES[book] || book;
+    const refString = sorted.length === 1
+      ? `${bookName} ${chapter}:${sorted[0]}`
+      : `${bookName} ${chapter}:${sorted[0]}-${sorted[sorted.length - 1]}`;
+
+    const formattedText = `"${fullText}" — ${refString} (${versionLabel})`;
+
+    navigator.clipboard.writeText(formattedText);
+    showToast('Copied to clipboard!');
+    setSelectedVerses([]);
+  };
 
   // Canvas Image Generator for Share Card (Part C2)
   const drawShareCard = () => {
@@ -163,11 +351,20 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
     ctx.font = '14px sans-serif';
     ctx.fillText('A digital ministry of RCCG Region 63 Junior Church', 50, 95);
 
+    // main selection reference
+    const sorted = [...selectedVerses].sort((a, b) => a - b);
+    const refVerses = sorted.length === 1 
+      ? `:${sorted[0]}` 
+      : (sorted.length > 1 ? `:${sorted[0]}-${sorted[sorted.length - 1]}` : '');
+      
+    const bookName = BOOK_NAMES[book] || book;
+    const displayRef = `${bookName} ${chapter}${refVerses}`;
+
     // Main Quote block
     ctx.fillStyle = '#ffffff';
     ctx.font = 'italic bold 28px sans-serif';
     const text1 = `Join me in reading`;
-    const text2 = `${book} Chapter ${chapter}`;
+    const text2 = displayRef;
     ctx.fillText(text1, 50, 240);
     ctx.font = 'italic bold 42px sans-serif';
     ctx.fillText(text2, 50, 300);
@@ -210,11 +407,18 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
     if (isShareModalOpen) {
       drawShareCard();
     }
-  }, [isShareModalOpen, book, chapter, versionId]);
+  }, [isShareModalOpen, book, chapter, versionId, selectedVerses]);
 
   const handleShareClick = async () => {
+    const sorted = [...selectedVerses].sort((a, b) => a - b);
+    const refVerses = sorted.length === 1 
+      ? `:${sorted[0]}` 
+      : (sorted.length > 1 ? `:${sorted[0]}-${sorted[sorted.length - 1]}` : '');
+      
+    const bookName = BOOK_NAMES[book] || book;
+    const displayRef = `${bookName} ${chapter}${refVerses}`;
     const shareUrl = window.location.href;
-    const shareText = `Come read the Bible with me! ${book} Chapter ${chapter} (${currentVersionLabel}) on Faith Tribe.`;
+    const shareText = `Come read the Bible with me! ${displayRef} (${currentVersionLabel}) on Faith Tribe.`;
 
     if (navigator.share) {
       try {
@@ -448,6 +652,89 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
               Cancel
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[100] bg-slate-900 text-white text-xs font-bold px-5 py-3 rounded-2xl shadow-xl animate-bounce">
+          {toastMessage}
+        </div>
+      )}
+
+      {/* Floating Verse Action Bar */}
+      {selectedVerses.length > 0 && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-[#372f58]/95 backdrop-blur-md border border-white/10 rounded-full py-3.5 px-6 shadow-2xl flex items-center gap-6 text-white text-xs font-black animate-in fade-in slide-in-from-bottom duration-300">
+          <span className="text-[#1CABB9] border-r border-white/15 pr-4 select-none">
+            {selectedVerses.length} {selectedVerses.length === 1 ? 'verse' : 'verses'} selected
+          </span>
+
+          <div className="relative">
+            <button
+              onClick={() => setIsHighlightMenuOpen(!isHighlightMenuOpen)}
+              className="hover:text-[#1CABB9] transition-colors flex items-center gap-1.5 cursor-pointer"
+            >
+              <Highlighter size={14} />
+              <span>HIGHLIGHT</span>
+            </button>
+
+            {/* Highlights Submenu */}
+            {isHighlightMenuOpen && (
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 bg-white rounded-3xl p-3 shadow-2xl border border-gray-100 flex items-center gap-3 z-50 animate-in zoom-in-95 duration-200">
+                <button
+                  onClick={() => handleHighlightColor('teal')}
+                  className="w-7 h-7 rounded-full bg-[#1CABB9] border-2 border-white shadow-md hover:scale-110 active:scale-95 transition-transform cursor-pointer"
+                  title="Teal Highlight"
+                />
+                <button
+                  onClick={() => handleHighlightColor('gold')}
+                  className="w-7 h-7 rounded-full bg-amber-500 border-2 border-white shadow-md hover:scale-110 active:scale-95 transition-transform cursor-pointer"
+                  title="Amber Highlight"
+                />
+                <button
+                  onClick={() => handleHighlightColor('pink')}
+                  className="w-7 h-7 rounded-full bg-pink-500 border-2 border-white shadow-md hover:scale-110 active:scale-95 transition-transform cursor-pointer"
+                  title="Pink Highlight"
+                />
+                <button
+                  onClick={() => handleHighlightColor('purple')}
+                  className="w-7 h-7 rounded-full bg-violet-500 border-2 border-white shadow-md hover:scale-110 active:scale-95 transition-transform cursor-pointer"
+                  title="Purple Highlight"
+                />
+                <div className="w-[1px] h-5 bg-gray-200" />
+                <button
+                  onClick={() => handleHighlightColor('clear')}
+                  className="p-1 text-gray-500 hover:text-red-500 hover:scale-110 transition-transform cursor-pointer flex items-center justify-center"
+                  title="Clear Highlight"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            )}
+          </div>
+
+          <button
+            onClick={handleCopy}
+            className="hover:text-[#1CABB9] transition-colors flex items-center gap-1.5 cursor-pointer"
+          >
+            <Copy size={14} />
+            <span>COPY</span>
+          </button>
+
+          <button
+            onClick={handleShareClick}
+            className="hover:text-[#1CABB9] transition-colors flex items-center gap-1.5 cursor-pointer"
+          >
+            <Share2 size={14} />
+            <span>SHARE</span>
+          </button>
+
+          <button
+            onClick={() => setSelectedVerses([])}
+            className="text-gray-450 hover:text-white transition-colors cursor-pointer text-[10px] pl-2 border-l border-white/15"
+          >
+            CANCEL
+          </button>
         </div>
       )}
     </div>

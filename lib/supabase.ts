@@ -177,3 +177,43 @@ export async function saveCurriculumCache(data: any[]): Promise<void> {
     }
   }
 }
+
+export async function fetchCustomVerse(): Promise<string | null> {
+  const localKey = 'ft_custom_verse';
+
+  if (isRealSupabase && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('site_settings')
+        .select('value')
+        .eq('key', 'verse_of_the_week')
+        .single();
+      
+      if (!error && data) {
+        return data.value;
+      }
+    } catch (e) {
+      console.warn("Supabase custom verse fetch failed, using local storage:", e);
+    }
+  }
+
+  return localStorage.getItem(localKey);
+}
+
+export async function updateCustomVerse(passageId: string): Promise<void> {
+  const localKey = 'ft_custom_verse';
+  localStorage.setItem(localKey, passageId);
+
+  if (isRealSupabase && supabase) {
+    try {
+      const { error } = await supabase
+        .from('site_settings')
+        .upsert({ key: 'verse_of_the_week', value: passageId }, { onConflict: 'key' });
+      
+      if (error) throw error;
+    } catch (e) {
+      console.warn("Supabase custom verse update failed:", e);
+    }
+  }
+}
+
