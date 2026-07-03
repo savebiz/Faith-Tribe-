@@ -1126,7 +1126,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
 
       {/* Floating Verse Action Bar (Portaled to body) */}
       {mounted && selectedVerses.length > 0 && createPortal(
-        <div className="fixed bottom-6 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-auto z-50 bg-[#372f58]/95 backdrop-blur-md border border-white/10 rounded-2xl sm:rounded-full py-3 px-4 sm:py-3.5 sm:px-6 shadow-2xl flex items-center justify-between sm:justify-start gap-4 sm:gap-6 text-white text-xs font-black animate-in fade-in slide-in-from-bottom duration-300">
+        <div className="fixed top-20 left-4 right-4 sm:left-1/2 sm:right-auto sm:-translate-x-1/2 sm:w-auto z-50 bg-[#372f58]/95 backdrop-blur-md border border-white/10 rounded-2xl sm:rounded-full py-3 px-4 sm:py-3.5 sm:px-6 shadow-2xl flex items-center justify-between sm:justify-start gap-4 sm:gap-6 text-white text-xs font-black animate-in fade-in slide-in-from-top-4 duration-300">
           <span className="text-[#1CABB9] border-r border-white/15 pr-4 select-none whitespace-nowrap">
             {selectedVerses.length} {selectedVerses.length === 1 ? 'verse' : 'verses'} selected
           </span>
@@ -1142,7 +1142,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
 
             {/* Highlights Submenu */}
             {isHighlightMenuOpen && (
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 bg-white rounded-3xl p-3 shadow-2xl border border-gray-100 flex items-center gap-3 z-50 animate-in zoom-in-95 duration-200">
+              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-4 bg-white rounded-3xl p-3 shadow-2xl border border-gray-100 flex items-center gap-3 z-50 animate-in zoom-in-95 duration-200">
                 <button
                   onClick={() => handleHighlightColor('teal')}
                   className="w-7 h-7 rounded-full bg-[#1CABB9] border-2 border-white shadow-md hover:scale-110 active:scale-95 transition-transform cursor-pointer"
