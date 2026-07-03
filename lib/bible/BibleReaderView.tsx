@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { BibleReader } from '@youversion/platform-react-ui';
 import { ArrowLeft, Book, Flame, Share2, MoreVertical, Copy, AlertTriangle, Check, Award, Download, Highlighter, Trash2, X, ArrowRight } from 'lucide-react';
 import { fetchReactionCount, incrementReactionCount, hasReacted } from '../supabase';
@@ -209,22 +209,25 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
   const [pendingScrollVerse, setPendingScrollVerse] = useState<number | null>(null);
   const lastScrollY = useRef(0);
-  const translationRef = useRef<HTMLDivElement>(null);
   const [translationInView, setTranslationInView] = useState(true);
+  const observerRef = useRef<IntersectionObserver | null>(null);
 
-  // Monitor when the top Translation control enters or leaves the viewport
-  useEffect(() => {
-    const el = translationRef.current;
-    if (!el) return;
+  const translationRef = useCallback((node: HTMLDivElement | null) => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
+    }
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        setTranslationInView(entry.isIntersecting);
-      },
-      { threshold: 0 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
+    if (node) {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          setTranslationInView(entry.isIntersecting);
+        },
+        { threshold: 0 }
+      );
+      observer.observe(node);
+      observerRef.current = observer;
+    }
   }, []);
 
   const showToast = (msg: string) => {
