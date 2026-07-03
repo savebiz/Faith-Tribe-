@@ -195,3 +195,33 @@
 [data-yv-sdk] button[aria-label*="Comment" i] {
   display: none !important;
 }
+
+/* Copyright / attribution text inside the YouVersion reader —
+   The SDK renders copyright as a <p> with class "yv:text-[0.75em]" inside
+   [data-yv-sdk]. We override at multiple specificity levels to ensure it
+   scales down to ~25% of the verse body size (base 18px → target ≈ 10–11px). */
+
+/* Primary: target the SDK's compiled utility class for 0.75em text */
+[data-yv-sdk] .yv\:text-\[0\.75em\] {
+  font-size: 0.6rem !important;
+  line-height: 1.5 !important;
+  opacity: 0.65 !important;
+}
+
+/* Secondary: target the attribution data-slot element */
+[data-yv-sdk] [data-slot="attribution"] {
+  font-size: 0.6rem !important;
+  line-height: 1.5 !important;
+  opacity: 0.65 !important;
+}
+
+/* Tertiary: broad catch for any paragraph that is the direct child of the
+   reader footer — this is the structural container for copyright text */
+.yv-reader-wrapper p:last-of-type,
+.yv-reader-wrapper [class*="footer"] p,
+.yv-reader-wrapper [class*="Footer"] p {
+  font-size: 0.6rem !important;
+  line-height: 1.5 !important;
+  opacity: 0.65 !important;
+}
+

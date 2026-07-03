@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { BibleReader } from '@youversion/platform-react-ui';
-import { ArrowLeft, Book, Flame, Share2, MoreVertical, Copy, AlertTriangle, Check, Award, Download, Highlighter, Trash2, X, ArrowRight } from 'lucide-react';
+import { ArrowLeft, Book, Flame, Share2, MoreVertical, Copy, AlertTriangle, Check, Award, Download, Highlighter, Trash2, X, ArrowRight, Search } from 'lucide-react';
 import { fetchReactionCount, incrementReactionCount, hasReacted } from '../supabase';
 import { useReadingPreferences } from './useReadingPreferences';
 import { ChapterSelector } from './ChapterSelector';
@@ -1187,14 +1187,15 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
                 autoFocus
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
-                placeholder="Type reference (e.g. John 3:16 or Psalm 23)"
-                className="w-full bg-gray-50 border border-gray-250 text-[#372f58] font-bold text-lg px-6 py-4.5 rounded-3xl shadow-inner focus:outline-none focus:ring-2 focus:ring-[#1CABB9] pr-16"
+                placeholder="e.g. John 3:16 or Psalm 23"
+                className="w-full bg-gray-50 border border-gray-250 text-[#372f58] font-semibold text-sm sm:text-base px-5 py-3.5 rounded-3xl shadow-inner focus:outline-none focus:ring-2 focus:ring-[#1CABB9] pr-14"
               />
               <button
                 type="submit"
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-[#1CABB9] hover:bg-[#158f9c] text-white p-2.5 rounded-2xl transition-colors cursor-pointer"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 w-9 h-9 flex items-center justify-center bg-[#1CABB9] hover:bg-[#158f9c] text-white rounded-2xl transition-colors cursor-pointer shrink-0"
+                aria-label="Search scripture"
               >
-                <ArrowRight size={18} />
+                <Search size={16} />
               </button>
             </form>
 
