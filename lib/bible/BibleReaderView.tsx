@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { BibleReader } from '@youversion/platform-react-ui';
-import { ArrowLeft, Book, Flame, Share2, MoreVertical, Copy, AlertTriangle, Check, Award, Download, Highlighter, Trash2 } from 'lucide-react';
+import { ArrowLeft, Book, Flame, Share2, MoreVertical, Copy, AlertTriangle, Check, Award, Download, Highlighter, Trash2, X, ArrowRight } from 'lucide-react';
 import { fetchReactionCount, incrementReactionCount, hasReacted } from '../supabase';
 
 const APPROVED_VERSIONS = [
@@ -32,6 +32,142 @@ const BOOK_NAMES: Record<string, string> = {
   JAS: 'James', '1PET': '1 Peter', '2PET': '2 Peter', '1JOHN': '1 John',
   '2JOHN': '2 John', '3JOHN': '3 John', JUDE: 'Jude', REV: 'Revelation'
 };
+
+const BOOK_ABBREVIATIONS: Record<string, string> = {
+  // Genesis
+  'genesis': 'GEN', 'gen': 'GEN', 'ge': 'GEN',
+  // Exodus
+  'exodus': 'EXOD', 'exo': 'EXOD', 'ex': 'EXOD',
+  // Leviticus
+  'leviticus': 'LEV', 'lev': 'LEV', 'le': 'LEV',
+  // Numbers
+  'numbers': 'NUM', 'num': 'NUM', 'nu': 'NUM',
+  // Deuteronomy
+  'deuteronomy': 'DEUT', 'deu': 'DEUT', 'dt': 'DEUT',
+  // Joshua
+  'joshua': 'JOSH', 'jos': 'JOSH', 'josh': 'JOSH',
+  // Judges
+  'judges': 'JUDG', 'judg': 'JUDG', 'jdg': 'JUDG',
+  // Ruth
+  'ruth': 'RUTH', 'rut': 'RUTH', 'ru': 'RUTH',
+  // 1 Samuel
+  '1 samuel': '1SAM', '1sam': '1SAM', '1 sam': '1SAM', '1 sa': '1SAM', '1s': '1SAM',
+  // 2 Samuel
+  '2 samuel': '2SAM', '2sam': '2SAM', '2 sam': '2SAM', '2 sa': '2SAM', '2s': '2SAM',
+  // 1 Kings
+  '1 kings': '1KGS', '1kgs': '1KGS', '1 ki': '1KGS', '1k': '1KGS',
+  // 2 Kings
+  '2 kings': '2KGS', '2kgs': '2KGS', '2 ki': '2KGS', '2k': '2KGS',
+  // 1 Chronicles
+  '1 chronicles': '1CHR', '1chr': '1CHR', '1 ch': '1CHR',
+  // 2 Chronicles
+  '2 chronicles': '2CHR', '2chr': '2CHR', '2 ch': '2CHR',
+  // Ezra
+  'ezra': 'EZRA', 'ezr': 'EZRA',
+  // Nehemiah
+  'nehemiah': 'NEH', 'neh': 'NEH', 'ne': 'NEH',
+  // Esther
+  'esther': 'ESTH', 'est': 'ESTH', 'es': 'ESTH',
+  // Job
+  'job': 'JOB', 'jb': 'JOB',
+  // Psalms
+  'psalms': 'PSALM', 'psalm': 'PSALM', 'psal': 'PSALM', 'ps': 'PSALM', 'psa': 'PSALM',
+  // Proverbs
+  'proverbs': 'PROV', 'prov': 'PROV', 'pr': 'PROV',
+  // Ecclesiastes
+  'ecclesiastes': 'ECCL', 'eccl': 'ECCL', 'ecc': 'ECCL', 'ec': 'ECCL',
+  // Song of Solomon
+  'song of solomon': 'SONG', 'song of songs': 'SONG', 'song': 'SONG', 'so': 'SONG',
+  // Isaiah
+  'isaiah': 'ISA', 'isa': 'ISA', 'is': 'ISA',
+  // Jeremiah
+  'jeremiah': 'JER', 'jer': 'JER', 'je': 'JER',
+  // Lamentations
+  'lamentations': 'LAM', 'lam': 'LAM', 'la': 'LAM',
+  // Ezekiel
+  'ezekiel': 'EZEK', 'ezek': 'EZEK', 'eze': 'EZEK',
+  // Daniel
+  'daniel': 'DAN', 'dan': 'DAN', 'da': 'DAN',
+  // Hosea
+  'hosea': 'HOS', 'hos': 'HOS', 'ho': 'HOS',
+  // Joel
+  'joel': 'JOEL', 'joe': 'JOEL',
+  // Amos
+  'amos': 'AMOS', 'amo': 'AMOS', 'am': 'AMOS',
+  // Obadiah
+  'obadiah': 'OBAD', 'obad': 'OBAD', 'ob': 'OBAD',
+  // Jonah
+  'jonah': 'JONAH', 'jon': 'JONAH',
+  // Micah
+  'micah': 'MIC', 'mic': 'MIC', 'mi': 'MIC',
+  // Nahum
+  'nahum': 'NAH', 'nah': 'NAH', 'na': 'NAH',
+  // Habakkuk
+  'habakkuk': 'HAB', 'hab': 'HAB',
+  // Zephaniah
+  'zephaniah': 'ZEPH', 'zep': 'ZEPH',
+  // Haggai
+  'haggai': 'HAG', 'hag': 'HAG',
+  // Zechariah
+  'zechariah': 'ZECH', 'zec': 'ZECH',
+  // Malachi
+  'malachi': 'MAL', 'mal': 'MAL',
+  // Matthew
+  'matthew': 'MATT', 'matt': 'MATT', 'mat': 'MATT', 'mt': 'MATT',
+  // Mark
+  'mark': 'MARK', 'mrk': 'MARK', 'mk': 'MARK',
+  // Luke
+  'luke': 'LUKE', 'luk': 'LUKE', 'lk': 'LUKE',
+  // John
+  'john': 'JOHN', 'jhn': 'JOHN', 'joh': 'JOHN', 'jn': 'JOHN',
+  // Acts
+  'acts': 'ACTS', 'act': 'ACTS', 'ac': 'ACTS',
+  // Romans
+  'romans': 'ROM', 'rom': 'ROM', 'ro': 'ROM',
+  // 1 Corinthians
+  '1 corinthians': '1COR', '1cor': '1COR', '1 cor': '1COR', '1 co': '1COR',
+  // 2 Corinthians
+  '2 corinthians': '2COR', '2cor': '2COR', '2 cor': '2COR', '2 co': '2COR',
+  // Galatians
+  'galatians': 'GAL', 'gal': 'GAL', 'ga': 'GAL',
+  // Ephesians
+  'ephesians': 'EPH', 'eph': 'EPH', 'ep': 'EPH',
+  // Philippians
+  'philippians': 'PHIL', 'phil': 'PHIL', 'phi': 'PHIL', 'php': 'PHIL',
+  // Colossians
+  'colossians': 'COL', 'col': 'COL', 'co': 'COL',
+  // 1 Thessalonians
+  '1 thessalonians': '1THESS', '1thess': '1THESS', '1 thess': '1THESS', '1 th': '1THESS',
+  // 2 Thessalonians
+  '2 thessalonians': '2THESS', '2thess': '2THESS', '2 thess': '2THESS', '2 th': '2THESS',
+  // 1 Timothy
+  '1 timothy': '1TIM', '1tim': '1TIM', '1 tim': '1TIM', '1 ti': '1TIM',
+  // 2 Timothy
+  '2 timothy': '2TIM', '2tim': '2TIM', '2 tim': '2TIM', '2 ti': '2TIM',
+  // Titus
+  'titus': 'TITUS', 'tit': 'TITUS', 'ti': 'TITUS',
+  // Philemon
+  'philemon': 'PHILEM', 'philem': 'PHILEM', 'phm': 'PHILEM',
+  // Hebrews
+  'hebrew': 'HEB', 'hebrews': 'HEB', 'heb': 'HEB',
+  // James
+  'james': 'JAS', 'jas': 'JAS', 'jam': 'JAS', 'jm': 'JAS',
+  // 1 Peter
+  '1 peter': '1PET', '1pet': '1PET', '1 pet': '1PET', '1 pe': '1PET',
+  // 2 Peter
+  '2 peter': '2PET', '2pet': '2PET', '2 pet': '2PET', '2 pe': '2PET',
+  // 1 John
+  '1 john': '1JOHN', '1john': '1JOHN', '1 jn': '1JOHN', '1 jhn': '1JOHN', '1j': '1JOHN',
+  // 2 John
+  '2 john': '2JOHN', '2john': '2JOHN', '2 jn': '2JOHN', '2 jhn': '2JOHN', '2j': '2JOHN',
+  // 3 John
+  '3 john': '3JOHN', '3john': '3JOHN', '3 jn': '3JOHN', '3 jhn': '3JOHN', '3j': '3JOHN',
+  // Jude
+  'jude': 'JUDE', 'jud': 'JUDE',
+  // Revelation
+  'revelation': 'REV', 'rev': 'REV', 're': 'REV', 'revelations': 'REV'
+};
+
 
 export function BibleReaderView({ onBack }: { onBack: () => void }) {
   // 1. Read initial values from URL path and search params
@@ -65,6 +201,14 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
   const [selectedVerses, setSelectedVerses] = useState<number[]>([]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isHighlightMenuOpen, setIsHighlightMenuOpen] = useState(false);
+
+  // Navigation, Search and Progress States
+  const [isNavVisible, setIsNavVisible] = useState(true);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const [searchValue, setSearchValue] = useState('');
+  const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
+  const [pendingScrollVerse, setPendingScrollVerse] = useState<number | null>(null);
+  const lastScrollY = useRef(0);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -153,6 +297,51 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
     setSelectedVerses([]);
   }, [book, chapter, versionId]);
 
+  // Implement scroll-direction hiding and progress tracking
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      
+      // Update progress
+      if (totalHeight > 0) {
+        setScrollProgress((currentScrollY / totalHeight) * 100);
+      } else {
+        setScrollProgress(0);
+      }
+
+      // Hide or show bottom bar based on scroll direction
+      const delta = currentScrollY - lastScrollY.current;
+      const isAtBottom = window.innerHeight + currentScrollY >= document.documentElement.scrollHeight - 50;
+
+      if (isAtBottom) {
+        setIsNavVisible(true);
+      } else if (Math.abs(delta) >= 10) {
+        if (delta > 0 && currentScrollY > 100) {
+          setIsNavVisible(false);
+        } else {
+          setIsNavVisible(true);
+        }
+        lastScrollY.current = currentScrollY;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Global search shortcut listener (Cmd+K / Ctrl+K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsSearchOverlayOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // Apply Highlight and Selection Styling via MutationObserver
   const applyHighlightsAndStyles = () => {
     const verses = document.querySelectorAll('.yv-v');
@@ -203,6 +392,18 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
       if (selectedVerses.includes(verseNum)) {
         el.classList.add('bg-[#372f58]/15', 'ring-2', 'ring-[#372f58]/20', 'rounded-md', 'px-1');
       }
+
+      // Handle pending scroll target from reference search
+      if (pendingScrollVerse !== null && verseNum === pendingScrollVerse) {
+        setPendingScrollVerse(null);
+        setTimeout(() => {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('animate-pulse-highlight');
+          setTimeout(() => {
+            el.classList.remove('animate-pulse-highlight');
+          }, 3000);
+        }, 100);
+      }
     });
   };
 
@@ -218,7 +419,70 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
 
     observer.observe(target, { childList: true, subtree: true });
     return () => observer.disconnect();
-  }, [book, chapter, versionId, selectedVerses]);
+  }, [book, chapter, versionId, selectedVerses, pendingScrollVerse]);
+
+  // Reference search parser and handler
+  const handleSearchSubmit = (input: string) => {
+    const clean = input.trim().toLowerCase();
+    if (!clean) return;
+    
+    // Sort keys by length descending to match multi-word books first
+    const sortedKeys = Object.keys(BOOK_ABBREVIATIONS).sort((a, b) => b.length - a.length);
+    let matchedBookKey = '';
+    
+    for (const key of sortedKeys) {
+      if (clean.startsWith(key)) {
+        matchedBookKey = key;
+        break;
+      }
+    }
+    
+    if (!matchedBookKey) {
+      alert("Couldn't find that book — try 'John 3:16' or 'Genesis 1'");
+      return;
+    }
+    
+    const bookCode = BOOK_ABBREVIATIONS[matchedBookKey];
+    const remaining = clean.slice(matchedBookKey.length).trim();
+    
+    // Match chapter and optional verse (e.g., "3", "3:16", "3:16-18")
+    const match = remaining.match(/^(\d+)(?:\s*:\s*(\d+)(?:\s*-\s*(\d+))?)?$/);
+    
+    if (!match && remaining.length > 0) {
+      alert("Couldn't parse chapter/verse — try 'John 3:16' or 'Genesis 1'");
+      return;
+    }
+    
+    const chapterNum = match ? match[1] : '1';
+    const startVerse = match && match[2] ? Number(match[2]) : null;
+    
+    setBook(bookCode);
+    setChapter(chapterNum);
+    
+    if (startVerse) {
+      setPendingScrollVerse(startVerse);
+    }
+    
+    setIsSearchOverlayOpen(false);
+  };
+
+  const handleSuggestionClick = (bookName: string) => {
+    setSearchValue(`${bookName} `);
+  };
+
+  // Suggestions filter based on typed text
+  const getSuggestions = () => {
+    if (!searchValue.trim()) return [];
+    const val = searchValue.trim().toLowerCase();
+    return Object.entries(BOOK_NAMES)
+      .filter(([code, name]) => {
+        return name.toLowerCase().includes(val) || code.toLowerCase().includes(val);
+      })
+      .map(([code, name]) => ({ code, name }))
+      .slice(0, 8);
+  };
+  
+  const suggestions = getSuggestions();
 
   // Click Event Delegation for Verse Selection
   useEffect(() => {
@@ -481,34 +745,99 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
           </div>
         </div>
 
-        {/* Translation Dropdown (Top) */}
-        <div className="flex flex-col gap-2 mb-6">
-          <label htmlFor="version-select" className="text-xs font-bold text-[#372f58]/80 uppercase tracking-wider">
-            Translation
-          </label>
-          <div className="relative max-w-xs">
-            <select
-              id="version-select"
-              value={versionId}
-              onChange={(e) => handleVersionChange(Number(e.target.value))}
-              className="w-full bg-white/80 border border-gray-200 text-[#372f58] font-bold text-sm px-4 py-2.5 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1CABB9] cursor-pointer appearance-none"
-            >
-              {APPROVED_VERSIONS.map((v) => (
-                <option key={v.id} value={v.id}>
-                  {v.label}
-                </option>
-              ))}
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#372f58]/60">
-              <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-              </svg>
+        {/* Search & Translation Row */}
+        <div className="flex items-end justify-between gap-6 mb-8 pb-2">
+          {/* Translation Dropdown */}
+          <div className="flex flex-col gap-2 w-full sm:max-w-xs">
+            <label htmlFor="version-select" className="text-xs font-bold text-[#372f58]/80 uppercase tracking-wider">
+              Translation
+            </label>
+            <div className="relative">
+              <select
+                id="version-select"
+                value={versionId}
+                onChange={(e) => handleVersionChange(Number(e.target.value))}
+                className="w-full bg-white/80 border border-gray-200 text-[#372f58] font-bold text-sm px-4 py-2.5 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1CABB9] cursor-pointer appearance-none"
+              >
+                {APPROVED_VERSIONS.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {v.label}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#372f58]/60">
+                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                </svg>
+              </div>
             </div>
+          </div>
+
+          {/* Scripture Search Bar (Tablet / Desktop) */}
+          <div className="hidden sm:block flex-grow max-w-sm relative">
+            <label className="block text-xs font-bold text-[#372f58]/80 uppercase tracking-wider mb-2">
+              Scripture Search
+            </label>
+            <form 
+              onSubmit={(e) => { e.preventDefault(); handleSearchSubmit(searchValue); }}
+              className="relative"
+            >
+              <input
+                type="text"
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                placeholder="Search reference (e.g. John 3:16)"
+                className="w-full bg-white/80 border border-gray-200 text-[#372f58] font-semibold text-sm pl-4 pr-16 py-2.5 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1CABB9]"
+              />
+              <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+                <kbd className="hidden lg:inline-flex items-center bg-gray-100 border border-gray-200 text-[10px] text-gray-400 px-1.5 py-0.5 rounded font-sans font-bold select-none">
+                  ⌘K
+                </kbd>
+                <button
+                  type="submit"
+                  className="bg-[#1CABB9] hover:bg-[#158f9c] text-white p-1.5 rounded-xl transition-colors cursor-pointer"
+                  title="Search passage"
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                  </svg>
+                </button>
+              </div>
+            </form>
+
+            {/* Autocomplete Dropdown */}
+            {suggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-150 rounded-2xl shadow-xl z-50 py-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                {suggestions.map((s) => (
+                  <button
+                    key={s.code}
+                    onClick={() => handleSuggestionClick(s.name)}
+                    className="w-full text-left px-4 py-2 text-xs font-bold text-[#372f58] hover:bg-gray-50 transition-colors flex items-center justify-between cursor-pointer"
+                  >
+                    <span>{s.name}</span>
+                    <span className="text-[9px] text-gray-400 font-mono tracking-wider">{s.code}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Search Trigger Icon for Mobile */}
+          <div className="sm:hidden">
+            <button
+              onClick={() => setIsSearchOverlayOpen(true)}
+              className="bg-white border border-gray-200 text-[#372f58] hover:text-[#1CABB9] p-2.5 rounded-2xl shadow-sm cursor-pointer transition-colors"
+              aria-label="Search scripture"
+            >
+              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </button>
           </div>
         </div>
 
         {/* YouVersion Bible Reader Wrapper */}
-        <div className="yv-reader-wrapper border border-[#372f58]/10 rounded-3xl p-4 sm:p-6 bg-white/40 shadow-inner relative">
+        <div className="yv-reader-wrapper border border-[#372f58]/10 rounded-3xl p-4 sm:p-6 pb-24 sm:pb-28 bg-white/40 shadow-inner relative">
           <BibleReader.Root
             book={book}
             onBookChange={setBook}
@@ -575,10 +904,6 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
                   </div>
                 )}
               </div>
-            </div>
-
-            <div className="mt-6 pt-4 border-t border-[#372f58]/10">
-              <BibleReader.Toolbar />
             </div>
           </BibleReader.Root>
         </div>
@@ -735,12 +1060,155 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
 
           <button
             onClick={() => setSelectedVerses([])}
-            className="text-gray-450 hover:text-white transition-colors cursor-pointer text-[10px] pl-2 border-l border-white/15"
+            className="text-gray-455 hover:text-white transition-colors cursor-pointer text-[10px] pl-2 border-l border-white/15"
           >
             CANCEL
           </button>
         </div>
       )}
+
+      {/* Floating Bottom Navigation Bars */}
+      {/* Mobile bottom full-width bar */}
+      <div 
+        className={`fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200/80 px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgba(0,0,0,0.06)] transition-transform duration-300 sm:hidden ${
+          isNavVisible ? 'translate-y-0' : 'translate-y-full'
+        }`}
+      >
+        <div className="max-w-md mx-auto">
+          <BibleReader.Toolbar />
+        </div>
+      </div>
+
+      {/* Center floating bottom pill (Tablet/Desktop) */}
+      <div 
+        className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-white/95 backdrop-blur-md border border-gray-250/85 px-6 py-2 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.12)] transition-transform duration-300 hidden sm:block ${
+          isNavVisible ? 'translate-y-0' : 'translate-y-[calc(100%+36px)]'
+        }`}
+      >
+        <div className="flex items-center justify-center min-w-[320px]">
+          <BibleReader.Toolbar />
+        </div>
+      </div>
+
+      {/* Reading Progress Bar */}
+      <div className="progress-bar-container">
+        <div 
+          className="progress-bar-fill bg-[#1CABB9]" 
+          style={{ width: `${scrollProgress}%` }}
+        />
+      </div>
+
+      {/* Mobile/Command Palette Search Takeover Overlay */}
+      {isSearchOverlayOpen && (
+        <div className="fixed inset-0 z-[100] flex flex-col bg-white/98 backdrop-blur-md p-6 sm:p-12 animate-in fade-in duration-200">
+          <div className="max-w-2xl mx-auto w-full flex flex-col h-full">
+            {/* Header */}
+            <div className="flex justify-between items-center mb-8">
+              <div>
+                <h3 className="text-xl font-black text-[#372f58]">Search Scripture</h3>
+                <p className="text-xs text-gray-500 mt-1">Jump straight to any book, chapter, or verse range</p>
+              </div>
+              <button
+                onClick={() => { setIsSearchOverlayOpen(false); setSearchValue(''); }}
+                className="p-2.5 bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-700 rounded-full transition-colors cursor-pointer"
+                aria-label="Close search"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Input field */}
+            <form
+              onSubmit={(e) => { e.preventDefault(); handleSearchSubmit(searchValue); }}
+              className="relative mb-6"
+            >
+              <input
+                type="text"
+                autoFocus
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                placeholder="Type reference (e.g. John 3:16 or Psalm 23)"
+                className="w-full bg-gray-50 border border-gray-250 text-[#372f58] font-bold text-lg px-6 py-4.5 rounded-3xl shadow-inner focus:outline-none focus:ring-2 focus:ring-[#1CABB9] pr-16"
+              />
+              <button
+                type="submit"
+                className="absolute right-4 top-1/2 -translate-y-1/2 bg-[#1CABB9] hover:bg-[#158f9c] text-white p-2.5 rounded-2xl transition-colors cursor-pointer"
+              >
+                <ArrowRight size={18} />
+              </button>
+            </form>
+
+            {/* Suggestions */}
+            {suggestions.length > 0 ? (
+              <div className="space-y-1.5 flex-grow overflow-y-auto max-h-[300px] pr-2">
+                <p className="text-[10px] font-black uppercase text-gray-400 tracking-wider mb-2 select-none">Suggestions</p>
+                {suggestions.map((s) => (
+                  <button
+                    key={s.code}
+                    onClick={() => handleSuggestionClick(s.name)}
+                    className="w-full text-left px-5 py-3.5 bg-gray-50 hover:bg-[#1CABB9]/5 rounded-2xl border border-gray-100 hover:border-[#1CABB9]/20 transition-all flex items-center justify-between cursor-pointer group"
+                  >
+                    <span className="font-bold text-sm text-[#372f58] group-hover:text-[#1CABB9] transition-colors">{s.name}</span>
+                    <span className="text-[10px] font-mono font-bold tracking-wider text-gray-400 bg-white border border-gray-150 px-2 py-0.5 rounded-md">{s.code}</span>
+                  </button>
+                ))}
+              </div>
+            ) : searchValue.trim().length > 0 ? (
+              <p className="text-xs text-gray-450 italic py-2 select-none">No books match "{searchValue}"</p>
+            ) : (
+              <div className="space-y-4 text-gray-555 select-none">
+                <p className="text-[10px] font-black uppercase text-gray-400 tracking-wider">Example references you can type</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100">
+                    <p className="font-bold text-[#372f58]">Genesis 1</p>
+                    <p className="text-[10px] text-gray-400 mt-0.5">Navigates to the chapter start</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100">
+                    <p className="font-bold text-[#372f58]">John 3:16</p>
+                    <p className="text-[10px] text-gray-400 mt-0.5">Navigates and scrolls directly to verse 16</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100">
+                    <p className="font-bold text-[#372f58]">Ps 23</p>
+                    <p className="text-[10px] text-gray-400 mt-0.5">Abbreviation support for Psalm 23</p>
+                  </div>
+                  <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100">
+                    <p className="font-bold text-[#372f58]">1 John 2:3-5</p>
+                    <p className="text-[10px] text-gray-400 mt-0.5">Support for verse range selections</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Inline styles for pulse animations and progress bars */}
+      <style>{`
+        @keyframes pulse-highlight {
+          0% { background-color: rgba(251, 191, 36, 0.5); border-radius: 0.375rem; }
+          50% { background-color: rgba(251, 191, 36, 0.5); border-radius: 0.375rem; }
+          100% { background-color: transparent; }
+        }
+        .animate-pulse-highlight {
+          animation: pulse-highlight 2.5s ease-out forwards;
+          display: inline-block;
+          width: 100%;
+        }
+        
+        .progress-bar-container {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 3px;
+          z-index: 100;
+          background-color: transparent;
+        }
+        .progress-bar-fill {
+          height: 100%;
+          transition: width 0.1s ease-out;
+        }
+      `}</style>
     </div>
   );
 }
