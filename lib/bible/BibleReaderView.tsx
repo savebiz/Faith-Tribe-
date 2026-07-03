@@ -13,10 +13,11 @@ const APPROVED_VERSIONS = [
   { id: 1588, label: 'Amplified Bible (AMP)' },
   { id: 111, label: 'New International Version (NIV)' },
   { id: 12, label: 'American Standard Version (ASV)' },
+  { id: 2079, label: 'EasyEnglish Bible' },
   // The three below must always render last, in this exact order
   { id: 911, label: 'Yoruba Contemporary Bible' },
-  { id: 1624, label: 'Igbo Contemporary Bible 2020' },
-  { id: 1614, label: 'Hausa Contemporary Bible 2020' },
+  { id: 1624, label: 'Igbo Contemporary Bible' },
+  { id: 1614, label: 'Hausa Contemporary Bible' },
 ];
 
 const BOOK_NAMES: Record<string, string> = {
@@ -217,6 +218,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
 
   const [isChapterSelectorOpen, setIsChapterSelectorOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [searchShortcutText, setSearchShortcutText] = useState('Ctrl+K');
 
   // Selection and Highlight Layer
   const [selectedVerses, setSelectedVerses] = useState<number[]>([]);
@@ -241,6 +243,19 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Detect OS for keyboard shortcut hint
+  useEffect(() => {
+    const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.userAgent);
+    setSearchShortcutText(isMac ? '⌘K' : 'Ctrl+K');
+  }, []);
+
+  // Kids Mode auto-switches active translation to EasyEnglish (ID: 2079) as default
+  useEffect(() => {
+    if (isKidsMode && versionId !== 2079) {
+      handleVersionChange(2079);
+    }
+  }, [isKidsMode, versionId]);
 
   useEffect(() => {
     if (!isTopDropdownOpen) return;
@@ -907,7 +922,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
               />
               <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
                 <kbd className="hidden lg:inline-flex items-center bg-gray-100 border border-gray-200 text-[10px] text-gray-400 px-1.5 py-0.5 rounded font-sans font-bold select-none">
-                  ⌘K
+                  {searchShortcutText}
                 </kbd>
                 <button
                   type="submit"
