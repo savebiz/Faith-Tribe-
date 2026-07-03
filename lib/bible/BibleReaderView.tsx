@@ -7,8 +7,12 @@ const APPROVED_VERSIONS = [
   { id: 3034, label: 'Berean Standard Bible (BSB)' },
   { id: 1932, label: 'Free Bible Version (FBV)' },
   { id: 1588, label: 'Amplified Bible (AMP)' },
-  { id: 12, label: 'American Standard Version (ASV)' },
   { id: 111, label: 'New International Version (NIV)' },
+  { id: 1, label: 'King James Version (KJV)' },
+  // The three below must always render last, in this exact order
+  { id: 911, label: 'Yoruba Contemporary Bible' },
+  { id: 1624, label: 'Igbo Contemporary Bible 2020' },
+  { id: 1614, label: 'Hausa Contemporary Bible 2020' },
 ];
 
 const BOOK_NAMES: Record<string, string> = {
