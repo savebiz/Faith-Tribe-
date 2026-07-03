@@ -215,6 +215,8 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
   const [mounted, setMounted] = useState(false);
   const [isTopDropdownOpen, setIsTopDropdownOpen] = useState(false);
   const topDropdownRef = useRef<HTMLDivElement>(null);
+  const [cardBottomInView, setCardBottomInView] = useState(false);
+  const cardBottomObserverRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -246,6 +248,27 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
       );
       observer.observe(node);
       observerRef.current = observer;
+    }
+  }, []);
+
+  const cardBottomRef = useCallback((node: HTMLDivElement | null) => {
+    if (cardBottomObserverRef.current) {
+      cardBottomObserverRef.current.disconnect();
+      cardBottomObserverRef.current = null;
+    }
+
+    if (node) {
+      const observer = new IntersectionObserver(
+        ([entry]) => {
+          setCardBottomInView(entry.isIntersecting);
+        },
+        { 
+          threshold: 0,
+          rootMargin: '0px'
+        }
+      );
+      observer.observe(node);
+      cardBottomObserverRef.current = observer;
     }
   }, []);
 
@@ -985,7 +1008,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
               {/* Mobile bottom full-width bar */}
               <div 
                 className={`mobile-floating-nav bg-white/95 backdrop-blur-md border-t border-gray-200/80 px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgba(0,0,0,0.06)] sm:hidden ${
-                  (!translationInView && isNavVisible) ? 'visible' : ''
+                  (!translationInView && isNavVisible && !cardBottomInView) ? 'visible' : ''
                 }`}
               >
                 <div className="max-w-md mx-auto">
@@ -996,7 +1019,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
               {/* Center floating bottom pill (Tablet/Desktop) */}
               <div 
                 className={`desktop-floating-nav bg-white/95 backdrop-blur-md border border-gray-250/85 px-6 py-2 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.12)] hidden sm:block ${
-                  (!translationInView && isNavVisible) ? 'visible' : ''
+                  (!translationInView && isNavVisible && !cardBottomInView) ? 'visible' : ''
                 }`}
               >
                 <div className="flex items-center justify-center min-w-[320px]">
@@ -1009,6 +1032,9 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
         </BibleReader.Root>
         </div>
       </div>
+
+      {/* Sentinel to detect bottom of reader container */}
+      <div ref={cardBottomRef} className="h-px w-full pointer-events-none" />
 
       {/* Part B: Custom Approved Versions Picker Overlay */}
       {isBottomPickerOpen && (
