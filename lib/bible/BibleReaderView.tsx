@@ -213,10 +213,23 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
   const [translationInView, setTranslationInView] = useState(true);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const [mounted, setMounted] = useState(false);
+  const [isTopDropdownOpen, setIsTopDropdownOpen] = useState(false);
+  const topDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!isTopDropdownOpen) return;
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (topDropdownRef.current && !topDropdownRef.current.contains(e.target as Node)) {
+        setIsTopDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [isTopDropdownOpen]);
 
   const translationRef = useCallback((node: HTMLDivElement | null) => {
     if (observerRef.current) {
@@ -729,14 +742,25 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
     }
   };
 
+  const currentVersion = APPROVED_VERSIONS.find(v => v.id === versionId) || APPROVED_VERSIONS[0];
+
+  const handleTopSelectorClick = (e: React.MouseEvent) => {
+    // If mobile viewport (< 640px), open the gorgeous custom modal picker
+    if (window.innerWidth < 640) {
+      setIsBottomPickerOpen(true);
+    } else {
+      setIsTopDropdownOpen(!isTopDropdownOpen);
+    }
+  };
+
   const copyBibleLink = () => {
     navigator.clipboard.writeText(window.location.href);
-    alert('Bible link copied to clipboard!');
+    showToast('Link copied to clipboard!');
     setIsMoreMenuOpen(false);
   };
 
   const handleReport = () => {
-    alert('Thank you. A report has been sent to the Region 63 moderators.');
+    showToast('Report sent to moderators.');
     setIsMoreMenuOpen(false);
   };
 
@@ -775,27 +799,50 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
         <div ref={translationRef} className="flex items-end justify-between gap-6 mb-8 pb-2">
           {/* Translation Dropdown */}
           <div className="flex flex-col gap-2 w-full sm:max-w-xs">
-            <label htmlFor="version-select" className="text-xs font-bold text-[#372f58]/80 uppercase tracking-wider">
+            <label htmlFor="version-select-button" className="text-xs font-bold text-[#372f58]/80 uppercase tracking-wider">
               Translation
             </label>
-            <div className="relative">
-              <select
-                id="version-select"
-                value={versionId}
-                onChange={(e) => handleVersionChange(Number(e.target.value))}
-                className="w-full bg-white/80 border border-gray-200 text-[#372f58] font-bold text-sm px-4 py-2.5 rounded-2xl shadow-sm focus:outline-none focus:ring-2 focus:ring-[#1CABB9] cursor-pointer appearance-none"
+            <div ref={topDropdownRef} className="relative w-full">
+              <button
+                type="button"
+                id="version-select-button"
+                onClick={handleTopSelectorClick}
+                className="w-full flex items-center justify-between bg-white/80 border border-gray-200 text-[#372f58] font-bold text-sm px-4 py-2.5 rounded-2xl shadow-sm hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#1CABB9] cursor-pointer transition-colors"
               >
-                {APPROVED_VERSIONS.map((v) => (
-                  <option key={v.id} value={v.id}>
-                    {v.label}
-                  </option>
-                ))}
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#372f58]/60">
-                <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <span className="truncate">{currentVersion.label}</span>
+                <svg className={`fill-[#372f58]/60 h-4 w-4 transition-transform duration-200 shrink-0 ml-2 ${isTopDropdownOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                   <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
                 </svg>
-              </div>
+              </button>
+
+              {/* Custom Desktop/Tablet Dropdown Menu */}
+              {isTopDropdownOpen && (
+                <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-white/95 backdrop-blur-md rounded-3xl border border-gray-200/80 shadow-2xl p-2.5 flex flex-col gap-1 w-full max-w-sm sm:max-w-xs animate-in fade-in slide-in-from-top-2 duration-200">
+                  {APPROVED_VERSIONS.map((v) => {
+                    const isSelected = v.id === versionId;
+                    return (
+                      <button
+                        key={v.id}
+                        type="button"
+                        onClick={() => {
+                          handleVersionChange(v.id);
+                          setIsTopDropdownOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between text-left px-4 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                          isSelected 
+                            ? 'bg-[#1CABB9]/10 text-[#1CABB9]' 
+                            : 'text-[#372f58] hover:bg-gray-50 hover:text-[#1CABB9]'
+                        }`}
+                      >
+                        <span className="truncate pr-2">{v.label}</span>
+                        {isSelected && (
+                          <Check size={12} className="text-[#1CABB9] shrink-0" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
 
@@ -1019,8 +1066,8 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
               </a>
               <button
                 onClick={() => {
-                  navigator.clipboard.writeText(`${book} Chapter ${chapter} (${currentVersionLabel})\n${window.location.href}`);
-                  alert('Verse text and link copied!');
+                  navigator.clipboard.writeText(`${book} Chapter ${chapter} (${currentVersion.label})\n${window.location.href}`);
+                  showToast('Verse text and link copied!');
                 }}
                 className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-[#372f58] font-black rounded-2xl text-sm transition-colors cursor-pointer"
               >
@@ -1040,8 +1087,13 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
 
       {/* Toast Notification (Portaled to body) */}
       {mounted && toastMessage && createPortal(
-        <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[100] bg-slate-900 text-white text-xs font-bold px-5 py-3 rounded-2xl shadow-xl animate-bounce">
-          {toastMessage}
+        <div className="fixed top-8 left-1/2 -translate-x-1/2 z-[100] bg-[#372f58]/95 backdrop-blur-md border border-white/10 text-white text-xs font-black py-3 px-5 rounded-2xl shadow-2xl flex items-center gap-2.5 animate-in fade-in slide-in-from-top-4 duration-300">
+          {toastMessage.toLowerCase().includes('clear') ? (
+            <Trash2 size={14} className="text-[#1CABB9] shrink-0" />
+          ) : (
+            <Check size={14} className="text-[#1CABB9] shrink-0" />
+          )}
+          <span>{toastMessage}</span>
         </div>,
         document.body
       )}
