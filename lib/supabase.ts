@@ -99,3 +99,81 @@ export async function incrementReactionCount(book: string, chapter: string): Pro
 export function hasReacted(book: string, chapter: string): boolean {
   return !!localStorage.getItem(`ft_reacted_${book.toUpperCase()}_${chapter}`);
 }
+
+const CACHE_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours in ms
+
+export async function getCurriculumCache(): Promise<any[] | null> {
+  const localKey = 'ft_lessons_cache';
+  const localTimeKey = 'ft_lessons_cache_time';
+
+  if (isRealSupabase && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('lessons_cache')
+        .select('*');
+      
+      if (!error && data && data.length > 0) {
+        const first = data[0];
+        if (first && first.updated_at) {
+          const cacheTime = new Date(first.updated_at).getTime();
+          if (Date.now() - cacheTime < CACHE_EXPIRY) {
+            return data;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Supabase lessons cache read failed:", e);
+    }
+  }
+
+  try {
+    const cachedTime = localStorage.getItem(localTimeKey);
+    const cachedData = localStorage.getItem(localKey);
+    if (cachedTime && cachedData) {
+      if (Date.now() - Number(cachedTime) < CACHE_EXPIRY) {
+        return JSON.parse(cachedData);
+      }
+    }
+  } catch (e) {
+    console.warn("localStorage cache read failed:", e);
+  }
+
+  return null;
+}
+
+export async function saveCurriculumCache(data: any[]): Promise<void> {
+  const localKey = 'ft_lessons_cache';
+  const localTimeKey = 'ft_lessons_cache_time';
+
+  try {
+    localStorage.setItem(localKey, JSON.stringify(data));
+    localStorage.setItem(localTimeKey, String(Date.now()));
+  } catch (e) {
+    console.warn("localStorage cache write failed:", e);
+  }
+
+  if (isRealSupabase && supabase) {
+    try {
+      const rows = data.map((item) => ({
+        id: item.id,
+        name: item.name,
+        slug: item.slug,
+        image: item.image,
+        shortDescription: item.shortDescription,
+        description: item.description,
+        videoEmbedUrl: item.videoEmbedUrl,
+        live: item.live,
+        aboutSection: item.aboutSection,
+        age: item.age,
+        sort: item.sort,
+        updated_at: new Date().toISOString()
+      }));
+
+      await supabase.from('lessons_cache').delete().neq('id', 'placeholder');
+      const { error } = await supabase.from('lessons_cache').insert(rows);
+      if (error) throw error;
+    } catch (e) {
+      console.warn("Supabase lessons cache write failed:", e);
+    }
+  }
+}
