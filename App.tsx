@@ -39,7 +39,65 @@ interface NewConvert {
 }
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<Audience>(Audience.HOME);
+  // Custom router helper (Part A2)
+  const getInitialViewAndParams = (): { view: Audience; book: string; chapter: string; versionId: number | null } => {
+    const path = window.location.pathname;
+    const searchParams = new URLSearchParams(window.location.search);
+    const versionParam = searchParams.get('version');
+    const versionId = versionParam ? Number(versionParam) : null;
+
+    if (path.startsWith('/about')) {
+      return { view: Audience.ABOUT, book: 'GEN', chapter: '1', versionId };
+    } else if (path.startsWith('/kids')) {
+      return { view: Audience.KIDS, book: 'GEN', chapter: '1', versionId };
+    } else if (path.startsWith('/teens')) {
+      return { view: Audience.TEENS, book: 'GEN', chapter: '1', versionId };
+    } else if (path.startsWith('/teachers')) {
+      return { view: Audience.TEACHERS, book: 'GEN', chapter: '1', versionId };
+    } else if (path.startsWith('/bible')) {
+      const match = path.match(/^\/bible\/([A-Za-z0-9]+)\/([0-9]+)/);
+      if (match) {
+        return { view: Audience.BIBLE, book: match[1].toUpperCase(), chapter: match[2], versionId };
+      }
+      return { view: Audience.BIBLE, book: 'GEN', chapter: '1', versionId };
+    }
+    return { view: Audience.HOME, book: 'GEN', chapter: '1', versionId };
+  };
+
+  const initial = getInitialViewAndParams();
+  const [currentView, setCurrentView] = useState<Audience>(initial.view);
+
+  const navigateToView = (view: Audience) => {
+    let path = '/';
+    if (view === Audience.ABOUT) path = '/about';
+    else if (view === Audience.KIDS) path = '/kids';
+    else if (view === Audience.TEENS) path = '/teens';
+    else if (view === Audience.TEACHERS) path = '/teachers';
+    else if (view === Audience.BIBLE) {
+      const savedVersion = localStorage.getItem('yv_version_id');
+      const versionToUse = savedVersion ? Number(savedVersion) : 3034;
+      const currentPath = window.location.pathname;
+      const match = currentPath.match(/^\/bible\/([A-Za-z0-9]+)\/([0-9]+)/);
+      const book = match ? match[1].toUpperCase() : 'GEN';
+      const chapter = match ? match[2] : '1';
+      path = `/bible/${book}/${chapter}?version=${versionToUse}`;
+    }
+
+    if (window.location.pathname !== path || (view === Audience.BIBLE && !window.location.search.includes('version='))) {
+      window.history.pushState(null, '', path);
+    }
+    setCurrentView(view);
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      const current = getInitialViewAndParams();
+      setCurrentView(current.view);
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
   
   // -- State for Live Stream Status (conditional UI) --
   const [broadcastStatus, setBroadcastStatus] = useState({
@@ -211,7 +269,7 @@ const App: React.FC = () => {
                 Meet Jesus
               </button>
               <button 
-                onClick={() => setCurrentView(Audience.KIDS)}
+                onClick={() => navigateToView(Audience.KIDS)}
                 className="w-auto rounded-full bg-[#F8B229] px-6 py-3 text-sm font-bold text-[#372f58] shadow-lg shadow-[#F8B229]/15 hover:bg-[#1CABB9] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#F8B229] text-center"
               >
                 Explore Tribes
@@ -271,7 +329,7 @@ const App: React.FC = () => {
             
             {/* Kids Card */}
             <div 
-              onClick={() => setCurrentView(Audience.KIDS)}
+              onClick={() => navigateToView(Audience.KIDS)}
               className="group bg-white/70 backdrop-blur-sm border-2 border-amber-100/60 p-8 rounded-3xl cursor-pointer hover:bg-amber-50/50 hover:border-amber-300 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/5 relative"
             >
               <div className="h-12 w-12 flex items-center justify-center rounded-2xl bg-amber-400 text-white shadow-md shadow-amber-200 mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -291,7 +349,7 @@ const App: React.FC = () => {
 
             {/* Teens Card */}
             <div 
-              onClick={() => setCurrentView(Audience.TEENS)}
+              onClick={() => navigateToView(Audience.TEENS)}
               className="group bg-white/70 backdrop-blur-sm border border-[#1CABB9]/20 p-8 rounded-3xl cursor-pointer hover:bg-[#1CABB9]/5 hover:border-[#1CABB9] transition-all duration-300 hover:shadow-xl hover:shadow-[#1CABB9]/5 relative"
             >
               <div className="h-12 w-12 flex items-center justify-center rounded-2xl bg-[#372f58] text-white shadow-md shadow-[#372f58]/10 mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -311,7 +369,7 @@ const App: React.FC = () => {
 
             {/* Teachers Card */}
             <div 
-              onClick={() => setCurrentView(Audience.TEACHERS)}
+              onClick={() => navigateToView(Audience.TEACHERS)}
               className="group bg-white/70 backdrop-blur-sm border border-teal-100 p-8 rounded-3xl cursor-pointer hover:bg-teal-50/50 hover:border-teal-300 transition-all duration-300 hover:shadow-xl hover:shadow-teal-500/5 relative"
             >
               <div className="h-12 w-12 flex items-center justify-center rounded-2xl bg-teal-600 text-white shadow-md shadow-teal-200 mb-6 group-hover:scale-110 transition-transform duration-300">
@@ -473,19 +531,19 @@ const App: React.FC = () => {
         </p>
         <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
           <button 
-            onClick={() => setCurrentView(Audience.KIDS)}
+            onClick={() => navigateToView(Audience.KIDS)}
             className="w-full sm:w-auto rounded-full bg-[#F8B229] px-6 py-3 text-sm font-bold text-[#372f58] shadow-md hover:bg-[#1CABB9] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#F8B229]"
           >
             Enter Zone — Faith Tribe Kids
           </button>
           <button 
-            onClick={() => setCurrentView(Audience.TEENS)}
+            onClick={() => navigateToView(Audience.TEENS)}
             className="w-full sm:w-auto rounded-full bg-[#1CABB9] px-6 py-3 text-sm font-bold text-white shadow-md hover:bg-[#372f58] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#1CABB9]"
           >
             Join Tribe — Faith Tribe Teens
           </button>
           <button 
-            onClick={() => setCurrentView(Audience.TEACHERS)}
+            onClick={() => navigateToView(Audience.TEACHERS)}
             className="w-full sm:w-auto rounded-full bg-[#372f58] px-6 py-3 text-sm font-bold text-white shadow-md hover:bg-[#1CABB9] hover:text-[#372f58] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#372f58]"
           >
             Access Hub — Faith Tribe Teachers
@@ -847,7 +905,7 @@ const App: React.FC = () => {
                 <Trophy size={18} />
               </div>
               <h3 className="text-2xl text-teal-700 mb-4 font-sans font-bold">Scripture for the Week</h3>
-              <VerseOfTheWeek versionId={1} />
+              <VerseOfTheWeek versionId={12} />
             </div>
           </div>
           
@@ -970,7 +1028,7 @@ const App: React.FC = () => {
     <div className="min-h-screen flex flex-col font-sans relative">
       <Navbar 
         currentView={currentView} 
-        onChangeView={setCurrentView} 
+        onChangeView={navigateToView} 
         onWatchLive={() => setIsLiveStreamOpen(true)}
         isLive={broadcastStatus.isLive}
       />
@@ -981,7 +1039,7 @@ const App: React.FC = () => {
         {currentView === Audience.KIDS && <KidsView />}
         {currentView === Audience.TEENS && <TeensView />}
         {currentView === Audience.TEACHERS && <TeachersView />}
-        {currentView === Audience.BIBLE && <BibleReaderView onBack={() => setCurrentView(Audience.HOME)} />}
+        {currentView === Audience.BIBLE && <BibleReaderView onBack={() => navigateToView(Audience.HOME)} />}
       </main>
 
       <footer className="bg-[#372f58] text-white py-14 border-t border-[#4d4475] overflow-hidden">
@@ -1000,12 +1058,12 @@ const App: React.FC = () => {
             <div>
               <h4 className="text-sm font-black uppercase tracking-wider text-white mb-4">Quick Links</h4>
               <ul className="space-y-2 text-sm text-white/70">
-                <li><button onClick={() => setCurrentView(Audience.HOME)} className="hover:text-[#1CABB9] transition-colors cursor-pointer">Home</button></li>
-                <li><button onClick={() => setCurrentView(Audience.ABOUT)} className="hover:text-[#1CABB9] transition-colors cursor-pointer">About Us</button></li>
-                <li><button onClick={() => setCurrentView(Audience.KIDS)} className="hover:text-[#1CABB9] transition-colors cursor-pointer">Kids Zone</button></li>
-                <li><button onClick={() => setCurrentView(Audience.TEENS)} className="hover:text-[#1CABB9] transition-colors cursor-pointer">Teens Tribe</button></li>
-                <li><button onClick={() => setCurrentView(Audience.TEACHERS)} className="hover:text-[#1CABB9] transition-colors cursor-pointer">Teachers Hub</button></li>
-                <li><button onClick={() => setCurrentView(Audience.BIBLE)} className="hover:text-[#1CABB9] transition-colors cursor-pointer">Read Bible</button></li>
+                <li><button onClick={() => navigateToView(Audience.HOME)} className="hover:text-[#1CABB9] transition-colors cursor-pointer">Home</button></li>
+                <li><button onClick={() => navigateToView(Audience.ABOUT)} className="hover:text-[#1CABB9] transition-colors cursor-pointer">About Us</button></li>
+                <li><button onClick={() => navigateToView(Audience.KIDS)} className="hover:text-[#1CABB9] transition-colors cursor-pointer">Kids Zone</button></li>
+                <li><button onClick={() => navigateToView(Audience.TEENS)} className="hover:text-[#1CABB9] transition-colors cursor-pointer">Teens Tribe</button></li>
+                <li><button onClick={() => navigateToView(Audience.TEACHERS)} className="hover:text-[#1CABB9] transition-colors cursor-pointer">Teachers Hub</button></li>
+                <li><button onClick={() => navigateToView(Audience.BIBLE)} className="hover:text-[#1CABB9] transition-colors cursor-pointer">Read Bible</button></li>
               </ul>
             </div>
             <div>

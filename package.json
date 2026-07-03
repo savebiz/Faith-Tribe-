@@ -15,7 +15,8 @@
     "lucide-react": "^0.562.0",
     "@youversion/platform-react-ui": "^2.2.0",
     "@youversion/platform-react-hooks": "^2.2.0",
-    "@youversion/platform-core": "^2.2.0"
+    "@youversion/platform-core": "^2.2.0",
+    "@supabase/supabase-js": "^2.45.0"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

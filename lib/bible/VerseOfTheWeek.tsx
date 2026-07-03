@@ -17,6 +17,24 @@ export function VerseOfTheWeek({ versionId }: { versionId: number }) {
   const dayOfYear = getMondayDayOfYear();
   const { data: votd, loading, error } = useVerseOfTheDay(dayOfYear);
 
+  const navigateToBible = (book: string, chapter: string) => {
+    const path = `/bible/${book}/${chapter}?version=${versionId}`;
+    window.history.pushState(null, '', path);
+    window.dispatchEvent(new PopStateEvent('popstate'));
+  };
+
+  const handleCardClick = () => {
+    if (!votd?.passage_id) return;
+    const parts = votd.passage_id.split('.');
+    if (parts.length >= 2) {
+      navigateToBible(parts[0], parts[1]);
+    }
+  };
+
+  const handleFallbackClick = () => {
+    navigateToBible('PSA', '119');
+  };
+
   if (loading) {
     return (
       <div className="animate-pulse space-y-2 py-4">
@@ -28,15 +46,28 @@ export function VerseOfTheWeek({ versionId }: { versionId: number }) {
 
   if (error || !votd?.passage_id) {
     return (
-      <div className="text-xs text-gray-500 py-2 italic text-center">
+      <div 
+        onClick={handleFallbackClick}
+        className="text-xs text-gray-500 py-2 italic text-center cursor-pointer hover:text-[#1CABB9] transition-colors"
+        title="Click to read Psalm 119 in Bible"
+      >
         Thy Word is a lamp unto my feet and a light unto my path. (Psalm 119:105)
       </div>
     );
   }
 
   return (
-    <div className="space-y-1">
-      <BibleTextView reference={votd.passage_id} versionId={versionId} />
+    <div 
+      onClick={handleCardClick}
+      className="space-y-1 cursor-pointer hover:opacity-90 transition-opacity p-2 -m-2 rounded-2xl group"
+      title="Click to read full chapter in Bible"
+    >
+      <div className="relative">
+        <BibleTextView reference={votd.passage_id} versionId={versionId} />
+        <div className="mt-4 text-xs font-black text-[#372f58] group-hover:text-[#1CABB9] transition-colors flex items-center gap-1.5 select-none">
+          <span>Read full chapter &rarr;</span>
+        </div>
+      </div>
     </div>
   );
 }

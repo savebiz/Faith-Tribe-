@@ -189,3 +189,9 @@
     letter-spacing: 0.15em;
   }
 }
+
+/* Hide unneeded comment/note buttons within YouVersion components */
+[data-yv-sdk] button[aria-label*="Note" i],
+[data-yv-sdk] button[aria-label*="Comment" i] {
+  display: none !important;
+}
