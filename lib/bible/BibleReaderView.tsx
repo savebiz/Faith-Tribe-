@@ -9,7 +9,7 @@ const APPROVED_VERSIONS = [
   { id: 1932, label: 'Free Bible Version (FBV)' },
   { id: 1588, label: 'Amplified Bible (AMP)' },
   { id: 111, label: 'New International Version (NIV)' },
-  { id: 1, label: 'King James Version (KJV)' },
+  { id: 12, label: 'American Standard Version (ASV)' },
   // The three below must always render last, in this exact order
   { id: 911, label: 'Yoruba Contemporary Bible' },
   { id: 1624, label: 'Igbo Contemporary Bible 2020' },
