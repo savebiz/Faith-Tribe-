@@ -905,7 +905,30 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
                 )}
               </div>
             </div>
-          </BibleReader.Root>
+
+          {/* Floating Bottom Navigation Bars (Inside YouVersion Context) */}
+          {/* Mobile bottom full-width bar */}
+          <div 
+            className={`fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200/80 px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgba(0,0,0,0.06)] transition-transform duration-300 sm:hidden ${
+              isNavVisible ? 'translate-y-0' : 'translate-y-full'
+            }`}
+          >
+            <div className="max-w-md mx-auto">
+              <BibleReader.Toolbar />
+            </div>
+          </div>
+
+          {/* Center floating bottom pill (Tablet/Desktop) */}
+          <div 
+            className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-white/95 backdrop-blur-md border border-gray-250/85 px-6 py-2 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.12)] transition-transform duration-300 hidden sm:block ${
+              isNavVisible ? 'translate-y-0' : 'translate-y-[calc(100%+36px)]'
+            }`}
+          >
+            <div className="flex items-center justify-center min-w-[320px]">
+              <BibleReader.Toolbar />
+            </div>
+          </div>
+        </BibleReader.Root>
         </div>
       </div>
 
@@ -1067,28 +1090,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
         </div>
       )}
 
-      {/* Floating Bottom Navigation Bars */}
-      {/* Mobile bottom full-width bar */}
-      <div 
-        className={`fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200/80 px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))] shadow-[0_-4px_16px_rgba(0,0,0,0.06)] transition-transform duration-300 sm:hidden ${
-          isNavVisible ? 'translate-y-0' : 'translate-y-full'
-        }`}
-      >
-        <div className="max-w-md mx-auto">
-          <BibleReader.Toolbar />
-        </div>
-      </div>
 
-      {/* Center floating bottom pill (Tablet/Desktop) */}
-      <div 
-        className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-40 bg-white/95 backdrop-blur-md border border-gray-250/85 px-6 py-2 rounded-full shadow-[0_8px_32px_rgba(0,0,0,0.12)] transition-transform duration-300 hidden sm:block ${
-          isNavVisible ? 'translate-y-0' : 'translate-y-[calc(100%+36px)]'
-        }`}
-      >
-        <div className="flex items-center justify-center min-w-[320px]">
-          <BibleReader.Toolbar />
-        </div>
-      </div>
 
       {/* Reading Progress Bar */}
       <div className="progress-bar-container">
