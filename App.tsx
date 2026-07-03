@@ -731,7 +731,12 @@ const App: React.FC = () => {
             return;
           }
 
-          const response = await fetch('https://api.staging.lessons.church/programs/public');
+          const apiKey = import.meta.env.VITE_LESSONS_API_KEY || 'cak_86f46978.916a8a5a5c0c706d2e3e8b10c42dad0f8d4b0d4c9d9bcf61';
+          const response = await fetch('https://api.staging.lessons.church/programs/public', {
+            headers: {
+              'Authorization': `Bearer ${apiKey}`
+            }
+          });
           if (response.ok) {
             const data = await response.json();
             if (Array.isArray(data) && data.length > 0) {
@@ -1142,8 +1147,8 @@ const App: React.FC = () => {
 
                       return filtered.map((lesson) => {
                         const targetSlug = lesson.slug || '';
-                        const fallbackUrl = 'https://lessons.church/curriculums';
-                        const lessonsUrl = targetSlug ? `https://lessons.church/${targetSlug}` : fallbackUrl;
+                        const fallbackUrl = 'https://staging.lessons.church/curriculums';
+                        const lessonsUrl = targetSlug ? `https://staging.lessons.church/${targetSlug}` : fallbackUrl;
                         const isPreTeen = lesson.name?.toLowerCase().includes('loop') || lesson.name?.toLowerCase().includes('elementary');
 
                         return (
