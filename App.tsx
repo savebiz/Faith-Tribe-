@@ -702,6 +702,8 @@ const App: React.FC = () => {
   );
 
   const TeachersView = () => {
+    const [curriculumTrack, setCurriculumTrack] = useState<'kids' | 'teens'>('kids');
+
     // -- Login Gate --
     if (!isTeacherLoggedIn) {
       return (
@@ -895,6 +897,125 @@ const App: React.FC = () => {
                 <p className="text-[10px] text-gray-400 mt-1">First 24 hrs checklist</p>
               </div>
 
+            </div>
+
+            {/* Lessons.church Curriculum Library Section */}
+            <div className="bg-white p-6 sm:p-8 rounded-[2rem] border border-gray-150 shadow-sm space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-2xl font-black text-teal-800 tracking-tight flex items-center gap-2">
+                    <BookOpen size={24} className="text-teal-650" /> Curriculum Library
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">Curated lesson programs powered by Lessons.church</p>
+                </div>
+                
+                {/* Curriculum Segment Tabs */}
+                <div className="flex bg-gray-100 p-1 rounded-xl self-start sm:self-auto">
+                  <button
+                    onClick={() => setCurriculumTrack('kids')}
+                    className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${curriculumTrack === 'kids' ? 'bg-teal-700 text-white shadow-sm' : 'text-gray-650 hover:text-teal-800'}`}
+                  >
+                    Kids Zone (2-12)
+                  </button>
+                  <button
+                    onClick={() => setCurriculumTrack('teens')}
+                    className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${curriculumTrack === 'teens' ? 'bg-teal-700 text-white shadow-sm' : 'text-gray-650 hover:text-teal-800'}`}
+                  >
+                    Teens Tribe (13-15)
+                  </button>
+                </div>
+              </div>
+
+              {/* Curried Curriculum Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {curriculumTrack === 'kids' ? (
+                  <>
+                    <div className="bg-amber-50/50 hover:bg-amber-50 border border-amber-100 p-5 rounded-2xl transition-all duration-300 hover:shadow-md flex flex-col justify-between h-full group">
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full">Ages 2–4</span>
+                          <span className="text-xs text-gray-400">Preschool</span>
+                        </div>
+                        <h4 className="font-display font-bold text-lg text-amber-700 group-hover:text-amber-800 transition-colors">Bible App for Kids</h4>
+                        <p className="text-xs text-gray-600 mt-2 leading-relaxed">Interactive storybook lessons helping preschoolers explore early Bible stories, coloring pages, and leader guides.</p>
+                      </div>
+                      <div className="mt-4 pt-3 border-t border-amber-100/50 flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-amber-600 bg-white border border-amber-200 px-2 py-0.5 rounded">Focus: Love, Obedience</span>
+                        <a href="https://lessons.church/curriculums" target="_blank" rel="noopener noreferrer" className="text-xs font-black text-amber-700 hover:underline flex items-center gap-1">Open Lessons &rarr;</a>
+                      </div>
+                    </div>
+
+                    <div className="bg-teal-50/30 hover:bg-teal-50/60 border border-teal-100 p-5 rounded-2xl transition-all duration-300 hover:shadow-md flex flex-col justify-between h-full group">
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[10px] font-black uppercase tracking-wider bg-teal-100 text-teal-800 px-2.5 py-0.5 rounded-full">Ages 5–7</span>
+                          <span className="text-xs text-gray-400">Kindergarten</span>
+                        </div>
+                        <h4 className="font-sans font-bold text-lg text-teal-850 group-hover:text-teal-900 transition-colors">Crosstown</h4>
+                        <p className="text-xs text-gray-600 mt-2 leading-relaxed">Fun animated adventures exploring key Bible stories, helping kids develop early habits of prayer and sharing.</p>
+                      </div>
+                      <div className="mt-4 pt-3 border-t border-teal-100/50 flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-teal-700 bg-white border border-teal-200 px-2 py-0.5 rounded">Focus: Kindness, Sharing</span>
+                        <a href="https://lessons.church/curriculums" target="_blank" rel="noopener noreferrer" className="text-xs font-black text-teal-850 hover:underline flex items-center gap-1">Open Lessons &rarr;</a>
+                      </div>
+                    </div>
+
+                    <div className="bg-indigo-50/30 hover:bg-indigo-50/60 border border-indigo-100 p-5 rounded-2xl transition-all duration-300 hover:shadow-md flex flex-col justify-between h-full group">
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[10px] font-black uppercase tracking-wider bg-indigo-100 text-indigo-800 px-2.5 py-0.5 rounded-full">Ages 8–9</span>
+                          <span className="text-xs text-gray-400">Grades 1-4</span>
+                        </div>
+                        <h4 className="font-sans font-bold text-lg text-indigo-800 group-hover:text-indigo-900 transition-colors">Konnect</h4>
+                        <p className="text-xs text-gray-600 mt-2 leading-relaxed">Fast-paced, video-based space station adventures teaching kids integrity, peer-choice support, and faith principles.</p>
+                      </div>
+                      <div className="mt-4 pt-3 border-t border-indigo-100/50 flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-indigo-700 bg-white border border-indigo-200 px-2 py-0.5 rounded">Focus: Integrity, Choices</span>
+                        <a href="https://lessons.church/curriculums" target="_blank" rel="noopener noreferrer" className="text-xs font-black text-indigo-800 hover:underline flex items-center gap-1">Open Lessons &rarr;</a>
+                      </div>
+                    </div>
+
+                    <div className="bg-purple-50/30 hover:bg-purple-50/60 border border-purple-100 p-5 rounded-2xl transition-all duration-300 hover:shadow-md flex flex-col justify-between h-full group">
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[10px] font-black uppercase tracking-wider bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded-full">Ages 10–12</span>
+                          <span className="text-xs text-gray-400">Grades 5-6</span>
+                        </div>
+                        <h4 className="font-sans font-bold text-lg text-purple-800 group-hover:text-purple-900 transition-colors">Loop</h4>
+                        <p className="text-xs text-gray-600 mt-2 leading-relaxed">Tailored pre-teen series tackling transitional growth topics, scripture context, and building personal devotions.</p>
+                      </div>
+                      <div className="mt-4 pt-3 border-t border-purple-100/50 flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-purple-700 bg-white border border-purple-200 px-2 py-0.5 rounded">Focus: Devotion, Apologetics</span>
+                        <a href="https://lessons.church/curriculums" target="_blank" rel="noopener noreferrer" className="text-xs font-black text-purple-800 hover:underline flex items-center gap-1">Open Lessons &rarr;</a>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="col-span-1 md:col-span-2 bg-emerald-50/30 hover:bg-emerald-50/60 border border-emerald-100 p-6 rounded-2xl transition-all duration-300 hover:shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-6 group">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">Ages 13–15</span>
+                        <span className="text-xs text-gray-400">Junior High</span>
+                      </div>
+                      <h4 className="font-sans font-black text-xl text-emerald-800 group-hover:text-emerald-900 transition-colors">Switch Youth</h4>
+                      <p className="text-xs text-gray-600 leading-relaxed max-w-xl">
+                        A robust, interactive discipleship curriculum exploring real-world culture, identity in Christ, bold faith expressions, and daily scripture engagement plans.
+                      </p>
+                      <div className="inline-block mt-2 text-[10px] font-bold text-emerald-700 bg-white border border-emerald-200 px-2.5 py-0.5 rounded">
+                        Focus: Identity, Boldness, Discipleship
+                      </div>
+                    </div>
+                    <a
+                      href="https://lessons.church/curriculums"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-5 py-3 rounded-xl transition-all hover:scale-105 active:scale-95 shadow-sm text-center whitespace-nowrap cursor-pointer self-stretch md:self-auto flex items-center justify-center gap-1"
+                    >
+                      Open Switch Lessons &rarr;
+                    </a>
+                  </div>
+                )}
+              </div>
             </div>
 
             <ContentSection title="Evangelism Resources" items={TEACHERS_CONTENT} colorTheme="text-teal-700" />
