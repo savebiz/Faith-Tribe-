@@ -605,15 +605,15 @@ const App: React.FC = () => {
             </button>
           </div>
 
-          <ContentSection title="This Week's Fun" items={KIDS_CONTENT} colorTheme="text-amber-500" />
+          <ContentSection title="Today's Fun" items={KIDS_CONTENT} colorTheme="text-amber-500" />
           
           {/* Bible Verse Spotlight */}
           <div className="bg-white p-8 rounded-[2rem] shadow-sm border-4 border-amber-200/60 relative overflow-hidden text-gray-700">
             <div className="absolute top-0 right-0 p-3 bg-amber-400 text-white rounded-bl-2xl">
               <Trophy size={18} />
             </div>
-            <h3 className="text-2xl text-amber-600 mb-4">Verse of the Week</h3>
-            <VerseOfTheWeek versionId={1932} />
+            <h3 className="text-2xl text-amber-600 mb-4">Verse of the Day</h3>
+            <VerseOfTheWeek versionId={2079} />
           </div>
         </div>
 
@@ -698,7 +698,7 @@ const App: React.FC = () => {
             <div className="absolute top-0 right-0 p-3 bg-emerald-400 text-white rounded-bl-2xl">
               <Trophy size={18} />
             </div>
-            <h3 className="text-2xl text-emerald-600 mb-4 font-sans font-bold">Verse of the Week</h3>
+            <h3 className="text-2xl text-emerald-600 mb-4 font-sans font-bold">Verse of the Day</h3>
             <VerseOfTheWeek versionId={1588} />
           </div>
         </div>
@@ -746,7 +746,7 @@ const App: React.FC = () => {
       setIsSavingCustomVerse(true);
       try {
         await updateCustomVerse(customVerseInput.trim());
-        toast.success('Verse of the Week updated! ✨ Check the homepage spotlight card to see the changes.', { duration: 5000 });
+        toast.success('Verse of the Day updated! ✨ Check the homepage spotlight card to see the changes.', { duration: 5000 });
       } catch (err) {
         console.error(err);
         toast.error('Failed to update custom verse. Please try again.');
@@ -1275,14 +1275,14 @@ const App: React.FC = () => {
               <div className="absolute top-0 right-0 p-3 bg-teal-600 text-white rounded-bl-2xl">
                 <Trophy size={18} />
               </div>
-              <h3 className="text-2xl text-teal-700 mb-4 font-sans font-bold">Scripture for the Week</h3>
+              <h3 className="text-2xl text-teal-700 mb-4 font-sans font-bold">Scripture for the Day</h3>
               <VerseOfTheWeek versionId={12} />
             </div>
 
             {/* Admin: Scripture Override Control Card */}
             <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-150 relative overflow-hidden text-gray-700 animate-in fade-in duration-300">
               <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <Sparkles size={16} className="text-teal-650" /> Admin Verse of the Week Control
+                <Sparkles size={16} className="text-teal-650" /> Admin Verse of the Day Control
               </h3>
               <p className="text-xs text-gray-500 mb-4">
                 Input any YouVersion Bible reference code (e.g. <code className="bg-gray-100 px-1.5 py-0.5 rounded text-teal-700 font-bold">JHN.3.16</code> or <code className="bg-gray-100 px-1.5 py-0.5 rounded text-teal-700 font-bold">ROM.12.1-2</code>) to override the homepage scripture spotlight.
