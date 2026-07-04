@@ -209,7 +209,7 @@
 }
 
 /* Secondary: target the attribution data-slot element */
-[data-yv-sdk] [data-slot="attribution"] {
+[data-yv-sdk] [data-slot="attribution"] .yv\:text-\[0\.75em\]{
   font-size: 0.6rem !important;
   line-height: 1.5 !important;
   opacity: 0.65 !important;
