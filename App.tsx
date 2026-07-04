@@ -4,9 +4,9 @@ import GeminiAssistant from './components/GeminiAssistant';
 import ContentSection from './components/ContentSection';
 import LiveStreamPlayer from './components/LiveStreamPlayer';
 import { Audience, ContentItem } from './types';
-import { 
-  ArrowRight, Star, Zap, BookOpen, Users, Heart, Share2, X, Lock, Radio, 
-  Smile, Shield, Calendar, ChevronRight, Plus, CheckCircle2, ClipboardList, 
+import {
+  ArrowRight, Star, Zap, BookOpen, Users, Heart, Share2, X, Lock, Radio,
+  Smile, Shield, Calendar, ChevronRight, Plus, CheckCircle2, ClipboardList,
   Send, Sparkles, Trophy, PlusCircle, Check, Instagram, Facebook, Youtube
 } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
@@ -100,7 +100,7 @@ const App: React.FC = () => {
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
-  
+
   // -- State for Live Stream Status (conditional UI) --
   const [broadcastStatus, setBroadcastStatus] = useState({
     isLive: false,
@@ -129,7 +129,7 @@ const App: React.FC = () => {
     const interval = setInterval(fetchStatus, 60000); // Poll every 60s
     return () => clearInterval(interval);
   }, []);
-  
+
   // -- State for Prayer Request --
   const [isPrayerModalOpen, setIsPrayerModalOpen] = useState(false);
   const [prayerRequest, setPrayerRequest] = useState('');
@@ -151,7 +151,7 @@ const App: React.FC = () => {
 
   // -- State for Teachers Hub Sub-Modals & Trackers --
   const [activeTeacherModal, setActiveTeacherModal] = useState<'convert' | 'decision' | 'schedule' | null>(null);
-  
+
   // -- State for Real-Time Converts Tracking (Teachers Hub) --
   const [newConverts, setNewConverts] = useState<NewConvert[]>([
     { name: "John Doe", age: "14", decisionDate: "2026-06-28", notes: "First-time decision at Sunday service." },
@@ -229,8 +229,8 @@ const App: React.FC = () => {
     <div className="mesh-gradient min-h-screen text-gray-900">
       {/* Live Stream Banner */}
       {broadcastStatus.isLive && (
-        <div 
-          className="bg-[#EE3135] text-white px-4 py-2 flex justify-between items-center sm:px-6 lg:px-8 cursor-pointer hover:bg-[#d62529] transition-colors z-10" 
+        <div
+          className="bg-[#EE3135] text-white px-4 py-2 flex justify-between items-center sm:px-6 lg:px-8 cursor-pointer hover:bg-[#d62529] transition-colors z-10"
           onClick={() => window.open(broadcastStatus.watchUrl, '_blank')}
         >
           <div className="flex items-center gap-3">
@@ -239,7 +239,7 @@ const App: React.FC = () => {
               LIVE NOW: {broadcastStatus.title}
             </p>
           </div>
-          <button 
+          <button
             onClick={(e) => {
               e.stopPropagation();
               window.open(broadcastStatus.watchUrl, '_blank');
@@ -264,9 +264,9 @@ const App: React.FC = () => {
             <p className="mt-6 text-base sm:text-lg leading-relaxed text-[#372f58]/85">
               The digital heartbeat for our children and teenagers. A vibrant space to encounter the presence of God, grow strong in faith, and lead peers into Christ's brilliant light.
             </p>
-            
+
             <div className="mt-8 flex flex-row gap-3 w-full sm:w-auto">
-              <button 
+              <button
                 onClick={() => setIsSalvationModalOpen(true)}
                 className="w-auto rounded-full bg-[#372f58] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#372f58]/10 hover:bg-[#1CABB9] hover:text-[#372f58] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#372f58] text-center"
               >
@@ -286,11 +286,18 @@ const App: React.FC = () => {
           </div>
           <div className="w-full flex justify-center lg:justify-end mt-6 sm:mt-12 lg:mt-0">
             <div className="w-full max-w-md sm:max-w-lg p-3 bg-white/40 backdrop-blur-md rounded-[2.5rem] border border-white/40 shadow-2xl flex">
-              <img
-                src="https://picsum.photos/seed/worship/800/500"
-                alt="Worship screenshot"
+              <video
+                autoPlay
+                muted
+                loop
+                playsInline
+                poster="/faith-tribe-hero-poster-1080.jpg"
                 className="w-full aspect-[4/3] rounded-[2rem] shadow-xl object-cover"
-              />
+                aria-hidden="true"
+              >
+                <source src="/faith-tribe-hero-w.webm" type="video/webm" />
+                <source src="/faith-tribe-hero.mp4" type="video/mp4" />
+              </video>
             </div>
           </div>
         </div>
@@ -307,13 +314,13 @@ const App: React.FC = () => {
             Whether you grew up in church or are seeking answers for the very first time, Jesus invites you to a life filled with purpose, freedom, and divine support.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <button 
+            <button
               onClick={() => { setIsSalvationModalOpen(true); setSalvationStep(1); }}
               className="bg-white text-[#372f58] px-6 py-3 rounded-full font-bold hover:bg-teal-50 hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer"
             >
               Start Salvation Guide
             </button>
-            <button 
+            <button
               onClick={() => setIsPrayerModalOpen(true)}
               className="bg-transparent border-2 border-white/80 text-white px-6 py-3 rounded-full font-bold hover:bg-white/10 hover:scale-105 active:scale-95 transition-all cursor-pointer"
             >
@@ -332,11 +339,11 @@ const App: React.FC = () => {
               Find Your Place in the Tribe
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            
+
             {/* Kids Card */}
-            <div 
+            <div
               onClick={() => navigateToView(Audience.KIDS)}
               className="group bg-white/70 backdrop-blur-sm border-2 border-amber-100/60 p-8 rounded-3xl cursor-pointer hover:bg-amber-50/50 hover:border-amber-300 transition-all duration-300 hover:shadow-xl hover:shadow-amber-500/5 relative"
             >
@@ -356,7 +363,7 @@ const App: React.FC = () => {
             </div>
 
             {/* Teens Card */}
-            <div 
+            <div
               onClick={() => navigateToView(Audience.TEENS)}
               className="group bg-white/70 backdrop-blur-sm border border-[#1CABB9]/20 p-8 rounded-3xl cursor-pointer hover:bg-[#1CABB9]/5 hover:border-[#1CABB9] transition-all duration-300 hover:shadow-xl hover:shadow-[#1CABB9]/5 relative"
             >
@@ -376,7 +383,7 @@ const App: React.FC = () => {
             </div>
 
             {/* Teachers Card */}
-            <div 
+            <div
               onClick={() => navigateToView(Audience.TEACHERS)}
               className="group bg-white/70 backdrop-blur-sm border border-teal-100 p-8 rounded-3xl cursor-pointer hover:bg-teal-50/50 hover:border-teal-300 transition-all duration-300 hover:shadow-xl hover:shadow-teal-500/5 relative"
             >
@@ -409,7 +416,7 @@ const App: React.FC = () => {
           ABOUT FAITH TRIBE
         </h2>
         <h1 className="text-4xl font-black tracking-tight text-[#372f58] sm:text-5xl leading-tight">
-          Empowering the Next Generation <br className="hidden sm:inline"/>Through Faith
+          Empowering the Next Generation <br className="hidden sm:inline" />Through Faith
         </h1>
       </div>
 
@@ -421,7 +428,7 @@ const App: React.FC = () => {
           <p className="text-sm leading-relaxed text-[#372f58]/85 mb-6">
             Faith Tribe is the Junior Church of RCCG Region 63 — a single, unified identity for everything we do with children and teenagers across the region. Under one name, Faith Tribe brings together three ministries with one shared purpose:
           </p>
-          
+
           {/* Simplified Editorial Sub-ministries list */}
           <div className="space-y-4">
             <div className="flex items-start gap-3 p-3.5 rounded-2xl hover:bg-[#1CABB9]/5 transition-colors duration-200">
@@ -460,9 +467,9 @@ const App: React.FC = () => {
 
         {/* Right Column: Logo Story */}
         <div className="lg:col-span-5 bg-white/60 backdrop-blur-md p-8 rounded-3xl border border-white/50 shadow-sm flex flex-col items-center text-center h-full">
-          <img 
-            src="/Faith_Tribe_Circular.png" 
-            alt="Faith Tribe Circular Emblem" 
+          <img
+            src="/Faith_Tribe_Circular.png"
+            alt="Faith Tribe Circular Emblem"
             className="w-32 h-32 sm:w-40 sm:h-40 object-contain rounded-full border border-[#372f58]/10 shadow-lg mb-6"
           />
           <h3 className="text-xl font-black text-[#372f58] mb-3">The Story Behind Our Name and Logo</h3>
@@ -538,19 +545,19 @@ const App: React.FC = () => {
           Whether you're a child taking your first steps in faith, a teenager navigating real questions with real stakes, or a teacher called to shape the next generation — there's a place for you here.
         </p>
         <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-          <button 
+          <button
             onClick={() => navigateToView(Audience.KIDS)}
             className="w-full sm:w-auto rounded-full bg-[#F8B229] px-6 py-3 text-sm font-bold text-[#372f58] shadow-md hover:bg-[#1CABB9] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#F8B229]"
           >
             Enter Zone — Faith Tribe Kids
           </button>
-          <button 
+          <button
             onClick={() => navigateToView(Audience.TEENS)}
             className="w-full sm:w-auto rounded-full bg-[#1CABB9] px-6 py-3 text-sm font-bold text-white shadow-md hover:bg-[#372f58] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#1CABB9]"
           >
             Join Tribe — Faith Tribe Teens
           </button>
-          <button 
+          <button
             onClick={() => navigateToView(Audience.TEACHERS)}
             className="w-full sm:w-auto rounded-full bg-[#372f58] px-6 py-3 text-sm font-bold text-white shadow-md hover:bg-[#1CABB9] hover:text-[#372f58] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#372f58]"
           >
@@ -583,7 +590,7 @@ const App: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 mt-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
-          
+
           {/* Bring a Friend ticket/card design */}
           <div className="kids-ticket p-6 shadow-md mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
             <div className="flex items-center gap-4 text-center sm:text-left">
@@ -597,7 +604,7 @@ const App: React.FC = () => {
                 </p>
               </div>
             </div>
-            <button 
+            <button
               onClick={() => toast('Invite Card generated! 🎉 Download and send to your friends.', { duration: 4000 })}
               className="px-5 py-2.5 bg-amber-400 text-white font-black rounded-2xl hover:bg-amber-500 transition-all hover:scale-105 active:scale-95 shadow-md shadow-amber-200 cursor-pointer text-sm shrink-0 border-b-4 border-amber-500"
             >
@@ -630,9 +637,9 @@ const App: React.FC = () => {
     <div className="mesh-gradient-teens min-h-screen text-gray-100 pb-16">
       {/* Teens Header Banner */}
       <div className="relative h-72 overflow-hidden border-b border-gray-800">
-        <img 
-          src="https://picsum.photos/seed/teens/1200/400" 
-          className="w-full h-full object-cover opacity-25 filter grayscale" 
+        <img
+          src="https://picsum.photos/seed/teens/1200/400"
+          className="w-full h-full object-cover opacity-25 filter grayscale"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-900/60 to-transparent flex items-end">
           <div className="max-w-7xl mx-auto px-6 pb-8 w-full flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
@@ -648,9 +655,9 @@ const App: React.FC = () => {
                 Genuine questions. Real faith. No performance, just raw truth.
               </p>
             </div>
-            <button 
+            <button
               onClick={() => {
-                navigator.clipboard.writeText(window.location.href).catch(() => {});
+                navigator.clipboard.writeText(window.location.href).catch(() => { });
                 toast.success('Invite link copied to clipboard! Share with your friends. 🔗', { duration: 4000 });
               }}
               className="flex items-center gap-2 bg-emerald-400 hover:bg-emerald-300 text-gray-950 px-5 py-2.5 rounded-full font-bold hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-500/10 cursor-pointer"
@@ -663,7 +670,7 @@ const App: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-6 mt-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-8">
-          
+
           {/* Monthly Topic Featured Panel */}
           <div className="p-6 sm:p-8 rounded-3xl bg-gray-900/80 border border-gray-800 shadow-xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full filter blur-2xl"></div>
@@ -674,15 +681,15 @@ const App: React.FC = () => {
             <p className="text-gray-400 mt-2 text-sm leading-relaxed max-w-xl">
               Who are you when the screen is turned off? Learn how Christ defines your worth, potential, and future far beyond likes and comments.
             </p>
-            
+
             <div className="flex flex-wrap gap-3 mt-6">
-              <button 
+              <button
                 onClick={() => toast('Loading sermon video... 🎬', { duration: 3000 })}
                 className="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-gray-950 rounded-lg text-sm font-bold transition-all hover:scale-102 cursor-pointer"
               >
                 Watch Message
               </button>
-              <button 
+              <button
                 onClick={() => setIsPrayerModalOpen(true)}
                 className="px-5 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 rounded-lg text-sm font-bold transition-all hover:scale-102 cursor-pointer"
               >
@@ -758,11 +765,11 @@ const App: React.FC = () => {
     useEffect(() => {
       const fetchFlagsAndCurriculum = async () => {
         setIsLoadingLive(true);
-        let activeFlags = { 
-          enableCurriculumPhase1: true, 
-          enableCurriculumPhase2: true, 
-          lessonsApiBaseUrl: 'https://api.lessons.church', 
-          lessonsApiKey: '' 
+        let activeFlags = {
+          enableCurriculumPhase1: true,
+          enableCurriculumPhase2: true,
+          lessonsApiBaseUrl: 'https://api.lessons.church',
+          lessonsApiKey: ''
         };
 
         try {
@@ -897,7 +904,7 @@ const App: React.FC = () => {
               <h1 className="text-3xl font-black text-gray-900 tracking-tight">Teachers Dashboard</h1>
               <p className="text-sm text-gray-500 mt-1">Equipping region leaders to save souls and grow conversions.</p>
             </div>
-            <button 
+            <button
               onClick={() => setIsTeacherLoggedIn(false)}
               className="text-xs font-bold text-red-500 hover:text-red-700 hover:bg-red-50 px-4.5 py-2 rounded-full border border-red-200/60 transition-colors"
             >
@@ -907,13 +914,13 @@ const App: React.FC = () => {
         </div>
 
         <div className="max-w-7xl mx-auto px-6 mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
+
           {/* Left Column (Bento grids) */}
           <div className="lg:col-span-2 space-y-8">
-            
+
             {/* Bento Layout Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
+
               {/* Tracker Widget Card */}
               <div className="p-6 rounded-2xl bg-gradient-to-r from-teal-700 to-teal-800 text-white shadow-lg flex flex-col justify-between">
                 <div>
@@ -926,17 +933,17 @@ const App: React.FC = () => {
                   <h4 className="text-2xl font-black mt-4">Evangelism Focus</h4>
                   <p className="text-sm text-teal-100 mt-1">Lead kids to make personal choices for Christ.</p>
                 </div>
-                
+
                 {/* Visual Progress Bar */}
                 <div className="mt-6">
                   <div className="flex justify-between text-xs font-bold mb-1">
                     <span>Decisions Target: {newConverts.length}/5 Souls</span>
-                    <span>{Math.min(100, Math.round((newConverts.length/5)*100))}%</span>
+                    <span>{Math.min(100, Math.round((newConverts.length / 5) * 100))}%</span>
                   </div>
                   <div className="w-full bg-teal-900/60 rounded-full h-2">
-                    <div 
-                      className="bg-yellow-400 h-2 rounded-full transition-all duration-500" 
-                      style={{ width: `${Math.min(100, (newConverts.length/5)*100)}%` }}
+                    <div
+                      className="bg-yellow-400 h-2 rounded-full transition-all duration-500"
+                      style={{ width: `${Math.min(100, (newConverts.length / 5) * 100)}%` }}
                     ></div>
                   </div>
                 </div>
@@ -949,8 +956,8 @@ const App: React.FC = () => {
                     <PlusCircle size={16} className="text-teal-600" /> Register Decision
                   </h3>
                   <form onSubmit={handleAddConvertSubmit} className="space-y-3">
-                    <input 
-                      type="text" 
+                    <input
+                      type="text"
                       required
                       value={convertNameInput}
                       onChange={e => setConvertNameInput(e.target.value)}
@@ -958,23 +965,23 @@ const App: React.FC = () => {
                       className="w-full text-xs border border-gray-200 rounded px-2.5 py-1.5 focus:outline-none focus:border-teal-600"
                     />
                     <div className="flex gap-2">
-                      <input 
-                        type="number" 
+                      <input
+                        type="number"
                         value={convertAgeInput}
                         onChange={e => setConvertAgeInput(e.target.value)}
                         placeholder="Age"
                         className="w-1/3 text-xs border border-gray-200 rounded px-2.5 py-1.5 focus:outline-none focus:border-teal-600"
                       />
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         value={convertNotesInput}
                         onChange={e => setConvertNotesInput(e.target.value)}
                         placeholder="Class Notes"
                         className="w-2/3 text-xs border border-gray-200 rounded px-2.5 py-1.5 focus:outline-none focus:border-teal-600"
                       />
                     </div>
-                    <button 
-                      type="submit" 
+                    <button
+                      type="submit"
                       className="w-full bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs py-1.5 rounded transition-all cursor-pointer shadow-sm flex justify-center items-center gap-1"
                     >
                       <Plus size={12} /> Add to Tracker
@@ -987,8 +994,8 @@ const App: React.FC = () => {
 
             {/* Quick Links / Submodal Clickers (Bento Style) */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              
-              <div 
+
+              <div
                 onClick={() => setActiveTeacherModal('convert')}
                 className="p-5 bg-white border border-gray-150 rounded-2xl cursor-pointer hover:border-teal-500 hover:shadow-md transition-all text-center flex flex-col items-center justify-center"
               >
@@ -997,7 +1004,7 @@ const App: React.FC = () => {
                 <p className="text-[10px] text-gray-400 mt-1">{newConverts.length} Records registered</p>
               </div>
 
-              <div 
+              <div
                 onClick={() => setActiveTeacherModal('decision')}
                 className="p-5 bg-white border border-gray-150 rounded-2xl cursor-pointer hover:border-teal-500 hover:shadow-md transition-all text-center flex flex-col items-center justify-center"
               >
@@ -1006,7 +1013,7 @@ const App: React.FC = () => {
                 <p className="text-[10px] text-gray-400 mt-1">Review altar responses</p>
               </div>
 
-              <div 
+              <div
                 onClick={() => setActiveTeacherModal('schedule')}
                 className="p-5 bg-white border border-gray-150 rounded-2xl cursor-pointer hover:border-teal-500 hover:shadow-md transition-all text-center flex flex-col items-center justify-center"
               >
@@ -1027,7 +1034,7 @@ const App: React.FC = () => {
                     </h3>
                     <p className="text-xs text-gray-500 mt-1">Curated lesson programs powered by Lessons.church</p>
                   </div>
-                  
+
                   {/* Curriculum Segment Tabs */}
                   <div className="flex bg-gray-100 p-1 rounded-xl self-start sm:self-auto">
                     <button
@@ -1149,7 +1156,7 @@ const App: React.FC = () => {
                     </h3>
                     <p className="text-xs text-gray-500 mt-1">Live programs pulled directly from LessonsApi (Staging)</p>
                   </div>
-                  
+
                   {/* Curriculum Segment Tabs */}
                   <div className="flex bg-gray-100 p-1 rounded-xl self-start sm:self-auto">
                     <button
@@ -1213,7 +1220,7 @@ const App: React.FC = () => {
                           <div
                             key={lesson.id}
                             className={`p-5 rounded-2xl border transition-all duration-300 hover:shadow-md flex flex-col justify-between h-full group
-                              ${curriculumTrack === 'kids' 
+                              ${curriculumTrack === 'kids'
                                 ? (isPreTeen ? 'bg-indigo-50/20 hover:bg-indigo-50/40 border-indigo-100' : 'bg-amber-50/40 hover:bg-amber-50/80 border-amber-100')
                                 : 'bg-emerald-50/30 hover:bg-emerald-50/65 border-emerald-100'
                               }`}
@@ -1287,18 +1294,18 @@ const App: React.FC = () => {
               <p className="text-xs text-gray-500 mb-4">
                 Input any YouVersion Bible reference code (e.g. <code className="bg-gray-100 px-1.5 py-0.5 rounded text-teal-700 font-bold">JHN.3.16</code> or <code className="bg-gray-100 px-1.5 py-0.5 rounded text-teal-700 font-bold">ROM.12.1-2</code>) to override the homepage scripture spotlight.
               </p>
-              
+
               <form onSubmit={handleSaveCustomVerse} className="flex gap-2">
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   required
                   value={customVerseInput}
                   onChange={e => setCustomVerseInput(e.target.value)}
                   placeholder="e.g. JHN.3.16"
                   className="flex-grow text-xs border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
                 />
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={isSavingCustomVerse}
                   className="bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all cursor-pointer shadow-sm flex items-center gap-1.5 disabled:opacity-50"
                 >
@@ -1307,7 +1314,7 @@ const App: React.FC = () => {
               </form>
             </div>
           </div>
-          
+
           {/* Right Column (AI Assistant) */}
           <div className="lg:col-span-1">
             <div className="sticky top-24">
@@ -1322,7 +1329,7 @@ const App: React.FC = () => {
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true">
             <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setActiveTeacherModal(null)}></div>
             <div className="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all w-full max-w-lg border border-gray-100">
-              
+
               <div className="bg-teal-700 px-6 py-4 flex justify-between items-center text-white">
                 <h3 className="text-base font-bold flex items-center gap-2">
                   {activeTeacherModal === 'convert' && <><Users size={18} /> New Convert Tracker</>}
@@ -1331,7 +1338,7 @@ const App: React.FC = () => {
                 </h3>
                 <button onClick={() => setActiveTeacherModal(null)} className="text-white/80 hover:text-white"><X size={18} /></button>
               </div>
-              
+
               <div className="p-6 max-h-[350px] overflow-y-auto">
                 {activeTeacherModal === 'convert' && (
                   <div className="space-y-4">
@@ -1407,9 +1414,9 @@ const App: React.FC = () => {
                   </div>
                 )}
               </div>
-              
+
               <div className="bg-gray-50 px-6 py-3.5 flex justify-end">
-                <button 
+                <button
                   onClick={() => setActiveTeacherModal(null)}
                   className="bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs px-4 py-2 rounded transition-colors cursor-pointer"
                 >
@@ -1425,13 +1432,13 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col font-sans relative">
-      <Navbar 
-        currentView={currentView} 
-        onChangeView={navigateToView} 
+      <Navbar
+        currentView={currentView}
+        onChangeView={navigateToView}
         onWatchLive={() => setIsLiveStreamOpen(true)}
         isLive={broadcastStatus.isLive}
       />
-      
+
       <main className="flex-grow">
         {currentView === Audience.HOME && <HomeView />}
         {currentView === Audience.ABOUT && <AboutView />}
@@ -1494,10 +1501,10 @@ const App: React.FC = () => {
               A digital ministry of RCCG Region 63 Junior Church
             </div>
           </div>
-          
+
           {/* Thin Horizontal Divider Line above the giant wordmark */}
           <hr className="border-[#4d4475] my-6 opacity-60" />
-          
+
           {/* Giant Wordmark */}
           <div className="footer-wordmark-wrapper text-center">
             <span className="footer-wordmark font-display inline-block">FaithTribe</span>
@@ -1508,8 +1515,8 @@ const App: React.FC = () => {
       {/* Prayer Request Modal */}
       {isPrayerModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" aria-labelledby="prayer-modal-title" role="dialog" aria-modal="true">
-          <div 
-            className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" 
+          <div
+            className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity"
             onClick={() => setIsPrayerModalOpen(false)}
           ></div>
 
@@ -1518,21 +1525,21 @@ const App: React.FC = () => {
               <h3 className="text-base font-extrabold flex items-center gap-2" id="prayer-modal-title">
                 <Heart className="fill-current text-[#F8B229]" size={18} /> Request Prayer Support
               </h3>
-              <button 
+              <button
                 onClick={() => setIsPrayerModalOpen(false)}
                 className="text-white/70 hover:text-white transition-colors cursor-pointer"
               >
                 <X size={20} />
               </button>
             </div>
-            
+
             <div className="px-6 py-5">
               <form onSubmit={handlePrayerSubmit}>
                 <div className="mb-4">
                   <label htmlFor="request" className="block text-xs font-bold uppercase tracking-wider text-[#372f58]/60 mb-2">
                     How can our prayer squad lift you up?
                   </label>
-                  <textarea 
+                  <textarea
                     id="request"
                     value={prayerRequest}
                     onChange={(e) => setPrayerRequest(e.target.value)}
@@ -1543,16 +1550,16 @@ const App: React.FC = () => {
                   />
                 </div>
                 <div className="mt-5 flex flex-col gap-2">
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#F8B229] px-6 py-3 text-sm font-bold text-[#372f58] shadow-lg shadow-[#F8B229]/20 hover:bg-[#372f58] hover:text-white hover:scale-[1.02] active:scale-95 transition-all cursor-pointer"
                   >
                     <Send size={14} />
                     Send Request
                   </button>
-                  <button 
-                    type="button" 
-                    onClick={() => setIsPrayerModalOpen(false)} 
+                  <button
+                    type="button"
+                    onClick={() => setIsPrayerModalOpen(false)}
                     className="w-full inline-flex justify-center py-2 text-xs font-semibold text-[#372f58]/50 hover:text-[#372f58] underline-offset-2 hover:underline transition-colors cursor-pointer"
                   >
                     Cancel
@@ -1569,7 +1576,7 @@ const App: React.FC = () => {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true">
           <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={resetSalvationModal}></div>
           <div className="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-lg border border-gray-150">
-            
+
             {/* Modal Header */}
             <div className="bg-[#372f58] px-6 py-4 flex justify-between items-center text-white">
               <h3 className="text-base font-extrabold flex items-center gap-2">
@@ -1618,7 +1625,7 @@ const App: React.FC = () => {
                         </p>
                         <p className="text-right text-[10px] font-bold text-gray-500 mt-1">- Romans 3:23</p>
                       </div>
-                      <button 
+                      <button
                         onClick={() => setSalvationStep(2)}
                         className="w-full bg-[#372f58] hover:bg-[#1CABB9] text-white font-bold py-2.5 rounded-lg text-xs transition-all shadow-sm flex items-center justify-center gap-1 cursor-pointer"
                       >
@@ -1643,13 +1650,13 @@ const App: React.FC = () => {
                         <p className="text-right text-[10px] font-bold text-gray-500 mt-1">- Acts 16:31</p>
                       </div>
                       <div className="flex gap-2.5">
-                        <button 
+                        <button
                           onClick={() => setSalvationStep(1)}
                           className="w-1/3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 rounded-lg text-xs transition-all cursor-pointer"
                         >
                           Back
                         </button>
-                        <button 
+                        <button
                           onClick={() => setSalvationStep(3)}
                           className="w-2/3 bg-[#372f58] hover:bg-[#1CABB9] text-white font-bold py-2.5 rounded-lg text-xs transition-all shadow-sm flex items-center justify-center gap-1 cursor-pointer"
                         >
@@ -1673,32 +1680,32 @@ const App: React.FC = () => {
 
                       <form onSubmit={handleSalvationSubmit} className="space-y-3">
                         <p className="text-[10px] font-bold text-[#372f58]/40 uppercase tracking-widest">Sign Your Decision Card</p>
-                        <input 
-                          type="text" 
+                        <input
+                          type="text"
                           required
                           value={salvationName}
                           onChange={e => setSalvationName(e.target.value)}
                           placeholder="Your Name"
                           className="w-full text-xs border border-gray-200 rounded px-2.5 py-2 focus:outline-none focus:border-[#1CABB9]"
                         />
-                        <input 
-                          type="email" 
+                        <input
+                          type="email"
                           required
                           value={salvationEmail}
                           onChange={e => setSalvationEmail(e.target.value)}
                           placeholder="Your Email Address"
                           className="w-full text-xs border border-gray-200 rounded px-2.5 py-2 focus:outline-none focus:border-[#1CABB9]"
                         />
-                        
+
                         <div className="flex gap-2.5 mt-2">
-                          <button 
+                          <button
                             type="button"
                             onClick={() => setSalvationStep(2)}
                             className="w-1/3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 rounded-lg text-xs transition-all cursor-pointer"
                           >
                             Back
                           </button>
-                          <button 
+                          <button
                             type="submit"
                             className="w-2/3 bg-[#F8B229] hover:bg-[#372f58] text-[#372f58] hover:text-white font-bold py-2.5 rounded-lg text-xs transition-all shadow-md shadow-[#F8B229]/30 flex items-center justify-center gap-1.5 cursor-pointer"
                           >
@@ -1720,7 +1727,7 @@ const App: React.FC = () => {
                       Your decision card has been recorded. Heaven is celebrating! We have registered you in the Class Altar Tracker.
                     </p>
                   </div>
-                  <button 
+                  <button
                     onClick={resetSalvationModal}
                     className="bg-[#372f58] hover:bg-[#1CABB9] text-white font-bold text-xs px-6 py-2.5 rounded-lg shadow-md shadow-[#372f58]/20 cursor-pointer transition-colors"
                   >
