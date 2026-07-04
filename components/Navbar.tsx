@@ -98,7 +98,7 @@ const Navbar: React.FC<NavbarProps> = ({ currentView, onChangeView, onWatchLive,
                   currentView === Audience.TEENS ? 'text-white' : 'text-[#372f58]'}`}>
                 Faith Tribe
               </span>
-              <span className={`text-[8px] sm:text-[9px] font-medium tracking-tight mt-0.5 sm:mt-1 leading-none transition-colors duration-300
+              <span className={`text-[8px] sm:text-[9px] font-medium tracking-tight mt-0.5 sm:mt-0.5 leading-none transition-colors duration-300
                 ${currentView === Audience.KIDS ? 'text-white/80' : 
                   currentView === Audience.TEENS ? 'text-gray-400' : 'text-[#372f58]/65'}`}>
                 <span className="hidden sm:inline">RCCG </span>Region 63 Junior Church
