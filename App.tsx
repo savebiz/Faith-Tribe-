@@ -605,7 +605,7 @@ const App: React.FC = () => {
             </button>
           </div>
 
-          <ContentSection title="Today's Fun" items={KIDS_CONTENT} colorTheme="text-amber-500" />
+          <ContentSection title="This Week's Fun" items={KIDS_CONTENT} colorTheme="text-amber-500" />
           
           {/* Bible Verse Spotlight */}
           <div className="bg-white p-8 rounded-[2rem] shadow-sm border-4 border-amber-200/60 relative overflow-hidden text-gray-700">
