@@ -1536,17 +1536,18 @@ const App: React.FC = () => {
                     required
                   />
                 </div>
-                <div className="mt-5 sm:grid sm:grid-cols-2 sm:gap-3">
+                <div className="mt-5 flex flex-col gap-2">
                   <button 
                     type="submit" 
-                    className="inline-flex w-full justify-center rounded-lg bg-[#372f58] px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-[#372f58]/20 hover:bg-[#1CABB9] transition-colors cursor-pointer sm:col-start-2"
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-[#F8B229] px-6 py-3 text-sm font-bold text-[#372f58] shadow-lg shadow-[#F8B229]/20 hover:bg-[#372f58] hover:text-white hover:scale-[1.02] active:scale-95 transition-all cursor-pointer"
                   >
+                    <Send size={14} />
                     Send Request
                   </button>
                   <button 
                     type="button" 
                     onClick={() => setIsPrayerModalOpen(false)} 
-                    className="mt-3 inline-flex w-full justify-center rounded-lg bg-white px-4 py-2.5 text-sm font-bold text-gray-700 shadow-sm ring-1 ring-gray-200 hover:bg-gray-50 transition-colors cursor-pointer sm:col-start-1 sm:mt-0"
+                    className="w-full inline-flex justify-center py-2 text-xs font-semibold text-[#372f58]/50 hover:text-[#372f58] underline-offset-2 hover:underline transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
