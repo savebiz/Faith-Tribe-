@@ -269,12 +269,16 @@ const App: React.FC = () => {
               >
                 Meet Jesus
               </button>
-              <button 
-                onClick={() => navigateToView(Audience.KIDS)}
+              <a
+                href="#discipleship-tracks"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById('discipleship-tracks')?.scrollIntoView({ behavior: 'smooth' });
+                }}
                 className="w-auto rounded-full bg-[#F8B229] px-6 py-3 text-sm font-bold text-[#372f58] shadow-lg shadow-[#F8B229]/15 hover:bg-[#1CABB9] hover:scale-105 active:scale-95 transition-all cursor-pointer border border-[#F8B229] text-center"
               >
                 Explore Tribes
-              </button>
+              </a>
             </div>
           </div>
           <div className="w-full flex justify-center lg:justify-end mt-6 sm:mt-12 lg:mt-0">
@@ -317,7 +321,7 @@ const App: React.FC = () => {
       </div>
 
       {/* Audience Selection Grid */}
-      <div className="py-24 bg-white/30 backdrop-blur-md border-t border-teal-100/50">
+      <div id="discipleship-tracks" className="py-24 bg-white/30 backdrop-blur-md border-t border-teal-100/50" style={{ scrollMarginTop: '80px' }}>
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center mb-16">
             <h2 className="text-xs font-bold leading-7 text-[#1CABB9] uppercase tracking-widest">Discipleship Tracks</h2>
@@ -1461,13 +1465,13 @@ const App: React.FC = () => {
                 RCCG Region 63 Junior Church.
               </p>
               <div className="flex space-x-3 mb-6">
-                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/10 rounded-full cursor-pointer hover:bg-[#1CABB9] transition-all hover:scale-110 flex items-center justify-center text-white" aria-label="Instagram">
+                <a href="https://www.instagram.com/faithtribe_official" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/10 rounded-full cursor-pointer hover:bg-[#1CABB9] transition-all hover:scale-110 flex items-center justify-center text-white" aria-label="Instagram">
                   <Instagram size={16} />
                 </a>
-                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/10 rounded-full cursor-pointer hover:bg-[#1CABB9] transition-all hover:scale-110 flex items-center justify-center text-white" aria-label="Facebook">
+                <a href="https://www.facebook.com/profile.php?id=61591368402377" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/10 rounded-full cursor-pointer hover:bg-[#1CABB9] transition-all hover:scale-110 flex items-center justify-center text-white" aria-label="Facebook">
                   <Facebook size={16} />
                 </a>
-                <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/10 rounded-full cursor-pointer hover:bg-[#1CABB9] transition-all hover:scale-110 flex items-center justify-center text-white" aria-label="YouTube">
+                <a href="https://www.youtube.com/@FaithTribe_official" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/10 rounded-full cursor-pointer hover:bg-[#1CABB9] transition-all hover:scale-110 flex items-center justify-center text-white" aria-label="YouTube">
                   <Youtube size={16} />
                 </a>
               </div>
@@ -1504,13 +1508,13 @@ const App: React.FC = () => {
           ></div>
 
           <div className="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all w-full max-w-lg border border-gray-150">
-            <div className="bg-indigo-600 px-6 py-4 flex justify-between items-center text-white">
+            <div className="bg-[#372f58] px-6 py-4 flex justify-between items-center text-white">
               <h3 className="text-base font-extrabold flex items-center gap-2" id="prayer-modal-title">
-                <Heart className="fill-current text-indigo-200" size={18} /> Request Prayer Support
+                <Heart className="fill-current text-[#F8B229]" size={18} /> Request Prayer Support
               </h3>
               <button 
                 onClick={() => setIsPrayerModalOpen(false)}
-                className="text-white/80 hover:text-white transition-colors cursor-pointer"
+                className="text-white/70 hover:text-white transition-colors cursor-pointer"
               >
                 <X size={20} />
               </button>
@@ -1519,14 +1523,14 @@ const App: React.FC = () => {
             <div className="px-6 py-5">
               <form onSubmit={handlePrayerSubmit}>
                 <div className="mb-4">
-                  <label htmlFor="request" className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+                  <label htmlFor="request" className="block text-xs font-bold uppercase tracking-wider text-[#372f58]/60 mb-2">
                     How can our prayer squad lift you up?
                   </label>
                   <textarea 
                     id="request"
                     value={prayerRequest}
                     onChange={(e) => setPrayerRequest(e.target.value)}
-                    className="w-full border border-gray-200 rounded-xl shadow-sm p-3.5 focus:outline-none focus:ring-2 focus:ring-indigo-100 focus:border-indigo-500 text-sm resize-none"
+                    className="w-full border border-gray-200 rounded-xl shadow-sm p-3.5 focus:outline-none focus:ring-2 focus:ring-[#1CABB9]/30 focus:border-[#1CABB9] text-sm resize-none"
                     rows={4}
                     placeholder="Describe your needs, we will stand in faith with you..."
                     required
@@ -1535,7 +1539,7 @@ const App: React.FC = () => {
                 <div className="mt-5 sm:grid sm:grid-cols-2 sm:gap-3">
                   <button 
                     type="submit" 
-                    className="inline-flex w-full justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-100 hover:bg-indigo-500 transition-colors cursor-pointer sm:col-start-2"
+                    className="inline-flex w-full justify-center rounded-lg bg-[#372f58] px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-[#372f58]/20 hover:bg-[#1CABB9] transition-colors cursor-pointer sm:col-start-2"
                   >
                     Send Request
                   </button>
@@ -1560,30 +1564,30 @@ const App: React.FC = () => {
           <div className="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all w-full max-w-lg border border-gray-150">
             
             {/* Modal Header */}
-            <div className="bg-indigo-600 px-6 py-4 flex justify-between items-center text-white">
+            <div className="bg-[#372f58] px-6 py-4 flex justify-between items-center text-white">
               <h3 className="text-base font-extrabold flex items-center gap-2">
-                <Sparkles size={18} className="text-indigo-200" />
+                <Sparkles size={18} className="text-[#F8B229]" />
                 <span>Salvation Guide: The ABC Steps</span>
               </h3>
-              <button onClick={resetSalvationModal} className="text-white/80 hover:text-white cursor-pointer">
+              <button onClick={resetSalvationModal} className="text-white/70 hover:text-white cursor-pointer">
                 <X size={20} />
               </button>
             </div>
 
             {/* Steps Progress Indicator */}
-            <div className="bg-indigo-50 px-6 py-3.5 border-b border-indigo-100 flex items-center justify-between text-xs font-bold text-indigo-700">
+            <div className="bg-[#372f58]/5 px-6 py-3.5 border-b border-[#372f58]/10 flex items-center justify-between text-xs font-bold text-[#372f58]">
               <div className="flex items-center gap-1.5">
-                <span className={`w-5 h-5 rounded-full flex items-center justify-center border ${salvationStep >= 1 ? 'bg-indigo-600 text-white border-indigo-600' : 'border-indigo-300'}`}>1</span>
+                <span className={`w-5 h-5 rounded-full flex items-center justify-center border ${salvationStep >= 1 ? 'bg-[#F8B229] text-[#372f58] border-[#F8B229]' : 'border-[#372f58]/30 text-[#372f58]/50'}`}>1</span>
                 <span>Admit</span>
               </div>
-              <div className="w-8 h-[2px] bg-indigo-200"></div>
+              <div className="w-8 h-[2px] bg-[#372f58]/20"></div>
               <div className="flex items-center gap-1.5">
-                <span className={`w-5 h-5 rounded-full flex items-center justify-center border ${salvationStep >= 2 ? 'bg-indigo-600 text-white border-indigo-600' : 'border-indigo-300'}`}>2</span>
+                <span className={`w-5 h-5 rounded-full flex items-center justify-center border ${salvationStep >= 2 ? 'bg-[#F8B229] text-[#372f58] border-[#F8B229]' : 'border-[#372f58]/30 text-[#372f58]/50'}`}>2</span>
                 <span>Believe</span>
               </div>
-              <div className="w-8 h-[2px] bg-indigo-200"></div>
+              <div className="w-8 h-[2px] bg-[#372f58]/20"></div>
               <div className="flex items-center gap-1.5">
-                <span className={`w-5 h-5 rounded-full flex items-center justify-center border ${salvationStep >= 3 ? 'bg-indigo-600 text-white border-indigo-600' : 'border-indigo-300'}`}>3</span>
+                <span className={`w-5 h-5 rounded-full flex items-center justify-center border ${salvationStep >= 3 ? 'bg-[#F8B229] text-[#372f58] border-[#F8B229]' : 'border-[#372f58]/30 text-[#372f58]/50'}`}>3</span>
                 <span>Confess</span>
               </div>
             </div>
@@ -1594,14 +1598,14 @@ const App: React.FC = () => {
                 <>
                   {salvationStep === 1 && (
                     <div className="space-y-4 animate-in fade-in duration-300">
-                      <div className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
-                        <h4 className="font-extrabold text-indigo-900 text-sm">Step A: Admit</h4>
-                        <p className="text-xs text-indigo-750 mt-1 leading-relaxed">
+                      <div className="bg-[#372f58]/5 p-4 rounded-xl border border-[#372f58]/10">
+                        <h4 className="font-extrabold text-[#372f58] text-sm">Step A: Admit</h4>
+                        <p className="text-xs text-[#372f58]/75 mt-1 leading-relaxed">
                           Admit that you have made mistakes and sinned. We all fall short, but admitting this opens our hearts to receive forgiveness.
                         </p>
                       </div>
-                      <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Scripture Focus</span>
+                      <div className="p-4 bg-gray-50 rounded-xl border-l-4 border-[#1CABB9] border-t border-r border-b border-gray-100">
+                        <span className="text-[10px] font-bold text-[#1CABB9] uppercase tracking-widest">Scripture Focus</span>
                         <p className="text-xs italic text-gray-600 mt-1 leading-relaxed">
                           "For all have sinned and fall short of the glory of God."
                         </p>
@@ -1609,7 +1613,7 @@ const App: React.FC = () => {
                       </div>
                       <button 
                         onClick={() => setSalvationStep(2)}
-                        className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-lg text-xs transition-all shadow-sm flex items-center justify-center gap-1 cursor-pointer"
+                        className="w-full bg-[#372f58] hover:bg-[#1CABB9] text-white font-bold py-2.5 rounded-lg text-xs transition-all shadow-sm flex items-center justify-center gap-1 cursor-pointer"
                       >
                         Next Step: Believe <ChevronRight size={14} />
                       </button>
@@ -1618,14 +1622,14 @@ const App: React.FC = () => {
 
                   {salvationStep === 2 && (
                     <div className="space-y-4 animate-in fade-in duration-300">
-                      <div className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100">
-                        <h4 className="font-extrabold text-indigo-900 text-sm">Step B: Believe</h4>
-                        <p className="text-xs text-indigo-750 mt-1 leading-relaxed">
+                      <div className="bg-[#372f58]/5 p-4 rounded-xl border border-[#372f58]/10">
+                        <h4 className="font-extrabold text-[#372f58] text-sm">Step B: Believe</h4>
+                        <p className="text-xs text-[#372f58]/75 mt-1 leading-relaxed">
                           Believe that Jesus is the Son of God, and that He died on the cross and rose from the grave to pay for your mistakes and give you eternal life.
                         </p>
                       </div>
-                      <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Scripture Focus</span>
+                      <div className="p-4 bg-gray-50 rounded-xl border-l-4 border-[#1CABB9] border-t border-r border-b border-gray-100">
+                        <span className="text-[10px] font-bold text-[#1CABB9] uppercase tracking-widest">Scripture Focus</span>
                         <p className="text-xs italic text-gray-600 mt-1 leading-relaxed">
                           "Believe in the Lord Jesus, and you will be saved..."
                         </p>
@@ -1640,7 +1644,7 @@ const App: React.FC = () => {
                         </button>
                         <button 
                           onClick={() => setSalvationStep(3)}
-                          className="w-2/3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-lg text-xs transition-all shadow-sm flex items-center justify-center gap-1 cursor-pointer"
+                          className="w-2/3 bg-[#372f58] hover:bg-[#1CABB9] text-white font-bold py-2.5 rounded-lg text-xs transition-all shadow-sm flex items-center justify-center gap-1 cursor-pointer"
                         >
                           Next Step: Confess <ChevronRight size={14} />
                         </button>
@@ -1650,25 +1654,25 @@ const App: React.FC = () => {
 
                   {salvationStep === 3 && (
                     <div className="space-y-4 animate-in fade-in duration-300">
-                      <div className="bg-indigo-50/50 p-4 rounded-xl border border-indigo-100 text-xs">
-                        <h4 className="font-extrabold text-indigo-900 text-sm">Step C: Confess & Commit</h4>
-                        <p className="text-indigo-750 mt-1 leading-relaxed">
+                      <div className="bg-[#1CABB9]/5 p-4 rounded-xl border border-[#1CABB9]/10 text-xs">
+                        <h4 className="font-extrabold text-[#372f58] text-sm">Step C: Confess &amp; Commit</h4>
+                        <p className="text-[#372f58]/75 mt-1 leading-relaxed">
                           Confess Jesus as your Savior. Pray this prayer from your heart:
                         </p>
-                        <p className="mt-2.5 italic font-bold text-indigo-950 bg-white/70 p-3 rounded-lg border border-indigo-100/50 leading-relaxed">
+                        <p className="mt-2.5 italic font-bold text-[#372f58] bg-white/70 p-3 rounded-lg border border-[#1CABB9]/10 leading-relaxed">
                           "Lord Jesus, I admit I have made mistakes. I believe You died for my sins and rose again. I ask You to come into my heart, wash me clean, and be my forever Savior. Thank you for saving me. Amen!"
                         </p>
                       </div>
 
                       <form onSubmit={handleSalvationSubmit} className="space-y-3">
-                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Sign Your Decision Card</p>
+                        <p className="text-[10px] font-bold text-[#372f58]/40 uppercase tracking-widest">Sign Your Decision Card</p>
                         <input 
                           type="text" 
                           required
                           value={salvationName}
                           onChange={e => setSalvationName(e.target.value)}
                           placeholder="Your Name"
-                          className="w-full text-xs border border-gray-200 rounded px-2.5 py-2 focus:outline-none focus:border-indigo-600"
+                          className="w-full text-xs border border-gray-200 rounded px-2.5 py-2 focus:outline-none focus:border-[#1CABB9]"
                         />
                         <input 
                           type="email" 
@@ -1676,7 +1680,7 @@ const App: React.FC = () => {
                           value={salvationEmail}
                           onChange={e => setSalvationEmail(e.target.value)}
                           placeholder="Your Email Address"
-                          className="w-full text-xs border border-gray-200 rounded px-2.5 py-2 focus:outline-none focus:border-indigo-600"
+                          className="w-full text-xs border border-gray-200 rounded px-2.5 py-2 focus:outline-none focus:border-[#1CABB9]"
                         />
                         
                         <div className="flex gap-2.5 mt-2">
@@ -1689,7 +1693,7 @@ const App: React.FC = () => {
                           </button>
                           <button 
                             type="submit"
-                            className="w-2/3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-lg text-xs transition-all shadow-md shadow-indigo-150 flex items-center justify-center gap-1.5 cursor-pointer"
+                            className="w-2/3 bg-[#F8B229] hover:bg-[#372f58] text-[#372f58] hover:text-white font-bold py-2.5 rounded-lg text-xs transition-all shadow-md shadow-[#F8B229]/30 flex items-center justify-center gap-1.5 cursor-pointer"
                           >
                             <Send size={12} /> Submit Decision
                           </button>
@@ -1711,7 +1715,7 @@ const App: React.FC = () => {
                   </div>
                   <button 
                     onClick={resetSalvationModal}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-6 py-2.5 rounded-lg shadow-md cursor-pointer"
+                    className="bg-[#372f58] hover:bg-[#1CABB9] text-white font-bold text-xs px-6 py-2.5 rounded-lg shadow-md shadow-[#372f58]/20 cursor-pointer transition-colors"
                   >
                     Return to Portal
                   </button>
