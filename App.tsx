@@ -832,73 +832,7 @@ const App: React.FC = () => {
     }, [isTeacherLoggedIn]);
 
     // -- Login Gate --
-    if (!isTeacherLoggedIn) {
-      return (
-        <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-          <div className="sm:mx-auto sm:w-full sm:max-w-md px-4">
-            <div className="flex justify-center">
-              <div className="h-14 w-14 rounded-2xl bg-teal-700 flex items-center justify-center shadow-lg shadow-teal-200">
-                <Lock className="text-white" size={24} />
-              </div>
-            </div>
-            <h2 className="mt-6 text-center text-3xl font-black tracking-tight text-gray-900">
-              Teachers Hub
-            </h2>
-            <p className="mt-2 text-center text-sm text-gray-500">
-              Access curriculum plans and manage discipleship tracking.
-            </p>
-            <div className="mt-4 bg-teal-50/70 border border-teal-100 p-3 rounded-2xl text-center text-xs text-teal-850 font-bold max-w-xs mx-auto">
-              🔑 Demo Access: Pre-filled below. Just click Sign In!
-            </div>
-          </div>
-
-          <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md px-4">
-            <div className="bg-white py-8 px-6 shadow-xl rounded-3xl border border-gray-150">
-              <form className="space-y-5" onSubmit={handleTeacherLogin}>
-                <div>
-                  <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">
-                    Email address
-                  </label>
-                  <input
-                    id="email"
-                    name="email"
-                    type="email"
-                    required
-                    value={teacherEmail}
-                    onChange={(e) => setTeacherEmail(e.target.value)}
-                    placeholder="teacher@faithtribe.org"
-                    className="block w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-100"
-                  />
-                </div>
-
-                <div>
-                  <label htmlFor="password" className="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">
-                    Password
-                  </label>
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    required
-                    value={teacherPassword}
-                    onChange={(e) => setTeacherPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="block w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-100"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="flex w-full justify-center rounded-lg bg-teal-700 py-2.5 px-4 text-sm font-bold text-white shadow-md shadow-teal-200 hover:bg-teal-800 transition-colors cursor-pointer"
-                >
-                  Sign In
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      );
-    }
+    if (!isTeacherLoggedIn) return null;
 
     // -- Bento Grid Dashboard for Teachers --
     return (
@@ -1449,7 +1383,71 @@ const App: React.FC = () => {
         {currentView === Audience.ABOUT && <AboutView />}
         {currentView === Audience.KIDS && <KidsView />}
         {currentView === Audience.TEENS && <TeensView />}
-        {currentView === Audience.TEACHERS && <TeachersView />}
+        {currentView === Audience.TEACHERS && !isTeacherLoggedIn && (
+          <div className="min-h-[100dvh] bg-gray-50 flex flex-col justify-center py-6 sm:px-6 lg:px-8">
+            <div className="sm:mx-auto sm:w-full sm:max-w-md px-4">
+              <div className="flex justify-center">
+                <div className="h-12 w-12 rounded-2xl bg-teal-700 flex items-center justify-center shadow-lg shadow-teal-200">
+                  <Lock className="text-white" size={22} />
+                </div>
+              </div>
+              <h2 className="mt-4 text-center text-3xl font-black tracking-tight text-gray-900">
+                Teachers Hub
+              </h2>
+              <p className="mt-1.5 text-center text-sm text-gray-500">
+                Access curriculum plans and manage discipleship tracking.
+              </p>
+            </div>
+
+            <div className="mt-5 sm:mx-auto sm:w-full sm:max-w-md px-4">
+              <div className="bg-white py-6 px-6 shadow-xl rounded-3xl border border-gray-150">
+                <form className="space-y-4" onSubmit={handleTeacherLogin}>
+                  <div>
+                    <label htmlFor="teacher-email" className="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">
+                      Email address
+                    </label>
+                    <input
+                      id="teacher-email"
+                      name="teacher-email"
+                      type="email"
+                      autoComplete="email"
+                      required
+                      value={teacherEmail}
+                      onChange={(e) => setTeacherEmail(e.target.value)}
+                      placeholder="admin@faithtribe.com"
+                      className="block w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                    />
+                  </div>
+
+                  <div>
+                    <label htmlFor="teacher-password" className="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">
+                      Password
+                    </label>
+                    <input
+                      id="teacher-password"
+                      name="teacher-password"
+                      type="password"
+                      autoComplete="current-password"
+                      required
+                      value={teacherPassword}
+                      onChange={(e) => setTeacherPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="block w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="flex w-full justify-center rounded-full bg-teal-700 py-2.5 px-4 text-sm font-bold text-white shadow-md shadow-teal-200 hover:bg-teal-800 hover:scale-[1.01] active:scale-95 transition-all cursor-pointer mt-1"
+                  >
+                    Sign In
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+        )}
+        {currentView === Audience.TEACHERS && isTeacherLoggedIn && <TeachersView />}
         {currentView === Audience.BIBLE && <BibleReaderView onBack={() => navigateToView(Audience.HOME)} />}
       </main>
 
