@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { BibleReader } from '@youversion/platform-react-ui';
 import { ArrowLeft, Book, Flame, Share2, MoreVertical, Copy, AlertTriangle, Check, Award, Download, Highlighter, Trash2, X, ArrowRight, Search } from 'lucide-react';
+import { toast } from 'sonner';
 import { fetchReactionCount, incrementReactionCount, hasReacted } from '../supabase';
 import { useReadingPreferences } from './useReadingPreferences';
 import { ChapterSelector } from './ChapterSelector';
@@ -402,7 +403,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
     }
     
     if (!matchedBookKey) {
-      alert("Couldn't find that book — try 'John 3:16' or 'Genesis 1'");
+      toast.error("Couldn't find that book — try 'John 3:16' or 'Genesis 1'", { duration: 4000 });
       return;
     }
     
@@ -413,7 +414,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
     const match = remaining.match(/^(\d+)(?:\s*:\s*(\d+)(?:\s*-\s*(\d+))?)?$/);
     
     if (!match && remaining.length > 0) {
-      alert("Couldn't parse chapter/verse — try 'John 3:16' or 'Genesis 1'");
+      toast.error("Couldn't parse chapter/verse — try 'John 3:16' or 'Genesis 1'", { duration: 4000 });
       return;
     }
     

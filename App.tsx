@@ -9,6 +9,7 @@ import {
   Smile, Shield, Calendar, ChevronRight, Plus, CheckCircle2, ClipboardList, 
   Send, Sparkles, Trophy, PlusCircle, Check, Instagram, Facebook, Youtube
 } from 'lucide-react';
+import { Toaster, toast } from 'sonner';
 import { VerseOfTheWeek } from './lib/bible/VerseOfTheWeek';
 import { BibleReaderView } from './lib/bible/BibleReaderView';
 import { getCurriculumCache, saveCurriculumCache, fetchCustomVerse, updateCustomVerse } from './lib/supabase';
@@ -164,7 +165,9 @@ const App: React.FC = () => {
   const handlePrayerSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     console.log("Prayer Request Submitted:", prayerRequest);
-    alert("Thank you! Your prayer request has been received. Our team will pray for you!");
+    toast.success('Your prayer request has been received. Our team will lift you up in prayer! 🙏', {
+      duration: 5000,
+    });
     setPrayerRequest('');
     setIsPrayerModalOpen(false);
   };
@@ -174,7 +177,7 @@ const App: React.FC = () => {
     if (teacherEmail && teacherPassword) {
       setIsTeacherLoggedIn(true);
     } else {
-      alert("Please enter a valid email and password.");
+      toast.error('Please enter a valid email and password.');
     }
   };
 
@@ -595,7 +598,7 @@ const App: React.FC = () => {
               </div>
             </div>
             <button 
-              onClick={() => alert("Invite Card generated! Download and send to your friends.")}
+              onClick={() => toast('Invite Card generated! 🎉 Download and send to your friends.', { duration: 4000 })}
               className="px-5 py-2.5 bg-amber-400 text-white font-black rounded-2xl hover:bg-amber-500 transition-all hover:scale-105 active:scale-95 shadow-md shadow-amber-200 cursor-pointer text-sm shrink-0 border-b-4 border-amber-500"
             >
               Get Invite Card
@@ -646,7 +649,10 @@ const App: React.FC = () => {
               </p>
             </div>
             <button 
-              onClick={() => alert("Invite link copied to clipboard! Share with your friends.")}
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href).catch(() => {});
+                toast.success('Invite link copied to clipboard! Share with your friends. 🔗', { duration: 4000 });
+              }}
               className="flex items-center gap-2 bg-emerald-400 hover:bg-emerald-300 text-gray-950 px-5 py-2.5 rounded-full font-bold hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-500/10 cursor-pointer"
             >
               <Share2 size={16} /> Invite Friends
@@ -671,7 +677,7 @@ const App: React.FC = () => {
             
             <div className="flex flex-wrap gap-3 mt-6">
               <button 
-                onClick={() => alert("Loading sermon video...")}
+                onClick={() => toast('Loading sermon video... 🎬', { duration: 3000 })}
                 className="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-gray-950 rounded-lg text-sm font-bold transition-all hover:scale-102 cursor-pointer"
               >
                 Watch Message
@@ -740,10 +746,10 @@ const App: React.FC = () => {
       setIsSavingCustomVerse(true);
       try {
         await updateCustomVerse(customVerseInput.trim());
-        alert('Verse of the Week updated successfully! Check the homepage spotlight card to see the changes.');
+        toast.success('Verse of the Week updated! ✨ Check the homepage spotlight card to see the changes.', { duration: 5000 });
       } catch (err) {
         console.error(err);
-        alert('Failed to update custom verse.');
+        toast.error('Failed to update custom verse. Please try again.');
       } finally {
         setIsSavingCustomVerse(false);
       }
@@ -1733,6 +1739,30 @@ const App: React.FC = () => {
         <LiveStreamPlayer onClose={() => setIsLiveStreamOpen(false)} />
       )}
 
+      {/* Brand Toast System — mounted once at root, styled with Faith Tribe palette */}
+      <Toaster
+        position="top-center"
+        richColors
+        toastOptions={{
+          style: {
+            fontFamily: 'inherit',
+            borderRadius: '999px',
+            border: '1px solid rgba(55, 47, 88, 0.12)',
+            padding: '14px 20px',
+            fontSize: '0.875rem',
+            fontWeight: '600',
+            color: '#372f58',
+            background: '#ffffff',
+            boxShadow: '0 8px 32px rgba(55, 47, 88, 0.12), 0 2px 8px rgba(0,0,0,0.06)',
+          },
+          className: 'faith-toast',
+        }}
+        icons={{
+          success: '✅',
+          error: '⚠️',
+          info: 'ℹ️',
+        }}
+      />
     </div>
   );
 };
