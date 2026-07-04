@@ -136,8 +136,8 @@ const App: React.FC = () => {
 
   // -- State for Teacher Auth --
   const [isTeacherLoggedIn, setIsTeacherLoggedIn] = useState(false);
-  const [teacherEmail, setTeacherEmail] = useState('teacher@faithtribe.org');
-  const [teacherPassword, setTeacherPassword] = useState('password');
+  const [teacherEmail, setTeacherEmail] = useState('');
+  const [teacherPassword, setTeacherPassword] = useState('');
 
   // -- State for Live Stream --
   const [isLiveStreamOpen, setIsLiveStreamOpen] = useState(false);
@@ -174,10 +174,15 @@ const App: React.FC = () => {
 
   const handleTeacherLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (teacherEmail && teacherPassword) {
+    const validEmail = 'teacher@faithtribe.org';
+    const validPassword = 'password';
+    if (
+      teacherEmail.trim().toLowerCase() === validEmail &&
+      teacherPassword === validPassword
+    ) {
       setIsTeacherLoggedIn(true);
     } else {
-      toast.error('Please enter a valid email and password.');
+      toast.error('Incorrect email or password. Please try again.');
     }
   };
 
