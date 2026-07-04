@@ -1471,7 +1471,7 @@ const App: React.FC = () => {
                 RCCG Region 63 Junior Church.
               </p>
               <div className="flex space-x-3 mb-6">
-                <a href="https://www.instagram.com/faithtribe_official" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/10 rounded-full cursor-pointer hover:bg-[#1CABB9] transition-all hover:scale-110 flex items-center justify-center text-white" aria-label="Instagram">
+                <a href="https://www.instagram.com/faithtribe_rg63" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/10 rounded-full cursor-pointer hover:bg-[#1CABB9] transition-all hover:scale-110 flex items-center justify-center text-white" aria-label="Instagram">
                   <Instagram size={16} />
                 </a>
                 <a href="https://www.facebook.com/profile.php?id=61591368402377" target="_blank" rel="noopener noreferrer" className="w-8 h-8 bg-white/10 rounded-full cursor-pointer hover:bg-[#1CABB9] transition-all hover:scale-110 flex items-center justify-center text-white" aria-label="Facebook">
