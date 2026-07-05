@@ -20,7 +20,7 @@ export const WEEKLY_FUN_ITEMS: WeeklyFunItem[] = [
     type: 'video',
     thumbnailUrl: 'https://picsum.photos/seed/jesuslove/400/250',
     duration: '5:24',
-    youtubeVideoId: 'dQw4w9WgXcQ' // Rickroll as a placeholder or any child-friendly placeholder ID
+    youtubeVideoId: 'qH5HIPl0hRo' // Rickroll as a placeholder or any child-friendly placeholder ID
   },
   {
     id: 'kids-2',
