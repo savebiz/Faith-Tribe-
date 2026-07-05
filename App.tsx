@@ -7,7 +7,7 @@ import { Audience, ContentItem } from './types';
 import {
   ArrowRight, Star, Zap, BookOpen, Users, Heart, Share2, X, Lock, Radio,
   Smile, Shield, Calendar, ChevronRight, Plus, CheckCircle2, ClipboardList,
-  Send, Sparkles, Trophy, PlusCircle, Check, Instagram, Facebook, Youtube, Flame
+  Send, Sparkles, Trophy, PlusCircle, Check, Instagram, Facebook, Youtube, Flame, Play
 } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import { VerseOfTheWeek } from './lib/bible/VerseOfTheWeek';
