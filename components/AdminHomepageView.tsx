@@ -148,7 +148,7 @@ export const AdminHomepageView: React.FC<AdminHomepageViewProps> = ({ currentSta
                   required
                   value={heroVideoUrl}
                   onChange={(e) => setHeroVideoUrl(e.target.value)}
-                  placeholder="/assets/faith-tribe-hero.mp4"
+                  placeholder="/faith-tribe-hero.mp4"
                   className="block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none font-medium"
                 />
               </div>
@@ -163,7 +163,7 @@ export const AdminHomepageView: React.FC<AdminHomepageViewProps> = ({ currentSta
                   required
                   value={heroImageUrl}
                   onChange={(e) => setHeroImageUrl(e.target.value)}
-                  placeholder="/assets/faith-tribe-hero-poster-1080.jpg"
+                  placeholder="/faith-tribe-hero-poster-1080.jpg"
                   className="block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none font-medium"
                 />
               </div>

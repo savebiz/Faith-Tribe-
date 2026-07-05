@@ -1017,8 +1017,8 @@ export async function fetchBroadcastStatus(): Promise<DbBroadcastStatus> {
       is_live: false,
       title: 'Sunday Morning Glory Service',
       url: 'https://www.youtube.com/embed/qH5HIPl0hRo',
-      hero_video_url: '/assets/faith-tribe-hero.mp4',
-      hero_image_url: '/assets/faith-tribe-hero-poster-1080.jpg'
+      hero_video_url: '/faith-tribe-hero.mp4',
+      hero_image_url: '/faith-tribe-hero-poster-1080.jpg'
     };
   } else {
     return JSON.parse(localStorage.getItem('ft_mock_broadcast_status') || '{}');
