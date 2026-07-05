@@ -14,7 +14,7 @@ import { VerseOfTheWeek } from './lib/bible/VerseOfTheWeek';
 import { BibleReaderView } from './lib/bible/BibleReaderView';
 import { StudyNote } from './components/StudyNote';
 import { parseScriptureReference } from './lib/bible/bookCodes';
-import { getCurriculumCache, saveCurriculumCache, fetchCustomVerse, updateCustomVerse, fetchStudyNotesForChapter, signInStaff, signOutStaff, getCurrentStaff } from './lib/supabase';
+import { getCurriculumCache, saveCurriculumCache, fetchCustomVerse, updateCustomVerse, fetchStudyNotesForChapter, signInStaff, signOutStaff, getCurrentStaff, fetchBroadcastStatus, fetchContentItems } from './lib/supabase';
 import { WEEKLY_FUN_ITEMS, WeeklyFunItem } from './lib/weeklyFunConfig';
 import { WeeklyFunModal } from './components/WeeklyFunModal';
 import { AdminLayout } from './components/AdminLayout';
@@ -56,10 +56,13 @@ const App: React.FC = () => {
     if (path.startsWith('/about')) {
       return { view: Audience.ABOUT, book: 'GEN', chapter: '1', versionId };
     } else if (path.startsWith('/kids')) {
+      localStorage.setItem('ft_current_zone', 'kids');
       return { view: Audience.KIDS, book: 'GEN', chapter: '1', versionId };
     } else if (path.startsWith('/teens')) {
+      localStorage.setItem('ft_current_zone', 'teens');
       return { view: Audience.TEENS, book: 'GEN', chapter: '1', versionId };
     } else if (path.startsWith('/teachers')) {
+      localStorage.setItem('ft_current_zone', 'teachers');
       return { view: Audience.TEACHERS, book: 'GEN', chapter: '1', versionId };
     } else if (path.startsWith('/admin')) {
       return { view: Audience.ADMIN, book: 'GEN', chapter: '1', versionId };
@@ -79,9 +82,18 @@ const App: React.FC = () => {
   const navigateToView = (view: Audience) => {
     let path = '/';
     if (view === Audience.ABOUT) path = '/about';
-    else if (view === Audience.KIDS) path = '/kids';
-    else if (view === Audience.TEENS) path = '/teens';
-    else if (view === Audience.TEACHERS) path = '/teachers';
+    else if (view === Audience.KIDS) {
+      path = '/kids';
+      localStorage.setItem('ft_current_zone', 'kids');
+    }
+    else if (view === Audience.TEENS) {
+      path = '/teens';
+      localStorage.setItem('ft_current_zone', 'teens');
+    }
+    else if (view === Audience.TEACHERS) {
+      path = '/teachers';
+      localStorage.setItem('ft_current_zone', 'teachers');
+    }
     else if (view === Audience.ADMIN) {
       const currentPath = window.location.pathname;
       path = currentPath.startsWith('/admin') ? currentPath : '/admin';
@@ -115,28 +127,29 @@ const App: React.FC = () => {
   const [broadcastStatus, setBroadcastStatus] = useState({
     isLive: false,
     title: "",
-    watchUrl: ""
+    watchUrl: "",
+    heroVideoUrl: "",
+    heroImageUrl: ""
   });
 
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const res = await fetch('/broadcast_status.json');
-        if (res.ok) {
-          const data = await res.json();
-          setBroadcastStatus({
-            isLive: !!data.is_live,
-            title: data.title || "",
-            watchUrl: data.watch_url || ""
-          });
-        }
+        const data = await fetchBroadcastStatus();
+        setBroadcastStatus({
+          isLive: !!data.is_live,
+          title: data.title || "",
+          watchUrl: data.url || "",
+          heroVideoUrl: data.hero_video_url || "",
+          heroImageUrl: data.hero_image_url || ""
+        });
       } catch (err) {
         console.error("Failed to fetch broadcast status:", err);
       }
     };
 
     fetchStatus();
-    const interval = setInterval(fetchStatus, 60000); // Poll every 60s
+    const interval = setInterval(fetchStatus, 30000); // Poll every 30s
     return () => clearInterval(interval);
   }, []);
 
@@ -357,16 +370,23 @@ const App: React.FC = () => {
           <div className="w-full flex justify-center lg:justify-end mt-6 sm:mt-12 lg:mt-0">
             <div className="w-full max-w-md sm:max-w-lg p-3 bg-white/40 backdrop-blur-md rounded-[2.5rem] border border-white/40 shadow-2xl flex">
               <video
+                key={broadcastStatus.heroVideoUrl || "/faith-tribe-hero.mp4"}
                 autoPlay
                 muted
                 loop
                 playsInline
-                poster="/faith-tribe-hero-poster-1080.jpg"
+                poster={broadcastStatus.heroImageUrl || "/faith-tribe-hero-poster-1080.jpg"}
                 className="w-full aspect-[4/3] rounded-[2rem] shadow-xl object-cover"
                 aria-hidden="true"
               >
-                <source src="/faith-tribe-hero-w.webm" type="video/webm" />
-                <source src="/faith-tribe-hero.mp4" type="video/mp4" />
+                {broadcastStatus.heroVideoUrl ? (
+                  <source src={broadcastStatus.heroVideoUrl} type="video/mp4" />
+                ) : (
+                  <>
+                    <source src="/faith-tribe-hero-w.webm" type="video/webm" />
+                    <source src="/faith-tribe-hero.mp4" type="video/mp4" />
+                  </>
+                )}
               </video>
             </div>
           </div>
@@ -644,6 +664,35 @@ const App: React.FC = () => {
       const saved = localStorage.getItem('ft_bible_streak');
       return saved ? Number(saved) : 0;
     });
+    const [weeklyFunItems, setWeeklyFunItems] = useState<WeeklyFunItem[]>(WEEKLY_FUN_ITEMS);
+
+    useEffect(() => {
+      async function loadKidsContent() {
+        try {
+          const dbItems = await fetchContentItems('kids', undefined, 'published');
+          if (dbItems && dbItems.length > 0) {
+            const mapped: WeeklyFunItem[] = dbItems.map(item => ({
+              id: item.id,
+              title: item.title,
+              description: item.description || '',
+              thumbnailUrl: item.thumbnail_url || 'https://picsum.photos/seed/jesuslove/400/250',
+              type: item.type as any,
+              duration: item.duration || '',
+              videoId: item.video_id || '',
+              videoSource: item.video_source as any || 'youtube',
+              storyContent: item.story_content || '',
+              writingPrompt: item.writing_prompt || '',
+              coloringImageUrl: item.coloring_image_url || '',
+              documentUrl: item.document_url || ''
+            }));
+            setWeeklyFunItems(mapped);
+          }
+        } catch (err) {
+          console.error('Failed to fetch kids content:', err);
+        }
+      }
+      loadKidsContent();
+    }, []);
 
     return (
       <div className="mesh-gradient-kids min-h-screen pb-16 font-display">
@@ -696,7 +745,7 @@ const App: React.FC = () => {
                 This Week's Fun
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {WEEKLY_FUN_ITEMS.map((item) => {
+                {weeklyFunItems.map((item) => {
                   const badgeText = item.type === 'video' ? 'Watch Video' : item.type === 'reading' ? 'Read Story' : item.type === 'writing' ? 'Writing Activity' : 'Coloring Paint';
                   const badgeClass = item.type === 'video' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : item.type === 'reading' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' : item.type === 'writing' ? 'bg-purple-500/10 text-purple-600 border border-purple-500/20' : 'bg-teal-500/10 text-teal-600 border border-teal-500/20';
                   

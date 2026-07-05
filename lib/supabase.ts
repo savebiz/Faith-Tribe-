@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
-import { StaffMember, AuditLogEntry, StaffRole, ZoneScope } from '../types';
+import { StaffMember, AuditLogEntry, StaffRole, ZoneScope, DbContentItem, VotdOverride, BibleVersion, DbBroadcastStatus } from '../types';
 
-// Initialize mock staff data in localStorage if empty for local dev fallbacks
+// Initialize mock data collections in localStorage if empty for local dev fallbacks
 if (typeof window !== 'undefined') {
   if (!localStorage.getItem('ft_mock_staff')) {
     const initialStaff: StaffMember[] = [
@@ -20,6 +20,98 @@ if (typeof window !== 'undefined') {
 
   if (!localStorage.getItem('ft_mock_audit_log')) {
     localStorage.setItem('ft_mock_audit_log', JSON.stringify([]));
+  }
+
+  if (!localStorage.getItem('ft_mock_content_items')) {
+    // Seed with initial Kids Zone items from weeklyFunConfig to ensure zero initial content gap
+    const initialContent: DbContentItem[] = [
+      {
+        id: 'kids-1',
+        zone: 'kids',
+        type: 'video',
+        title: 'Meet Your New Best Friend',
+        description: 'Who is Jesus and why does He love you so much? Watch this cute cartoon video to learn more!',
+        thumbnail_url: 'https://picsum.photos/seed/jesuslove/400/250',
+        video_source: 'youtube',
+        video_id: 'qH5HIPl0hRo',
+        duration: '5:24',
+        status: 'published',
+        publish_date: new Date().toISOString()
+      },
+      {
+        id: 'kids-2',
+        zone: 'kids',
+        type: 'reading',
+        title: 'David and Goliath: Tiny Courage',
+        description: 'Learn how David faced the giant with God\'s help! Read the interactive story inside.',
+        thumbnail_url: 'https://picsum.photos/seed/david/400/250',
+        story_content: `# David and Goliath: Tiny Courage\n\nA long, long time ago, in a beautiful green land, there lived a young boy named David. David was a shepherd. His job was to take care of his father's sheep. Every day, he walked with them, watched them eat sweet grass, and kept them safe.\n\nDavid was not big. He was not strong. But David had something very special: **he trusted God with all his heart.**\n\n---\n\n## The Big Giant\n\nOne day, David went to visit his older brothers who were soldiers. There, he saw a giant named Goliath. Goliath was very, very tall. He wore heavy armor and had a huge spear. \n\nEvery morning and every evening, Goliath came out and yelled at the soldiers. He made them feel very scared. None of the soldiers wanted to fight him.\n\nBut David said, *"Do not be afraid! I will go and fight the giant."*\n\nThe king looked at David and said, *"You are just a boy, and he is a giant!"*\n\nDavid smiled and replied, *"God helped me save my sheep from lions and bears. He will help me now too!"*\n\n---\n\n## Five Smooth Stones\n\nInstead of heavy armor, David took his shepherd's staff. He went to a bubbling brook and chose **five smooth stones**. He put them in his pouch, took his sling, and walked toward the giant.\n\nWhen Goliath saw David, he laughed. *"Am I a dog that you come at me with sticks?"* he boomed.\n\nDavid stood tall. *"You come with a sword and spear, but I come to you in the name of the Lord!"*\n\n---\n\n## The Victory\n\nDavid reached into his bag, took out a stone, and put it in his sling. He swung it around and around, then let it fly!\n\n*Swoosh!* \n\nThe stone sailed through the air and hit Goliath right on his forehead. The giant stopped laughing. He wobbled, he shook, and then—\n\n*THUD!*\n\nThe giant fell flat on the ground. The battle was won, not by strength, but by trust in God!\n\n---\n\n### What We Learned:\n1. **No giant is too big** when God is on our side.\n2. **You are never too small** to do great things for God.\n3. **Trust God** always, just like David did!`,
+        status: 'published',
+        publish_date: new Date().toISOString()
+      },
+      {
+        id: 'kids-3',
+        zone: 'kids',
+        type: 'writing',
+        title: 'Writing Activity: A Note to Jesus',
+        description: 'Type a special letter or thank-you note to Jesus. Share what you are thankful for today!',
+        writing_prompt: 'Write a thank-you note to Jesus. Tell Him what you are thankful for today, or write a prayer!',
+        thumbnail_url: 'https://picsum.photos/seed/writing/400/250',
+        status: 'published',
+        publish_date: new Date().toISOString()
+      },
+      {
+        id: 'kids-4',
+        zone: 'kids',
+        type: 'painting',
+        title: 'Coloring Activity: The Cross of Grace',
+        description: 'Use our paint tools to color the cross outline! Draw, paint, and create your own artwork.',
+        coloring_image_url: 'https://images.unsplash.com/photo-1601247076559-459b7325606d?w=400&q=80',
+        thumbnail_url: 'https://picsum.photos/seed/cross/400/250',
+        status: 'published',
+        publish_date: new Date().toISOString()
+      }
+    ];
+    localStorage.setItem('ft_mock_content_items', JSON.stringify(initialContent));
+  }
+
+  if (!localStorage.getItem('ft_mock_votd_overrides')) {
+    localStorage.setItem('ft_mock_votd_overrides', JSON.stringify([]));
+  }
+
+  if (!localStorage.getItem('ft_mock_broadcast_status')) {
+    const defaultBroadcast: DbBroadcastStatus = {
+      is_live: false,
+      title: 'Sunday Morning Glory Service',
+      url: 'https://www.youtube.com/embed/qH5HIPl0hRo',
+      hero_video_url: '/assets/faith-tribe-hero.mp4',
+      hero_image_url: '/assets/faith-tribe-hero-poster-1080.jpg'
+    };
+    localStorage.setItem('ft_mock_broadcast_status', JSON.stringify(defaultBroadcast));
+  }
+
+  if (!localStorage.getItem('ft_mock_bible_versions')) {
+    const defaultVersions: BibleVersion[] = [
+      { bible_id: 3034, label: 'Berean Standard Bible (BSB)', short_code: 'BSB', display_order: 1, is_active: true, is_verified: true },
+      { bible_id: 1932, label: 'Free Bible Version (FBV)', short_code: 'FBV', display_order: 2, is_active: true, is_verified: true },
+      { bible_id: 1588, label: 'Amplified Bible (AMP)', short_code: 'AMP', display_order: 3, is_active: true, is_verified: true },
+      { bible_id: 111, label: 'New International Version (NIV)', short_code: 'NIV', display_order: 4, is_active: true, is_verified: true },
+      { bible_id: 12, label: 'American Standard Version (ASV)', short_code: 'ASV', display_order: 5, is_active: true, is_verified: true },
+      { bible_id: 2079, label: 'EasyEnglish Bible', short_code: 'EEB', display_order: 6, is_active: true, is_verified: true },
+      { bible_id: 911, label: 'Yoruba Contemporary Bible', short_code: 'YCB', display_order: 7, is_active: true, is_verified: true },
+      { bible_id: 1624, label: 'Igbo Contemporary Bible', short_code: 'ICB', display_order: 8, is_active: true, is_verified: true },
+      { bible_id: 1614, label: 'Hausa Contemporary Bible', short_code: 'HCB', display_order: 9, is_active: true, is_verified: true }
+    ];
+    localStorage.setItem('ft_mock_bible_versions', JSON.stringify(defaultVersions));
+  }
+
+  if (!localStorage.getItem('ft_mock_zone_defaults')) {
+    const defaultDefaults = {
+      kids: 2079,
+      teens: 3034,
+      teachers: 3034
+    };
+    localStorage.setItem('ft_mock_zone_defaults', JSON.stringify(defaultDefaults));
   }
 }
 
@@ -580,7 +672,6 @@ async function logAuditLocalOrDB(
     } catch (e) {
       console.error('Failed to log audit entry:', e);
     }
-  } else {
     const logs: AuditLogEntry[] = JSON.parse(localStorage.getItem('ft_mock_audit_log') || '[]');
     const newLog: AuditLogEntry = {
       id: `mock-log-id-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
@@ -593,6 +684,397 @@ async function logAuditLocalOrDB(
     };
     logs.push(newLog);
     localStorage.setItem('ft_mock_audit_log', JSON.stringify(logs));
+  }
+}
+
+export async function fetchContentItems(
+  zone?: 'kids' | 'teens' | 'teachers',
+  type?: 'video' | 'reading' | 'writing' | 'painting' | 'document',
+  status?: 'draft' | 'scheduled' | 'published' | 'archived'
+): Promise<DbContentItem[]> {
+  if (isRealSupabase && supabase) {
+    let query = supabase.from('content_items').select('*');
+    if (zone) query = query.eq('zone', zone);
+    if (type) query = query.eq('type', type);
+    if (status) query = query.eq('status', status);
+    
+    const { data, error } = await query.order('created_at', { ascending: false });
+    if (error) throw error;
+    return data || [];
+  } else {
+    let list: DbContentItem[] = JSON.parse(localStorage.getItem('ft_mock_content_items') || '[]');
+    if (zone) list = list.filter(i => i.zone === zone);
+    if (type) list = list.filter(i => i.type === type);
+    if (status) list = list.filter(i => i.status === status);
+    return list.sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
+  }
+}
+
+export async function upsertContentItem(item: Partial<DbContentItem>): Promise<DbContentItem> {
+  const currentStaff = await getCurrentStaff();
+  const actorId = currentStaff?.id || 'unknown';
+
+  if (isRealSupabase && supabase) {
+    const isNew = !item.id;
+    const payload = {
+      ...item,
+      updated_at: new Date().toISOString(),
+      ...(isNew ? { created_by: actorId, created_at: new Date().toISOString() } : {})
+    };
+    
+    const { data, error } = await supabase
+      .from('content_items')
+      .upsert(payload)
+      .select()
+      .single();
+      
+    if (error) throw error;
+    
+    await logAuditLocalOrDB(
+      actorId, 
+      isNew ? 'content.created' : 'content.updated', 
+      'content_items', 
+      data.id, 
+      { title: data.title, type: data.type, zone: data.zone }
+    );
+    return data;
+  } else {
+    let list: DbContentItem[] = JSON.parse(localStorage.getItem('ft_mock_content_items') || '[]');
+    const isNew = !item.id;
+    const finalItem: DbContentItem = {
+      ...(item as DbContentItem),
+      id: item.id || `content-id-${Date.now()}`,
+      updated_at: new Date().toISOString(),
+      ...(isNew ? { created_by: actorId, created_at: new Date().toISOString() } : {})
+    };
+    
+    if (isNew) {
+      list.push(finalItem);
+    } else {
+      const idx = list.findIndex(i => i.id === item.id);
+      if (idx !== -1) list[idx] = finalItem;
+      else list.push(finalItem);
+    }
+    
+    localStorage.setItem('ft_mock_content_items', JSON.stringify(list));
+    await logAuditLocalOrDB(
+      actorId, 
+      isNew ? 'content.created' : 'content.updated', 
+      'content_items', 
+      finalItem.id, 
+      { title: finalItem.title, type: finalItem.type, zone: finalItem.zone }
+    );
+    return finalItem;
+  }
+}
+
+export async function deleteContentItem(id: string): Promise<void> {
+  const currentStaff = await getCurrentStaff();
+  const actorId = currentStaff?.id || 'unknown';
+
+  if (isRealSupabase && supabase) {
+    const { error } = await supabase.from('content_items').delete().eq('id', id);
+    if (error) throw error;
+    await logAuditLocalOrDB(actorId, 'content.deleted', 'content_items', id, {});
+  } else {
+    let list: DbContentItem[] = JSON.parse(localStorage.getItem('ft_mock_content_items') || '[]');
+    list = list.filter(i => i.id !== id);
+    localStorage.setItem('ft_mock_content_items', JSON.stringify(list));
+    await logAuditLocalOrDB(actorId, 'content.deleted', 'content_items', id, {});
+  }
+}
+
+export async function fetchVotdOverrides(zone?: 'kids' | 'teens' | 'teachers'): Promise<VotdOverride[]> {
+  if (isRealSupabase && supabase) {
+    let query = supabase.from('votd_overrides').select('*');
+    if (zone) query = query.eq('zone', zone);
+    const { data, error } = await query.order('override_date', { ascending: true });
+    if (error) throw error;
+    return data || [];
+  } else {
+    let list: VotdOverride[] = JSON.parse(localStorage.getItem('ft_mock_votd_overrides') || '[]');
+    if (zone) list = list.filter(o => o.zone === zone);
+    return list.sort((a, b) => a.override_date.localeCompare(b.override_date));
+  }
+}
+
+export async function setVotdOverride(
+  zone: 'kids' | 'teens' | 'teachers',
+  date: string,
+  reference: string,
+  versionId: number,
+  note?: string | null
+): Promise<VotdOverride> {
+  const currentStaff = await getCurrentStaff();
+  const actorId = currentStaff?.id || 'unknown';
+
+  if (isRealSupabase && supabase) {
+    const { data, error } = await supabase
+      .from('votd_overrides')
+      .upsert({
+        zone,
+        override_date: date,
+        reference,
+        version_id: versionId,
+        note,
+        created_by: actorId
+      }, { onConflict: 'zone,override_date' })
+      .select()
+      .single();
+      
+    if (error) throw error;
+    await logAuditLocalOrDB(actorId, 'votd.override_set', 'votd_overrides', data.id, { zone, date, reference });
+    return data;
+  } else {
+    const list: VotdOverride[] = JSON.parse(localStorage.getItem('ft_mock_votd_overrides') || '[]');
+    const existingIdx = list.findIndex(o => o.zone === zone && o.override_date === date);
+    
+    const item: VotdOverride = {
+      id: existingIdx !== -1 ? list[existingIdx].id : `votd-override-${Date.now()}`,
+      zone,
+      override_date: date,
+      reference,
+      version_id: versionId,
+      note,
+      created_by: actorId
+    };
+    
+    if (existingIdx !== -1) {
+      list[existingIdx] = item;
+    } else {
+      list.push(item);
+    }
+    
+    localStorage.setItem('ft_mock_votd_overrides', JSON.stringify(list));
+    await logAuditLocalOrDB(actorId, 'votd.override_set', 'votd_overrides', item.id, { zone, date, reference });
+    return item;
+  }
+}
+
+export async function deleteVotdOverride(id: string): Promise<void> {
+  const currentStaff = await getCurrentStaff();
+  const actorId = currentStaff?.id || 'unknown';
+
+  if (isRealSupabase && supabase) {
+    const { error } = await supabase.from('votd_overrides').delete().eq('id', id);
+    if (error) throw error;
+    await logAuditLocalOrDB(actorId, 'votd.override_deleted', 'votd_overrides', id, {});
+  } else {
+    let list: VotdOverride[] = JSON.parse(localStorage.getItem('ft_mock_votd_overrides') || '[]');
+    list = list.filter(o => o.id !== id);
+    localStorage.setItem('ft_mock_votd_overrides', JSON.stringify(list));
+    await logAuditLocalOrDB(actorId, 'votd.override_deleted', 'votd_overrides', id, {});
+  }
+}
+
+export async function fetchActiveBibleVersions(): Promise<BibleVersion[]> {
+  if (isRealSupabase && supabase) {
+    const { data, error } = await supabase
+      .from('bible_versions')
+      .select('*')
+      .eq('is_active', true)
+      .order('display_order', { ascending: true });
+    if (error) throw error;
+    return data || [];
+  } else {
+    const list: BibleVersion[] = JSON.parse(localStorage.getItem('ft_mock_bible_versions') || '[]');
+    return list.filter(v => v.is_active).sort((a, b) => a.display_order - b.display_order);
+  }
+}
+
+export async function fetchBibleVersionsAdmin(): Promise<BibleVersion[]> {
+  if (isRealSupabase && supabase) {
+    const { data, error } = await supabase
+      .from('bible_versions')
+      .select('*')
+      .order('display_order', { ascending: true });
+    if (error) throw error;
+    return data || [];
+  } else {
+    const list: BibleVersion[] = JSON.parse(localStorage.getItem('ft_mock_bible_versions') || '[]');
+    return list.sort((a, b) => a.display_order - b.display_order);
+  }
+}
+
+export async function upsertBibleVersion(version: Partial<BibleVersion>): Promise<BibleVersion> {
+  const currentStaff = await getCurrentStaff();
+  const actorId = currentStaff?.id || 'unknown';
+
+  if (isRealSupabase && supabase) {
+    const { data, error } = await supabase
+      .from('bible_versions')
+      .upsert(version)
+      .select()
+      .single();
+    if (error) throw error;
+    await logAuditLocalOrDB(actorId, 'bible.version_upserted', 'bible_versions', String(data.bible_id), { label: data.label });
+    return data;
+  } else {
+    const list: BibleVersion[] = JSON.parse(localStorage.getItem('ft_mock_bible_versions') || '[]');
+    const idx = list.findIndex(v => v.bible_id === version.bible_id);
+    
+    const finalItem: BibleVersion = {
+      ...(idx !== -1 ? list[idx] : {}),
+      ...(version as BibleVersion),
+      display_order: version.display_order ?? (idx !== -1 ? list[idx].display_order : list.length + 1)
+    };
+    
+    if (idx !== -1) list[idx] = finalItem;
+    else list.push(finalItem);
+    
+    localStorage.setItem('ft_mock_bible_versions', JSON.stringify(list));
+    await logAuditLocalOrDB(actorId, 'bible.version_upserted', 'bible_versions', String(finalItem.bible_id), { label: finalItem.label });
+    return finalItem;
+  }
+}
+
+export async function verifyBibleVersion(bibleId: number): Promise<boolean> {
+  const currentStaff = await getCurrentStaff();
+  const actorId = currentStaff?.id || 'unknown';
+
+  if (isRealSupabase && supabase) {
+    const { data: { session } } = await supabase.auth.getSession();
+    const token = session?.access_token || '';
+    
+    const response = await fetch('/api/admin/bible-versions/verify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ bibleId })
+    });
+    
+    const result = await response.json();
+    if (response.ok && result.verified) {
+      await logAuditLocalOrDB(actorId, 'bible.version_verified', 'bible_versions', String(bibleId), { verified: true });
+      return true;
+    }
+    await logAuditLocalOrDB(actorId, 'bible.version_verification_failed', 'bible_versions', String(bibleId), { verified: false });
+    return false;
+  } else {
+    const list: BibleVersion[] = JSON.parse(localStorage.getItem('ft_mock_bible_versions') || '[]');
+    const idx = list.findIndex(v => v.bible_id === bibleId);
+    
+    if (idx !== -1) {
+      list[idx].is_verified = true;
+      list[idx].last_verified_at = new Date().toISOString();
+      localStorage.setItem('ft_mock_bible_versions', JSON.stringify(list));
+    }
+    
+    await logAuditLocalOrDB(actorId, 'bible.version_verified', 'bible_versions', String(bibleId), { verified: true, mock: true });
+    return true;
+  }
+}
+
+export async function fetchZoneDefaultVersions(): Promise<Record<string, number>> {
+  if (isRealSupabase && supabase) {
+    const { data, error } = await supabase
+      .from('zone_default_versions')
+      .select('*');
+    if (error) throw error;
+    
+    const map: Record<string, number> = {};
+    (data || []).forEach((row: any) => {
+      map[row.zone] = row.bible_id;
+    });
+    return map;
+  } else {
+    return JSON.parse(localStorage.getItem('ft_mock_zone_defaults') || '{}');
+  }
+}
+
+export async function setZoneDefaultVersion(zone: 'kids' | 'teens' | 'teachers', bibleId: number): Promise<void> {
+  const currentStaff = await getCurrentStaff();
+  const actorId = currentStaff?.id || 'unknown';
+
+  if (isRealSupabase && supabase) {
+    const { error } = await supabase
+      .from('zone_default_versions')
+      .upsert({ zone, bible_id: bibleId }, { onConflict: 'zone' });
+    if (error) throw error;
+    await logAuditLocalOrDB(actorId, 'bible.default_version_changed', 'zone_default_versions', zone, { bibleId });
+  } else {
+    const map = JSON.parse(localStorage.getItem('ft_mock_zone_defaults') || '{}');
+    map[zone] = bibleId;
+    localStorage.setItem('ft_mock_zone_defaults', JSON.stringify(map));
+    await logAuditLocalOrDB(actorId, 'bible.default_version_changed', 'zone_default_versions', zone, { bibleId });
+  }
+}
+
+export async function fetchBroadcastStatus(): Promise<DbBroadcastStatus> {
+  if (isRealSupabase && supabase) {
+    const { data, error } = await supabase
+      .from('broadcast_status')
+      .select('*')
+      .order('id', { ascending: true })
+      .limit(1);
+      
+    if (error) throw error;
+    if (data && data.length > 0) return data[0];
+    
+    return {
+      is_live: false,
+      title: 'Sunday Morning Glory Service',
+      url: 'https://www.youtube.com/embed/qH5HIPl0hRo',
+      hero_video_url: '/assets/faith-tribe-hero.mp4',
+      hero_image_url: '/assets/faith-tribe-hero-poster-1080.jpg'
+    };
+  } else {
+    return JSON.parse(localStorage.getItem('ft_mock_broadcast_status') || '{}');
+  }
+}
+
+export async function updateBroadcastStatus(
+  isLive: boolean,
+  title: string,
+  url: string,
+  heroVideoUrl: string,
+  heroImageUrl: string
+): Promise<void> {
+  const currentStaff = await getCurrentStaff();
+  const actorId = currentStaff?.id || 'unknown';
+
+  if (isRealSupabase && supabase) {
+    const payload = {
+      is_live: isLive,
+      title,
+      url,
+      hero_video_url: heroVideoUrl,
+      hero_image_url: heroImageUrl,
+      updated_by: actorId,
+      updated_at: new Date().toISOString()
+    };
+    
+    const { data, error: selectError } = await supabase.from('broadcast_status').select('id').limit(1);
+    if (selectError) throw selectError;
+    
+    if (data && data.length > 0) {
+      const { error } = await supabase
+        .from('broadcast_status')
+        .update(payload)
+        .eq('id', data[0].id);
+      if (error) throw error;
+    } else {
+      const { error } = await supabase
+        .from('broadcast_status')
+        .insert(payload);
+      if (error) throw error;
+    }
+    
+    await logAuditLocalOrDB(actorId, 'broadcast.updated', 'broadcast_status', '1', { isLive, title });
+  } else {
+    const payload: DbBroadcastStatus = {
+      is_live: isLive,
+      title,
+      url,
+      hero_video_url: heroVideoUrl,
+      hero_image_url: heroImageUrl,
+      updated_by: actorId,
+      updated_at: new Date().toISOString()
+    };
+    localStorage.setItem('ft_mock_broadcast_status', JSON.stringify(payload));
+    await logAuditLocalOrDB(actorId, 'broadcast.updated', 'broadcast_status', '1', { isLive, title });
   }
 }
 

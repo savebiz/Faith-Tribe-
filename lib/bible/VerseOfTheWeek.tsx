@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BibleTextView } from '@youversion/platform-react-ui';
 import { useVerseOfTheDay } from '@youversion/platform-react-hooks';
-import { fetchCustomVerse } from '../supabase';
+import { fetchCustomVerse, fetchVotdOverrides } from '../supabase';
 import { BOOK_NAMES } from './bookCodes';
 
 function getMondayDayOfYear(): number {
@@ -20,11 +20,24 @@ export function VerseOfTheWeek({ versionId }: { versionId: number }) {
   const { data: votd, loading: votdLoading, error: votdError } = useVerseOfTheDay(dayOfYear);
   
   const [customVerse, setCustomVerse] = useState<string | null>(null);
+  const [overrideVersionId, setOverrideVersionId] = useState<number | null>(null);
   const [isCustomLoading, setIsCustomLoading] = useState(true);
 
   useEffect(() => {
     const loadCustom = async () => {
       try {
+        const zone = localStorage.getItem('ft_current_zone') || 'kids';
+        const todayStr = new Date().toISOString().split('T')[0];
+        const overrides = await fetchVotdOverrides(zone as any);
+        const match = overrides.find(o => o.override_date === todayStr);
+        
+        if (match) {
+          setCustomVerse(match.reference);
+          setOverrideVersionId(match.version_id);
+          setIsCustomLoading(false);
+          return;
+        }
+
         const verse = await fetchCustomVerse();
         setCustomVerse(verse);
       } catch (e) {
@@ -37,7 +50,8 @@ export function VerseOfTheWeek({ versionId }: { versionId: number }) {
   }, []);
 
   const navigateToBible = (book: string, chapter: string) => {
-    const path = `/bible/${book}/${chapter}?version=${versionId}`;
+    const activeVersionId = overrideVersionId || versionId;
+    const path = `/bible/${book}/${chapter}?version=${activeVersionId}`;
     window.history.pushState(null, '', path);
     window.dispatchEvent(new PopStateEvent('popstate'));
   };
@@ -108,7 +122,7 @@ export function VerseOfTheWeek({ versionId }: { versionId: number }) {
       title="Click to read full chapter in Bible"
     >
       <div className="relative">
-        <BibleTextView reference={activePassage} versionId={versionId} />
+        <BibleTextView reference={activePassage} versionId={overrideVersionId || versionId} />
         <div className="mt-2.5 text-xs font-black text-[#1CABB9] select-none tracking-wider">
           — {getDisplayReference(activePassage)}
         </div>

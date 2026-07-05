@@ -44,6 +44,61 @@ export interface ContentItem {
   duration?: string;
 }
 
+export interface DbContentItem {
+  id: string;
+  zone: 'kids' | 'teens' | 'teachers';
+  type: 'video' | 'reading' | 'writing' | 'painting' | 'document';
+  title: string;
+  description?: string | null;
+  thumbnail_url?: string | null;
+  video_source?: string | null;
+  video_id?: string | null;
+  duration?: string | null;
+  story_content?: string | null;
+  writing_prompt?: string | null;
+  coloring_image_url?: string | null;
+  document_url?: string | null;
+  status: 'draft' | 'scheduled' | 'published' | 'archived';
+  publish_date?: string | null;
+  unpublish_date?: string | null;
+  created_by?: string | null;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface VotdOverride {
+  id: string;
+  zone: 'kids' | 'teens' | 'teachers';
+  override_date: string; // YYYY-MM-DD
+  reference: string;
+  version_id: number;
+  note?: string | null;
+  created_by?: string | null;
+}
+
+export interface BibleVersion {
+  id?: number;
+  bible_id: number;
+  label: string;
+  short_code: string;
+  display_order: number;
+  is_active: boolean;
+  is_verified: boolean;
+  last_verified_at?: string | null;
+  created_at?: string;
+}
+
+export interface DbBroadcastStatus {
+  id?: number;
+  is_live: boolean;
+  title?: string | null;
+  url?: string | null;
+  hero_video_url?: string | null;
+  hero_image_url?: string | null;
+  updated_by?: string | null;
+  updated_at?: string;
+}
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'model';

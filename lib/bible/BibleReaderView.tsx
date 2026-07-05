@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { BibleReader } from '@youversion/platform-react-ui';
 import { ArrowLeft, Book, BookOpen, Flame, Share2, MoreVertical, Copy, AlertTriangle, Check, Award, Download, Highlighter, Trash2, X, ArrowRight, Search } from 'lucide-react';
 import { toast } from 'sonner';
-import { fetchReactionCount, incrementReactionCount, hasReacted, fetchStudyNotesForChapter, BibleStudyNote } from '../supabase';
+import { fetchReactionCount, incrementReactionCount, hasReacted, fetchStudyNotesForChapter, BibleStudyNote, fetchActiveBibleVersions, fetchZoneDefaultVersions } from '../supabase';
 import { StudyNote } from '../../components/StudyNote';
 import { useReadingPreferences } from './useReadingPreferences';
 import { ChapterSelector } from './ChapterSelector';
@@ -70,6 +70,36 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
   const [chapter, setChapter] = useState(initial.chapter);
   const [versionId, setVersionId] = useState(initial.versionId);
   const [isBottomPickerOpen, setIsBottomPickerOpen] = useState(false);
+  const [approvedVersions, setApprovedVersions] = useState<{ id: number; label: string }[]>(APPROVED_VERSIONS);
+
+  useEffect(() => {
+    async function loadVersionsAndDefaults() {
+      try {
+        const active = await fetchActiveBibleVersions();
+        if (active && active.length > 0) {
+          setApprovedVersions(active.map(v => ({ id: v.bible_id, label: v.label })));
+        }
+      } catch (err) {
+        console.error('Failed to load active Bible versions:', err);
+      }
+
+      const savedVersion = localStorage.getItem('yv_version_id');
+      const urlParams = new URLSearchParams(window.location.search);
+      const versionParam = urlParams.get('version');
+      if (!savedVersion && !versionParam) {
+        try {
+          const zone = localStorage.getItem('ft_current_zone') || 'teachers';
+          const defaults = await fetchZoneDefaultVersions();
+          if (defaults && defaults[zone]) {
+            setVersionId(defaults[zone]);
+          }
+        } catch (err) {
+          console.error('Failed to resolve zone default version:', err);
+        }
+      }
+    }
+    loadVersionsAndDefaults();
+  }, []);
 
   const {
     isKidsMode,
@@ -518,7 +548,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
 
   const handleVersionChange = (id: number) => {
     // Only accept approved versions (Part B)
-    if (APPROVED_VERSIONS.some((v) => v.id === id)) {
+    if (approvedVersions.some((v) => v.id === id)) {
       setVersionId(id);
     }
   };
@@ -531,7 +561,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
     setReactionsCount(updatedCount);
   };
 
-  const currentVersionLabel = APPROVED_VERSIONS.find((v) => v.id === versionId)?.label || 'Berean Standard Bible (BSB)';
+  const currentVersionLabel = approvedVersions.find((v) => v.id === versionId)?.label || 'Berean Standard Bible (BSB)';
 
   // Highlights handler (persisted locally)
   const handleHighlightColor = (color: 'teal' | 'gold' | 'pink' | 'purple' | 'clear') => {
@@ -568,7 +598,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
     });
 
     const fullText = textParts.join(' ');
-    const versionLabel = APPROVED_VERSIONS.find((v) => v.id === versionId)?.label.split('(')[1]?.replace(')', '') || 'BSB';
+    const versionLabel = approvedVersions.find((v) => v.id === versionId)?.label.split('(')[1]?.replace(')', '') || 'BSB';
     const bookName = BOOK_NAMES[book] || book;
     const refString = sorted.length === 1
       ? `${bookName} ${chapter}:${sorted[0]}`
@@ -695,7 +725,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
     }
   };
 
-  const currentVersion = APPROVED_VERSIONS.find(v => v.id === versionId) || APPROVED_VERSIONS[0];
+  const currentVersion = approvedVersions.find(v => v.id === versionId) || approvedVersions[0] || APPROVED_VERSIONS[0];
 
   const handleTopSelectorClick = (e: React.MouseEvent) => {
     // If mobile viewport (< 640px), open the gorgeous custom modal picker
@@ -771,7 +801,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
               {/* Custom Desktop/Tablet Dropdown Menu */}
               {isTopDropdownOpen && (
                 <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-white/95 backdrop-blur-md rounded-3xl border border-gray-200/80 shadow-2xl p-2.5 flex flex-col gap-1 w-full max-w-sm sm:max-w-xs animate-in fade-in slide-in-from-top-2 duration-200">
-                  {APPROVED_VERSIONS.map((v) => {
+                  {approvedVersions.map((v) => {
                     const isSelected = v.id === versionId;
                     return (
                       <button
@@ -1070,7 +1100,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
           <div className="bg-white rounded-[2.5rem] p-6 w-full max-w-sm border border-gray-100 shadow-2xl relative">
             <h3 className="text-lg font-black text-[#372f58] mb-4">Select Translation</h3>
             <div className="space-y-2">
-              {APPROVED_VERSIONS.map((v) => (
+              {approvedVersions.map((v) => (
                 <button
                   key={v.id}
                   onClick={() => {

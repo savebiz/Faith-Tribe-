@@ -2,9 +2,13 @@ import React, { useState } from 'react';
 import { StaffMember, Audience } from '../types';
 import { 
   LayoutDashboard, Users, BookOpen, ClipboardList, AlertCircle, 
-  LogOut, Menu, X, Shield, Sparkles, Smile
+  LogOut, Menu, X, Shield, Sparkles, Smile, Calendar, Radio, Book
 } from 'lucide-react';
 import { AdminStaffView } from './AdminStaffView';
+import { AdminContentView } from './AdminContentView';
+import { AdminVotdView } from './AdminVotdView';
+import { AdminHomepageView } from './AdminHomepageView';
+import { AdminBibleVersionsView } from './AdminBibleVersionsView';
 
 interface AdminLayoutProps {
   currentStaff: StaffMember;
@@ -14,10 +18,12 @@ interface AdminLayoutProps {
 
 export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentStaff, onSignOut, onNavigateHome }) => {
   const [activeTab, setActiveTab] = useState<string>(() => {
-    // If super_admin, default to staff, otherwise dashboard
     const path = window.location.pathname;
     if (path.endsWith('/staff') && currentStaff.role === 'super_admin') return 'staff';
     if (path.endsWith('/content') && ['super_admin', 'content_editor', 'zone_manager'].includes(currentStaff.role)) return 'content';
+    if (path.endsWith('/votd') && ['super_admin', 'content_editor', 'zone_manager'].includes(currentStaff.role)) return 'votd';
+    if (path.endsWith('/homepage') && ['super_admin', 'content_editor'].includes(currentStaff.role)) return 'homepage';
+    if (path.endsWith('/bible') && ['super_admin', 'content_editor'].includes(currentStaff.role)) return 'bible';
     if (path.endsWith('/review') && ['super_admin', 'reviewer'].includes(currentStaff.role)) return 'review';
     if (path.endsWith('/escalations') && ['super_admin', 'teacher_volunteer'].includes(currentStaff.role)) return 'escalations';
     return 'dashboard';
@@ -29,6 +35,9 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentStaff, onSignOu
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['super_admin', 'content_editor', 'zone_manager', 'teacher_volunteer', 'reviewer'] },
     { id: 'staff', label: 'Staff & Roles', icon: Users, roles: ['super_admin'] },
     { id: 'content', label: 'Zone Content', icon: BookOpen, roles: ['super_admin', 'content_editor', 'zone_manager'] },
+    { id: 'votd', label: 'VOTD Overrides', icon: Calendar, roles: ['super_admin', 'content_editor', 'zone_manager'] },
+    { id: 'homepage', label: 'Homepage Control', icon: Radio, roles: ['super_admin', 'content_editor'] },
+    { id: 'bible', label: 'Bible Config', icon: Book, roles: ['super_admin', 'content_editor'] },
     { id: 'review', label: 'Review Queue', icon: ClipboardList, roles: ['super_admin', 'reviewer'] },
     { id: 'escalations', label: 'Escalations', icon: AlertCircle, roles: ['super_admin', 'teacher_volunteer'] },
   ].filter(item => item.roles.includes(currentStaff.role));
@@ -36,7 +45,6 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentStaff, onSignOu
   const changeTab = (tabId: string) => {
     setActiveTab(tabId);
     setMobileMenuOpen(false);
-    // Push the state matching the tab path
     let newPath = '/admin';
     if (tabId !== 'dashboard') {
       newPath = `/admin/${tabId}`;
@@ -281,8 +289,12 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentStaff, onSignOu
           )}
 
           {activeTab === 'staff' && <AdminStaffView currentStaff={currentStaff} />}
+          {activeTab === 'content' && <AdminContentView currentStaff={currentStaff} />}
+          {activeTab === 'votd' && <AdminVotdView currentStaff={currentStaff} />}
+          {activeTab === 'homepage' && <AdminHomepageView currentStaff={currentStaff} />}
+          {activeTab === 'bible' && <AdminBibleVersionsView currentStaff={currentStaff} />}
 
-          {['content', 'review', 'escalations'].includes(activeTab) && (
+          {['review', 'escalations'].includes(activeTab) && (
             <div className="bg-white p-8 rounded-3xl border border-gray-150 shadow-sm text-center py-16">
               <div className="mx-auto w-12 h-12 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center mb-4">
                 <BookOpen size={24} />

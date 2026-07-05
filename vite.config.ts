@@ -22,7 +22,6 @@ export default defineConfig(({ mode }) => {
                 });
                 req.on('end', () => {
                   try {
-                    // Parse request body and return success
                     const parsed = JSON.parse(body);
                     res.writeHead(200, { 'Content-Type': 'application/json' });
                     res.end(JSON.stringify({ success: true, email: parsed.email }));
@@ -33,6 +32,25 @@ export default defineConfig(({ mode }) => {
                 });
                 return;
               }
+
+              if (req.url === '/api/admin/bible-versions/verify' && req.method === 'POST') {
+                let body = '';
+                req.on('data', chunk => {
+                  body += chunk;
+                });
+                req.on('end', () => {
+                  try {
+                    const parsed = JSON.parse(body);
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ verified: true, bibleId: parsed.bibleId, simulated: true }));
+                  } catch (e: any) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Invalid request body' }));
+                  }
+                });
+                return;
+              }
+
               next();
             });
           }
