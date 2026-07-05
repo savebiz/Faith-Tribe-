@@ -7,7 +7,7 @@ import { Audience, ContentItem } from './types';
 import {
   ArrowRight, Star, Zap, BookOpen, Users, Heart, Share2, X, Lock, Radio,
   Smile, Shield, Calendar, ChevronRight, Plus, CheckCircle2, ClipboardList,
-  Send, Sparkles, Trophy, PlusCircle, Check, Instagram, Facebook, Youtube
+  Send, Sparkles, Trophy, PlusCircle, Check, Instagram, Facebook, Youtube, Flame
 } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import { VerseOfTheWeek } from './lib/bible/VerseOfTheWeek';
@@ -15,6 +15,8 @@ import { BibleReaderView } from './lib/bible/BibleReaderView';
 import { StudyNote } from './components/StudyNote';
 import { parseScriptureReference } from './lib/bible/bookCodes';
 import { getCurriculumCache, saveCurriculumCache, fetchCustomVerse, updateCustomVerse, fetchStudyNotesForChapter } from './lib/supabase';
+import { WEEKLY_FUN_ITEMS, WeeklyFunItem } from './lib/weeklyFunConfig';
+import { WeeklyFunModal } from './components/WeeklyFunModal';
 
 // --- Mock Data ---
 const KIDS_CONTENT: ContentItem[] = [
@@ -575,70 +577,141 @@ const App: React.FC = () => {
     </div>
   );
 
-  const KidsView = () => (
-    <div className="mesh-gradient-kids min-h-screen pb-16 font-display">
-      {/* Kids Header */}
-      <div className="bg-amber-400 p-10 rounded-b-[3.5rem] shadow-xl text-center relative overflow-hidden border-b-4 border-amber-500">
-        <div className="absolute inset-0 bg-white/5 pointer-events-none">
-          <svg className="w-full h-full opacity-20" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <circle cx="15" cy="20" r="12" fill="white" />
-            <circle cx="85" cy="75" r="16" fill="white" />
-            <path d="M50,10 L60,30 L80,20 L65,45 L50,10" fill="white" />
-          </svg>
+  const KidsView = () => {
+    const [selectedWeeklyFunItem, setSelectedWeeklyFunItem] = useState<WeeklyFunItem | null>(null);
+    const [kidsStreak, setKidsStreak] = useState(() => {
+      const saved = localStorage.getItem('ft_bible_streak');
+      return saved ? Number(saved) : 0;
+    });
+
+    return (
+      <div className="mesh-gradient-kids min-h-screen pb-16 font-display">
+        {/* Kids Header */}
+        <div className="bg-amber-400 p-10 rounded-b-[3.5rem] shadow-xl text-center relative overflow-hidden border-b-4 border-amber-500">
+          <div className="absolute inset-0 bg-white/5 pointer-events-none">
+            <svg className="w-full h-full opacity-20" viewBox="0 0 100 100" preserveAspectRatio="none">
+              <circle cx="15" cy="20" r="12" fill="white" />
+              <circle cx="85" cy="75" r="16" fill="white" />
+              <path d="M50,10 L60,30 L80,20 L65,45 L50,10" fill="white" />
+            </svg>
+          </div>
+          <h1 className="text-4xl md:text-6xl text-white font-extrabold drop-shadow-md mb-2 flex items-center justify-center gap-2">
+            <Smile className="animate-bounce" size={40} />
+            <span>Faith Kids!</span>
+          </h1>
+          <p className="text-amber-100 text-lg font-bold tracking-wide">
+            Jesus wants to be your forever friend!
+          </p>
         </div>
-        <h1 className="text-4xl md:text-6xl text-white font-extrabold drop-shadow-md mb-2 flex items-center justify-center gap-2">
-          <Smile className="animate-bounce" size={40} />
-          <span>Faith Kids!</span>
-        </h1>
-        <p className="text-amber-100 text-lg font-bold tracking-wide">
-          Jesus wants to be your forever friend!
-        </p>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-4 mt-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
+        <div className="max-w-7xl mx-auto px-4 mt-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-8">
 
-          {/* Bring a Friend ticket/card design */}
-          <div className="kids-ticket p-6 shadow-md mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-4 text-center sm:text-left">
-              <div className="bg-amber-100 p-3 rounded-full text-amber-500">
-                <Heart size={28} fill="currentColor" />
+            {/* Bring a Friend ticket/card design */}
+            <div className="kids-ticket p-6 shadow-md mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4 text-center sm:text-left">
+                <div className="bg-amber-100 p-3 rounded-full text-amber-500">
+                  <Heart size={28} fill="currentColor" />
+                </div>
+                <div>
+                  <h3 className="font-black text-xl text-amber-700">Invite Your Best Buddies!</h3>
+                  <p className="text-sm font-sans font-medium text-gray-500 mt-0.5">
+                    Share the fun videos and learn together. Jesus has love for everyone!
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-black text-xl text-amber-700">Invite Your Best Buddies!</h3>
-                <p className="text-sm font-sans font-medium text-gray-500 mt-0.5">
-                  Share the fun videos and learn together. Jesus has love for everyone!
-                </p>
+              <button
+                onClick={() => toast('Invite Card generated! 🎉 Download and send to your friends.', { duration: 4000 })}
+                className="px-5 py-2.5 bg-amber-400 text-white font-black rounded-2xl hover:bg-amber-500 transition-all hover:scale-105 active:scale-95 shadow-md shadow-amber-200 cursor-pointer text-sm shrink-0 border-b-4 border-amber-500"
+              >
+                Get Invite Card
+              </button>
+            </div>
+
+            {/* This Week's Fun Section */}
+            <div className="py-6">
+              <h2 className="text-2xl font-black mb-6 tracking-tight text-amber-500 flex items-center gap-2 font-display text-left">
+                <span className="w-1.5 h-6 rounded-full bg-amber-400 opacity-70"></span>
+                This Week's Fun
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {WEEKLY_FUN_ITEMS.map((item) => {
+                  const badgeText = item.type === 'video' ? 'Watch Video' : item.type === 'reading' ? 'Read Story' : item.type === 'writing' ? 'Writing Activity' : 'Coloring Paint';
+                  const badgeClass = item.type === 'video' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : item.type === 'reading' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' : item.type === 'writing' ? 'bg-purple-500/10 text-purple-600 border border-purple-500/20' : 'bg-teal-500/10 text-teal-600 border border-teal-500/20';
+                  
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => setSelectedWeeklyFunItem(item)}
+                      className="group overflow-hidden cursor-pointer transition-all duration-300 rounded-3xl bg-white border-2 border-amber-100 hover-bounce shadow-sm text-gray-900 flex flex-col justify-between"
+                    >
+                      <div className="relative h-44 overflow-hidden bg-gray-100">
+                        <img
+                          src={item.thumbnailUrl}
+                          alt={item.title}
+                          className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-black/25 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                          {item.type === 'video' && (
+                            <div className="bg-white text-gray-900 p-3.5 rounded-full shadow-lg scale-90 group-hover:scale-100 transition-transform duration-300">
+                              <Play size={20} fill="currentColor" className="ml-0.5" />
+                            </div>
+                          )}
+                        </div>
+                        {item.duration && (
+                          <span className="absolute bottom-2.5 right-2.5 text-[10px] font-bold px-2 py-0.5 rounded-full backdrop-blur-md bg-black/60 text-white">
+                            {item.duration}
+                          </span>
+                        )}
+                      </div>
+                      <div className="p-5 text-left flex-1 flex flex-col justify-between">
+                        <div>
+                          <span className={`inline-block text-[11px] font-bold px-2.5 py-0.5 rounded-full mb-3 ${badgeClass}`}>
+                            {badgeText}
+                          </span>
+                          <h3 className="font-bold text-lg mb-1.5 line-clamp-2 text-gray-900 font-display group-hover:text-amber-600 transition-colors">
+                            {item.title}
+                          </h3>
+                          <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">
+                            {item.description}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
-            <button
-              onClick={() => toast('Invite Card generated! 🎉 Download and send to your friends.', { duration: 4000 })}
-              className="px-5 py-2.5 bg-amber-400 text-white font-black rounded-2xl hover:bg-amber-500 transition-all hover:scale-105 active:scale-95 shadow-md shadow-amber-200 cursor-pointer text-sm shrink-0 border-b-4 border-amber-500"
-            >
-              Get Invite Card
-            </button>
-          </div>
-
-          <ContentSection title="This Week's Fun" items={KIDS_CONTENT} colorTheme="text-amber-500" />
-          
-          {/* Bible Verse Spotlight */}
-          <div className="bg-white p-8 rounded-[2rem] shadow-sm border-4 border-amber-200/60 relative overflow-hidden text-gray-700">
-            <div className="absolute top-0 right-0 p-3 bg-amber-400 text-white rounded-bl-2xl">
-              <Trophy size={18} />
+            
+            {/* Bible Verse Spotlight */}
+            <div className="bg-white p-8 rounded-[2rem] shadow-sm border-4 border-amber-200/60 relative overflow-hidden text-gray-700">
+              {kidsStreak > 0 && (
+                <div className="absolute top-0 right-0 p-3 bg-amber-400 text-white rounded-bl-2xl flex items-center gap-1">
+                  <Flame size={16} className="fill-white animate-pulse" />
+                  <span className="text-xs font-black tracking-wide">{kidsStreak} Streak</span>
+                </div>
+              )}
+              <h3 className="text-2xl text-amber-600 mb-4 text-left font-sans font-bold">Verse of the Day</h3>
+              <VerseOfTheWeek versionId={2079} />
             </div>
-            <h3 className="text-2xl text-amber-600 mb-4">Verse of the Day</h3>
-            <VerseOfTheWeek versionId={2079} />
+          </div>
+
+          <div className="lg:col-span-1">
+            <div className="sticky top-24">
+              <GeminiAssistant audience={Audience.KIDS} />
+            </div>
           </div>
         </div>
 
-        <div className="lg:col-span-1">
-          <div className="sticky top-24">
-            <GeminiAssistant audience={Audience.KIDS} />
-          </div>
-        </div>
+        {/* Weekly Fun Modal */}
+        <WeeklyFunModal 
+          item={selectedWeeklyFunItem} 
+          onClose={() => setSelectedWeeklyFunItem(null)} 
+        />
       </div>
-    </div>
-  );
+    );
+  };
 
   const TeensView = () => (
     <div className="mesh-gradient-teens min-h-screen text-gray-100 pb-16">

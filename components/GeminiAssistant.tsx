@@ -2,6 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Audience, ChatMessage } from '../types';
 import { generateFaithAssistantResponse } from '../services/geminiService';
 import { Send, Bot, Loader2, User, Sparkles, Heart, HelpCircle, Share2, Flame, AlertCircle } from 'lucide-react';
+import { Christicon } from '@christicons/react';
+
+const PrayingHands = (props: { className?: string }) => {
+  const sizeMatch = props.className?.match(/w-(\d+)\s+h-(\d+)/) || props.className?.match(/h-(\d+)\s+w-(\d+)/);
+  const sizeValue = sizeMatch ? Number(sizeMatch[1]) * 4 : 24;
+  return <Christicon name="praying hands" size={sizeValue} style={{ color: 'currentColor' }} className={props.className} />;
+};
 
 interface GeminiAssistantProps {
   audience: Audience;
@@ -126,8 +133,12 @@ const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ audience }) => {
                         : 'bg-teal-700 text-white'}`}>
                   {isUser ? (
                     <User size={14} />
+                  ) : audience === Audience.KIDS ? (
+                    <div className="faith-buddy-avatar flex items-center justify-center">
+                      <PrayingHands className="w-5 h-5 text-white" />
+                    </div>
                   ) : (
-                    <Bot size={14} className={audience === Audience.KIDS ? 'animate-bounce' : ''} />
+                    <Bot size={14} />
                   )}
                 </div>
 
