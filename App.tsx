@@ -12,7 +12,9 @@ import {
 import { Toaster, toast } from 'sonner';
 import { VerseOfTheWeek } from './lib/bible/VerseOfTheWeek';
 import { BibleReaderView } from './lib/bible/BibleReaderView';
-import { getCurriculumCache, saveCurriculumCache, fetchCustomVerse, updateCustomVerse } from './lib/supabase';
+import { StudyNote } from './components/StudyNote';
+import { parseScriptureReference } from './lib/bible/bookCodes';
+import { getCurriculumCache, saveCurriculumCache, fetchCustomVerse, updateCustomVerse, fetchStudyNotesForChapter } from './lib/supabase';
 
 // --- Mock Data ---
 const KIDS_CONTENT: ContentItem[] = [
@@ -731,6 +733,56 @@ const App: React.FC = () => {
     const [useFallback, setUseFallback] = useState(false);
     const [flags, setFlags] = useState({ enableCurriculumPhase1: true, enableCurriculumPhase2: true });
 
+    // Study Notes states for lesson prep
+    const [studyNotesQuery, setStudyNotesQuery] = useState('');
+    const [studyNotesResults, setStudyNotesResults] = useState<any[]>([]);
+    const [isLoadingNotes, setIsLoadingNotes] = useState(false);
+    const [studyNotesSearched, setStudyNotesSearched] = useState(false);
+
+    const handleSearchStudyNotes = async (e: React.FormEvent) => {
+      e.preventDefault();
+      const q = studyNotesQuery.trim();
+      if (!q) return;
+
+      setIsLoadingNotes(true);
+      setStudyNotesSearched(true);
+      try {
+        const parsed = parseScriptureReference(q);
+        if (!parsed) {
+          toast.error("Invalid scripture format. Use e.g. 'John 3:16' or 'Luke 15'", { duration: 4000 });
+          setStudyNotesResults([]);
+          return;
+        }
+
+        const allNotes = await fetchStudyNotesForChapter(parsed.bookCode, parsed.chapter);
+        
+        // Filter further if verse is specified (e.g. John 3:16 -> filter notes matching usfm_start === "JHN 3:16" or containing JHN 3:16)
+        if (parsed.verse !== null) {
+          const expectedStart = `${parsed.bookCode} ${parsed.chapter}:${parsed.verse}`;
+          const filtered = allNotes.filter(note => {
+            if (!note.usfm_start) return false;
+            if (note.usfm_start === expectedStart) return true;
+            if (note.usfm_start.startsWith(expectedStart + '-')) return true;
+            const rangeMatch = note.usfm_start.match(/^([1-3]?\s*[A-Z]+)\s*(\d+):(\d+)(?:-(\d+):?(\d+)?)?/);
+            if (rangeMatch) {
+              const startV = Number(rangeMatch[3]);
+              const endV = rangeMatch[5] ? Number(rangeMatch[5]) : rangeMatch[4] ? Number(rangeMatch[4]) : startV;
+              return parsed.verse >= startV && parsed.verse <= endV;
+            }
+            return false;
+          });
+          setStudyNotesResults(filtered);
+        } else {
+          setStudyNotesResults(allNotes);
+        }
+      } catch (err) {
+        console.error('Error loading study notes for teacher:', err);
+        toast.error('Failed to load study notes.');
+      } finally {
+        setIsLoadingNotes(false);
+      }
+    };
+
     // Scripture Admin Override States
     const [customVerseInput, setCustomVerseInput] = useState('');
     const [isSavingCustomVerse, setIsSavingCustomVerse] = useState(false);
@@ -1213,6 +1265,59 @@ const App: React.FC = () => {
                 )}
               </div>
             )}
+            {/* Bible Study Notes Search Panel for Teachers */}
+            <div className="bg-white p-6 sm:p-8 rounded-[2rem] border border-gray-150 shadow-sm space-y-4 text-left animate-in fade-in duration-300">
+              <h3 className="text-xl font-black text-teal-800 tracking-tight flex items-center gap-2">
+                <BookOpen size={22} className="text-teal-650" /> Lesson Preparation Study Notes
+              </h3>
+              <p className="text-xs text-gray-500">
+                Search any book, chapter, or verse (e.g. <code className="bg-gray-50 px-1 py-0.5 rounded text-teal-755 font-bold font-mono">John 3:16</code> or <code className="bg-gray-50 px-1 py-0.5 rounded text-teal-755 font-bold font-mono">Luke 15</code>) to load contextual study notes from the Tyndale collection.
+              </p>
+
+              <form onSubmit={handleSearchStudyNotes} className="flex gap-2">
+                <input
+                  type="text"
+                  required
+                  value={studyNotesQuery}
+                  onChange={e => setStudyNotesQuery(e.target.value)}
+                  placeholder="e.g. John 3:16"
+                  className="flex-grow text-xs border border-gray-250 rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
+                />
+                <button
+                  type="submit"
+                  disabled={isLoadingNotes}
+                  className="bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all cursor-pointer shadow-sm disabled:opacity-50"
+                >
+                  {isLoadingNotes ? 'Loading...' : 'Find Notes'}
+                </button>
+              </form>
+
+              {studyNotesResults.length > 0 && (
+                <div className="space-y-4 max-h-[300px] overflow-y-auto border border-gray-100 rounded-2xl p-4 bg-gray-50/50">
+                  {studyNotesResults.map((note, index) => (
+                    <div key={index} className="space-y-2 border-b border-gray-100 pb-3 last:border-0 last:pb-0">
+                      <h4 className="font-sans font-bold text-sm text-teal-800 flex items-center gap-1.5 text-left">
+                        <span className="bg-teal-100 text-teal-700 text-[10px] px-2 py-0.5 rounded-md font-mono">{note.usfm_start || note.ref}</span>
+                        {note.title}
+                      </h4>
+                      <div className="text-xs text-gray-700 leading-relaxed font-sans prose prose-sm max-w-none">
+                        <StudyNote contentHtml={note.content_html} />
+                      </div>
+                    </div>
+                  ))}
+                  
+                  <div className="text-[10px] text-gray-400 italic pt-2 mt-2 border-t border-gray-100 text-left">
+                    Tyndale Open Study Notes &copy; 2019 Tyndale House Publishers. Used under CC BY-SA 4.0.
+                  </div>
+                </div>
+              )}
+
+              {studyNotesSearched && studyNotesResults.length === 0 && !isLoadingNotes && (
+                <p className="text-xs italic text-gray-400 text-center py-2">
+                  No study notes found for this reference. Please check your spelling and formatting (e.g. John 3:16).
+                </p>
+              )}
+            </div>
 
             <ContentSection title="Evangelism Resources" items={TEACHERS_CONTENT} colorTheme="text-teal-700" />
 

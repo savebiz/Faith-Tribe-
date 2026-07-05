@@ -217,3 +217,73 @@ export async function updateCustomVerse(passageId: string): Promise<void> {
   }
 }
 
+export interface BibleStudyNote {
+  ref: string;
+  usfm_start: string | null;
+  usfm_end?: string | null;
+  title: string;
+  content_html: string;
+  acai?: any[];
+  related_resources?: any[];
+  review_level: string;
+  language?: string;
+  source_version?: string;
+}
+
+const USFM_BOOK_ORDER = [
+  'GEN', 'EXO', 'LEV', 'NUM', 'DEU', 'JOS', 'JDG', 'RUT', '1SA', '2SA',
+  '1KI', '2KI', '1CH', '2CH', 'EZR', 'NEH', 'EST', 'JOB', 'PSA', 'PRO',
+  'ECC', 'SNG', 'ISA', 'JER', 'LAM', 'EZK', 'DAN', 'HOS', 'JOL', 'AMO',
+  'OBA', 'JON', 'MIC', 'NAM', 'HAB', 'ZEP', 'HAG', 'ZEC', 'MAL', 'MAT',
+  'MRK', 'LUK', 'JHN', 'ACT', 'ROM', '1CO', '2CO', 'GAL', 'EPH', 'PHP',
+  'COL', '1TH', '2TH', '1TI', '2TI', 'TIT', 'PHM', 'HEB', 'JAS', '1PE',
+  '2PE', '1JN', '2JN', '3JN', 'JUD', 'REV'
+];
+
+export async function fetchStudyNotesForChapter(book: string, chapter: string): Promise<BibleStudyNote[]> {
+  const normalizedBook = book.toUpperCase();
+  
+  if (isRealSupabase && supabase) {
+    try {
+      const prefix = `${normalizedBook} ${chapter}`;
+      const { data, error } = await supabase
+        .from('bible_study_notes')
+        .select('*')
+        .or(`usfm_start.eq.${prefix},usfm_start.like.${prefix}:%`);
+        
+      if (error) throw error;
+      if (data && data.length > 0) {
+        return data.sort((a, b) => a.ref.localeCompare(b.ref));
+      }
+    } catch (e) {
+      console.warn("Supabase fetchStudyNotesForChapter failed, falling back to local files:", e);
+    }
+  }
+
+  // Local JSON files fallback (Vite public/bible-study-notes/ directory)
+  try {
+    const bookIndex = USFM_BOOK_ORDER.indexOf(normalizedBook);
+    if (bookIndex !== -1) {
+      const bookNumber = String(bookIndex + 1).padStart(2, '0');
+      const response = await fetch(`/bible-study-notes/${bookNumber}.json`);
+      if (response.ok) {
+        const data = (await response.json()) as BibleStudyNote[];
+        
+        // Filter locally by usfm_start prefix
+        const prefix = `${normalizedBook} ${chapter}`;
+        const filtered = data.filter((note) => {
+          if (!note.usfm_start) return false;
+          return note.usfm_start === prefix || note.usfm_start.startsWith(`${prefix}:`);
+        });
+        
+        return filtered.sort((a, b) => a.ref.localeCompare(b.ref));
+      }
+    }
+  } catch (e) {
+    console.warn("Failed to load local study notes cache:", e);
+  }
+
+  return [];
+}
+
+

@@ -180,3 +180,36 @@ Object.entries(BOOK_ALIASES).forEach(([alias, name]) => {
     BOOK_ABBREVIATIONS[alias] = code;
   }
 });
+
+export function parseScriptureReference(input: string): { bookCode: string; chapter: string; verse: number | null } | null {
+  const clean = input.trim().toLowerCase();
+  if (!clean) return null;
+  
+  const sortedKeys = Object.keys(BOOK_ABBREVIATIONS).sort((a, b) => b.length - a.length);
+  let matchedBookKey = '';
+  
+  for (const key of sortedKeys) {
+    if (clean.startsWith(key)) {
+      matchedBookKey = key;
+      break;
+    }
+  }
+  
+  if (!matchedBookKey) return null;
+  
+  const bookCode = BOOK_ABBREVIATIONS[matchedBookKey];
+  const remaining = clean.slice(matchedBookKey.length).trim();
+  
+  // Matches chapter and optional verse (e.g., "3", "3:16", "3:16-18")
+  const match = remaining.match(/^(\d+)(?:\s*:\s*(\d+)(?:\s*-\s*(\d+))?)?$/);
+  if (!match && remaining.length > 0) return null;
+  
+  const chapterNum = match ? match[1] : '1';
+  const startVerse = match && match[2] ? Number(match[2]) : null;
+  
+  return {
+    bookCode,
+    chapter: chapterNum,
+    verse: startVerse
+  };
+}

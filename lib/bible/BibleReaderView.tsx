@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { BibleReader } from '@youversion/platform-react-ui';
-import { ArrowLeft, Book, Flame, Share2, MoreVertical, Copy, AlertTriangle, Check, Award, Download, Highlighter, Trash2, X, ArrowRight, Search } from 'lucide-react';
+import { ArrowLeft, Book, BookOpen, Flame, Share2, MoreVertical, Copy, AlertTriangle, Check, Award, Download, Highlighter, Trash2, X, ArrowRight, Search } from 'lucide-react';
 import { toast } from 'sonner';
-import { fetchReactionCount, incrementReactionCount, hasReacted } from '../supabase';
+import { fetchReactionCount, incrementReactionCount, hasReacted, fetchStudyNotesForChapter, BibleStudyNote } from '../supabase';
+import { StudyNote } from '../../components/StudyNote';
 import { useReadingPreferences } from './useReadingPreferences';
 import { ChapterSelector } from './ChapterSelector';
 import { ReaderSettings } from './ReaderSettings';
@@ -107,6 +108,32 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
   const topDropdownRef = useRef<HTMLDivElement>(null);
   const [cardBottomInView, setCardBottomInView] = useState(false);
   const cardBottomObserverRef = useRef<IntersectionObserver | null>(null);
+  // Study Notes states
+  const [studyNotes, setStudyNotes] = useState<BibleStudyNote[]>([]);
+  const [isGoDeeperOpen, setIsGoDeeperOpen] = useState(false);
+
+  // Load study notes on book/chapter change
+  useEffect(() => {
+    let active = true;
+    const loadNotes = async () => {
+      if (isKidsMode) {
+        setStudyNotes([]);
+        return;
+      }
+      try {
+        const notes = await fetchStudyNotesForChapter(book, chapter);
+        if (active) {
+          setStudyNotes(notes);
+        }
+      } catch (err) {
+        console.error('Error loading study notes:', err);
+      }
+    };
+    loadNotes();
+    return () => {
+      active = false;
+    };
+  }, [book, chapter, isKidsMode]);
 
   useEffect(() => {
     setMounted(true);
@@ -918,6 +945,60 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
                 )}
               </div>
             </div>
+
+            {/* Go Deeper Section (Bible Study Notes for Teens/Teachers) */}
+            {!isKidsMode && studyNotes.length > 0 && (
+              <div className="mt-6 pt-5 border-t border-[#372f58]/10 animate-in fade-in duration-300">
+                <button
+                  onClick={() => setIsGoDeeperOpen(!isGoDeeperOpen)}
+                  className="w-full flex items-center justify-between bg-teal-50/50 hover:bg-teal-50 hover:border-teal-300/40 border border-teal-200/40 p-4 rounded-2xl transition-all cursor-pointer group"
+                >
+                  <div className="flex items-center gap-2.5 text-teal-800">
+                    <BookOpen size={18} className="text-teal-650" />
+                    <span className="text-xs font-black tracking-wide">
+                      {isGoDeeperOpen ? 'HIDE STUDY NOTES' : 'GO DEEPER: READ STUDY NOTES'}
+                    </span>
+                    <span className="text-[10px] bg-teal-100/60 text-teal-700 px-2 py-0.5 rounded-full font-bold select-none">
+                      {studyNotes.length} {studyNotes.length === 1 ? 'Note' : 'Notes'}
+                    </span>
+                  </div>
+                  <span className="text-teal-600 group-hover:translate-y-0.5 transition-transform text-xs font-bold font-mono">
+                    {isGoDeeperOpen ? '▲ Collapse' : '▼ Expand'}
+                  </span>
+                </button>
+
+                {isGoDeeperOpen && (
+                  <div className="mt-4 p-5 bg-white border border-gray-100 rounded-2xl shadow-sm space-y-4 max-h-[350px] overflow-y-auto animate-in slide-in-from-top-4 duration-300">
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider mb-2 text-left">
+                      ⚠️ Note: These are advanced, unmodified study notes for deeper study.
+                    </p>
+                    <div className="space-y-4">
+                      {studyNotes.map((note) => (
+                        <div key={note.ref} className="border-b border-gray-100 pb-3 last:border-0 last:pb-0">
+                          <h4 className="font-sans font-bold text-sm text-[#372f58] flex items-center gap-2 text-left">
+                            <span className="bg-teal-50 text-teal-700 text-[10px] font-bold font-mono px-2 py-0.5 rounded">
+                              {note.usfm_start || note.ref}
+                            </span>
+                            {note.title}
+                          </h4>
+                          <div className="mt-2.5">
+                            <StudyNote 
+                              contentHtml={note.content_html} 
+                              currentVersionId={versionId}
+                              onNavigateToPassage={(newBook, newChapter) => {
+                                setBook(newBook);
+                                setChapter(newChapter);
+                                setIsGoDeeperOpen(true);
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
           {/* Floating Bottom Navigation Bars (Inside YouVersion Context & Portaled to body) */}
           {mounted && createPortal(
