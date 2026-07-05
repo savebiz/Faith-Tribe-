@@ -18,8 +18,8 @@ CREATE POLICY "Allow anonymous read access"
 DROP POLICY IF EXISTS "Allow anonymous upsert access for settings" ON site_settings;
 CREATE POLICY "Allow anonymous upsert access for settings"
   ON site_settings FOR ALL
-  USING (true)
-  WITH CHECK (true);
+  USING (auth.uid() IS NOT NULL)
+  WITH CHECK (auth.uid() IS NOT NULL);
 
 -- Create bible_study_notes table if it doesn't exist
 CREATE TABLE IF NOT EXISTS bible_study_notes (
@@ -52,8 +52,8 @@ CREATE POLICY "Allow anonymous read access for study notes"
 DROP POLICY IF EXISTS "Allow anonymous upsert access for study notes" ON bible_study_notes;
 CREATE POLICY "Allow anonymous upsert access for study notes"
   ON bible_study_notes FOR ALL
-  USING (true)
-  WITH CHECK (true);
+  USING (auth.uid() IS NOT NULL)
+  WITH CHECK (auth.uid() IS NOT NULL);
 
 -- Phase 1: Admin Roles & Staff Portal DDL Migration
 
@@ -112,11 +112,17 @@ ALTER TABLE audit_log ENABLE ROW LEVEL SECURITY;
 -- Helper functions for RLS checks
 CREATE OR REPLACE FUNCTION current_staff_role() RETURNS staff_role AS $$
   SELECT role FROM staff WHERE id = auth.uid()
-$$ LANGUAGE sql SECURITY DEFINER STABLE;
+$$ LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public;
+
+REVOKE ALL ON FUNCTION current_staff_role() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION current_staff_role() TO authenticated;
 
 CREATE OR REPLACE FUNCTION current_staff_zone() RETURNS zone_scope AS $$
   SELECT scoped_zone FROM staff WHERE id = auth.uid()
-$$ LANGUAGE sql SECURITY DEFINER STABLE;
+$$ LANGUAGE sql SECURITY DEFINER STABLE SET search_path = public;
+
+REVOKE ALL ON FUNCTION current_staff_zone() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION current_staff_zone() TO authenticated;
 
 -- Policies definition
 DROP POLICY IF EXISTS "super_admin manages staff" ON staff;
