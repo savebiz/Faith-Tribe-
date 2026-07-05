@@ -3,7 +3,7 @@ import Navbar from './components/Navbar';
 import GeminiAssistant from './components/GeminiAssistant';
 import ContentSection from './components/ContentSection';
 import LiveStreamPlayer from './components/LiveStreamPlayer';
-import { Audience, ContentItem } from './types';
+import { Audience, ContentItem, StaffMember } from './types';
 import {
   ArrowRight, Star, Zap, BookOpen, Users, Heart, Share2, X, Lock, Radio,
   Smile, Shield, Calendar, ChevronRight, Plus, CheckCircle2, ClipboardList,
@@ -14,9 +14,10 @@ import { VerseOfTheWeek } from './lib/bible/VerseOfTheWeek';
 import { BibleReaderView } from './lib/bible/BibleReaderView';
 import { StudyNote } from './components/StudyNote';
 import { parseScriptureReference } from './lib/bible/bookCodes';
-import { getCurriculumCache, saveCurriculumCache, fetchCustomVerse, updateCustomVerse, fetchStudyNotesForChapter } from './lib/supabase';
+import { getCurriculumCache, saveCurriculumCache, fetchCustomVerse, updateCustomVerse, fetchStudyNotesForChapter, signInStaff, signOutStaff, getCurrentStaff } from './lib/supabase';
 import { WEEKLY_FUN_ITEMS, WeeklyFunItem } from './lib/weeklyFunConfig';
 import { WeeklyFunModal } from './components/WeeklyFunModal';
+import { AdminLayout } from './components/AdminLayout';
 
 // --- Mock Data ---
 const KIDS_CONTENT: ContentItem[] = [
@@ -60,6 +61,8 @@ const App: React.FC = () => {
       return { view: Audience.TEENS, book: 'GEN', chapter: '1', versionId };
     } else if (path.startsWith('/teachers')) {
       return { view: Audience.TEACHERS, book: 'GEN', chapter: '1', versionId };
+    } else if (path.startsWith('/admin')) {
+      return { view: Audience.ADMIN, book: 'GEN', chapter: '1', versionId };
     } else if (path.startsWith('/bible')) {
       const match = path.match(/^\/bible\/([A-Za-z0-9]+)\/([0-9]+)/);
       if (match) {
@@ -79,7 +82,10 @@ const App: React.FC = () => {
     else if (view === Audience.KIDS) path = '/kids';
     else if (view === Audience.TEENS) path = '/teens';
     else if (view === Audience.TEACHERS) path = '/teachers';
-    else if (view === Audience.BIBLE) {
+    else if (view === Audience.ADMIN) {
+      const currentPath = window.location.pathname;
+      path = currentPath.startsWith('/admin') ? currentPath : '/admin';
+    } else if (view === Audience.BIBLE) {
       const savedVersion = localStorage.getItem('yv_version_id');
       const versionToUse = savedVersion ? Number(savedVersion) : 3034;
       const currentPath = window.location.pathname;
@@ -138,10 +144,37 @@ const App: React.FC = () => {
   const [isPrayerModalOpen, setIsPrayerModalOpen] = useState(false);
   const [prayerRequest, setPrayerRequest] = useState('');
 
-  // -- State for Teacher Auth --
-  const [isTeacherLoggedIn, setIsTeacherLoggedIn] = useState(false);
+  // -- State for Staff/Admin Authentication --
+  const [adminStaff, setAdminStaff] = useState<StaffMember | null>(null);
+  const [isAdminLoading, setIsAdminLoading] = useState(true);
   const [teacherEmail, setTeacherEmail] = useState('');
   const [teacherPassword, setTeacherPassword] = useState('');
+
+  // Compute isTeacherLoggedIn dynamically based on active staff member permissions
+  const isTeacherLoggedIn = !!adminStaff && [
+    'super_admin',
+    'teacher_volunteer',
+    'zone_manager'
+  ].includes(adminStaff.role) && (
+    adminStaff.role !== 'zone_manager' || 
+    !adminStaff.scoped_zone || 
+    adminStaff.scoped_zone === 'teachers'
+  );
+
+  // Load active staff session on mount
+  useEffect(() => {
+    const loadSession = async () => {
+      try {
+        const staff = await getCurrentStaff();
+        setAdminStaff(staff);
+      } catch (e) {
+        console.error('Failed to load staff session:', e);
+      } finally {
+        setIsAdminLoading(false);
+      }
+    };
+    loadSession();
+  }, []);
 
   // -- State for Live Stream --
   const [isLiveStreamOpen, setIsLiveStreamOpen] = useState(false);
@@ -176,17 +209,45 @@ const App: React.FC = () => {
     setIsPrayerModalOpen(false);
   };
 
-  const handleTeacherLogin = (e: React.FormEvent) => {
+  const handleTeacherLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const validEmail = 'teacher@faithtribe.org';
-    const validPassword = 'password';
-    if (
-      teacherEmail.trim().toLowerCase() === validEmail &&
-      teacherPassword === validPassword
-    ) {
-      setIsTeacherLoggedIn(true);
-    } else {
-      toast.error('Incorrect email or password. Please try again.');
+    if (!teacherEmail.trim() || !teacherPassword.trim()) {
+      toast.error('Email and password are required.');
+      return;
+    }
+    try {
+      setIsAdminLoading(true);
+      const staff = await signInStaff(teacherEmail, teacherPassword);
+      
+      // Verify role is authorized to view teachers hub
+      const canAccessTeachers = ['super_admin', 'teacher_volunteer', 'zone_manager'].includes(staff.role) && (
+        staff.role !== 'zone_manager' || !staff.scoped_zone || staff.scoped_zone === 'teachers'
+      );
+      
+      if (!canAccessTeachers) {
+        throw new Error('Your role does not grant access to the Teachers Hub.');
+      }
+      
+      setAdminStaff(staff);
+      toast.success(`Welcome back, ${staff.full_name}!`);
+    } catch (e: any) {
+      toast.error(e.message || 'Incorrect email or password. Please try again.');
+    } finally {
+      setIsAdminLoading(false);
+    }
+  };
+
+  const handleAdminSignOut = async () => {
+    try {
+      setIsAdminLoading(true);
+      await signOutStaff();
+      setAdminStaff(null);
+      toast.success('Signed out successfully.');
+      navigateToView(Audience.HOME);
+    } catch (e: any) {
+      toast.error('Failed to sign out.');
+    } finally {
+      setIsAdminLoading(false);
     }
   };
 
@@ -969,7 +1030,7 @@ const App: React.FC = () => {
               <p className="text-sm text-gray-500 mt-1">Equipping region leaders to save souls and grow conversions.</p>
             </div>
             <button
-              onClick={() => setIsTeacherLoggedIn(false)}
+              onClick={handleAdminSignOut}
               className="text-xs font-bold text-red-500 hover:text-red-700 hover:bg-red-50 px-4.5 py-2 rounded-full border border-red-200/60 transition-colors"
             >
               Sign Out Hub
@@ -1546,6 +1607,102 @@ const App: React.FC = () => {
       </div>
     );
   };
+
+  if (currentView === Audience.ADMIN) {
+    if (isAdminLoading) {
+      return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center font-sans">
+          <div className="text-center space-y-2">
+            <div className="w-10 h-10 border-4 border-teal-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+            <p className="text-sm font-bold text-gray-500">Loading admin session...</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (!adminStaff) {
+      return (
+        <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-sans">
+          <div className="sm:mx-auto sm:w-full sm:max-w-md px-4">
+            <div className="flex justify-center">
+              <div className="h-14 w-14 rounded-2xl bg-teal-800 flex items-center justify-center shadow-lg shadow-teal-200">
+                <Shield className="text-white" size={26} />
+              </div>
+            </div>
+            <h2 className="mt-4 text-center text-3xl font-black tracking-tight text-gray-900">
+              Faith Tribe Admin
+            </h2>
+            <p className="mt-1.5 text-center text-sm text-gray-500 font-medium">
+              Sign in to manage curriculum, review content, and configure live streams.
+            </p>
+          </div>
+
+          <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-md px-4">
+            <div className="bg-white py-8 px-6 shadow-xl rounded-3xl border border-gray-150 text-left">
+              <form className="space-y-4" onSubmit={handleTeacherLogin}>
+                <div>
+                  <label htmlFor="admin-email" className="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">
+                    Email address
+                  </label>
+                  <input
+                    id="admin-email"
+                    name="admin-email"
+                    type="email"
+                    autoComplete="email"
+                    required
+                    value={teacherEmail}
+                    onChange={(e) => setTeacherEmail(e.target.value)}
+                    placeholder="admin@faithtribe.com"
+                    className="block w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="admin-password" className="block text-xs font-bold uppercase tracking-wider text-gray-600 mb-1">
+                    Password
+                  </label>
+                  <input
+                    id="admin-password"
+                    name="admin-password"
+                    type="password"
+                    autoComplete="current-password"
+                    required
+                    value={teacherPassword}
+                    onChange={(e) => setTeacherPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="block w-full rounded-lg border border-gray-200 px-3 py-2.5 text-sm focus:border-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-100"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  className="flex w-full justify-center rounded-full bg-teal-700 py-2.5 px-4 text-sm font-bold text-white shadow-md shadow-teal-200 hover:bg-teal-800 hover:scale-[1.01] active:scale-95 transition-all cursor-pointer mt-1"
+                >
+                  Sign In
+                </button>
+              </form>
+            </div>
+            <div className="text-center mt-6">
+              <button 
+                onClick={() => navigateToView(Audience.HOME)}
+                className="text-xs font-bold text-teal-600 hover:text-teal-800 cursor-pointer"
+              >
+                &larr; Back to Public Portal
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <AdminLayout 
+        currentStaff={adminStaff} 
+        onSignOut={handleAdminSignOut} 
+        onNavigateHome={() => navigateToView(Audience.HOME)} 
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col font-sans relative">
