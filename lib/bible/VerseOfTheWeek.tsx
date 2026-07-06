@@ -26,6 +26,7 @@ export function VerseOfTheWeek({ versionId, showStudyNotes = false }: { versionI
   const [studyNotes, setStudyNotes] = useState<BibleStudyNote[]>([]);
   const [notesLoading, setNotesLoading] = useState(false);
   const [goDeeper, setGoDeeper] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     const loadCustom = async () => {
@@ -156,13 +157,26 @@ export function VerseOfTheWeek({ versionId, showStudyNotes = false }: { versionI
           <div className="mt-2.5 text-xs font-black text-[#1CABB9] select-none tracking-wider">
             — {getDisplayReference(activePassage)}
           </div>
-          <div className="mt-4 text-xs font-black text-[#372f58] group-hover:text-[#1CABB9] transition-colors flex items-center gap-1.5 select-none">
+          <div className="mt-4 text-xs font-black text-[#372f58] group-hover:text-[#1CABB9] transition-colors flex items-center justify-between select-none">
             <span>Read full chapter &rarr;</span>
+            {showStudyNotes && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsExpanded(!isExpanded);
+                }}
+                className="px-4 py-1.5 bg-emerald-50 text-emerald-600 border border-emerald-200 hover:bg-emerald-100 rounded-full font-bold text-[10px] uppercase tracking-wider transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+              >
+                <BookOpen size={12} className="text-emerald-500" />
+                <span>{isExpanded ? 'Hide Insights' : 'Study Insights'}</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
 
-      {showStudyNotes && (
+      {showStudyNotes && isExpanded && (
         <div className="mt-6 pt-6 border-t border-gray-150 text-left font-sans">
           <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
             <h4 className="text-sm font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
