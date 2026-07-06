@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { X, Download, Share2 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 interface KidsInviteModalProps {
   isOpen: boolean;
