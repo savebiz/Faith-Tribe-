@@ -15,7 +15,8 @@ interface GeminiAssistantProps {
   audience: Audience;
 }
 
-const formatText = (text: string) => {
+const formatText = (text?: string) => {
+  if (!text || typeof text !== 'string') return '';
   // Simple escape
   const safeText = text
     .replace(/&/g, "&amp;")
