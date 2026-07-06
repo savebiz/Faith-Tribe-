@@ -25,6 +25,10 @@ export const AdminReviewView: React.FC<{ currentStaff: StaffMember }> = ({ curre
   }, []);
 
   const fetchDrafts = async () => {
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const { data, error } = await supabase
       .from('bible_study_notes')
@@ -42,6 +46,10 @@ export const AdminReviewView: React.FC<{ currentStaff: StaffMember }> = ({ curre
   };
 
   const handleGenerateDraft = async () => {
+    if (!supabase) {
+      toast.error('Supabase is not connected');
+      return;
+    }
     setGenerating(true);
     try {
       const ref = `${genBook} ${genChapter}`;
@@ -75,6 +83,7 @@ export const AdminReviewView: React.FC<{ currentStaff: StaffMember }> = ({ curre
   };
 
   const handleApprove = async (ref: string) => {
+    if (!supabase) return;
     try {
       const { error } = await supabase
         .from('bible_study_notes')
@@ -93,6 +102,7 @@ export const AdminReviewView: React.FC<{ currentStaff: StaffMember }> = ({ curre
   };
 
   const handleReject = async (ref: string) => {
+    if (!supabase) return;
     try {
       const { error } = await supabase
         .from('bible_study_notes')
@@ -113,6 +123,7 @@ export const AdminReviewView: React.FC<{ currentStaff: StaffMember }> = ({ curre
   };
 
   const handleSaveEdit = async (ref: string) => {
+    if (!supabase) return;
     try {
       const { error } = await supabase
         .from('bible_study_notes')

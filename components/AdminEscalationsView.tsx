@@ -14,6 +14,10 @@ export const AdminEscalationsView: React.FC<{ currentStaff: StaffMember }> = ({ 
   }, []);
 
   const fetchEscalations = async () => {
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const { data, error } = await supabase
       .from('escalations')
@@ -29,6 +33,7 @@ export const AdminEscalationsView: React.FC<{ currentStaff: StaffMember }> = ({ 
   };
 
   const handleClaim = async (id: string) => {
+    if (!supabase) return;
     try {
       const { error } = await supabase
         .from('escalations')
@@ -46,6 +51,7 @@ export const AdminEscalationsView: React.FC<{ currentStaff: StaffMember }> = ({ 
   };
 
   const handleResolve = async (id: string) => {
+    if (!supabase) return;
     try {
       const { error } = await supabase
         .from('escalations')

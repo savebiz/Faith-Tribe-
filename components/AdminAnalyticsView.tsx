@@ -15,6 +15,10 @@ export const AdminAnalyticsView: React.FC<{ currentStaff: StaffMember }> = ({ cu
   }, [selectedZone, daysBack]);
 
   const fetchAnalytics = async () => {
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     let query = supabase
       .from('analytics_events')
