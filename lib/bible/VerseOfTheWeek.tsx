@@ -78,9 +78,12 @@ export function VerseOfTheWeek({ versionId, showStudyNotes = false }: { versionI
     loadNotes();
   }, [activePassage, showStudyNotes]);
 
-  const navigateToBible = (book: string, chapter: string) => {
+  const navigateToBible = (book: string, chapter: string, verse?: string) => {
     const activeVersionId = overrideVersionId || versionId;
-    const path = `/bible/${book}/${chapter}?version=${activeVersionId}`;
+    let path = `/bible/${book}/${chapter}?version=${activeVersionId}`;
+    if (verse) {
+      path += `&verse=${verse}`;
+    }
     window.history.pushState(null, '', path);
     window.dispatchEvent(new PopStateEvent('popstate'));
   };
@@ -99,7 +102,9 @@ export function VerseOfTheWeek({ versionId, showStudyNotes = false }: { versionI
 
   const handleCardClick = (passageId: string) => {
     const parts = passageId.split('.');
-    if (parts.length >= 2) {
+    if (parts.length >= 3) {
+      navigateToBible(parts[0], parts[1], parts[2]);
+    } else if (parts.length >= 2) {
       navigateToBible(parts[0], parts[1]);
     }
   };
@@ -139,10 +144,57 @@ export function VerseOfTheWeek({ versionId, showStudyNotes = false }: { versionI
     );
   }
 
-  // Filter notes based on toggle
+  // Parse activePassage (e.g. "PRO.19.17" or "ROM.12.1-2") to individual verses
+  const activeVerses: string[] = [];
+  const parts = activePassage.split('.');
+  if (parts.length >= 3) {
+    const versePart = parts[2];
+    if (versePart.includes('-')) {
+      const [startStr, endStr] = versePart.split('-');
+      const start = parseInt(startStr, 10);
+      const end = parseInt(endStr, 10);
+      if (!isNaN(start) && !isNaN(end)) {
+        for (let v = start; v <= end; v++) {
+          activeVerses.push(v.toString());
+        }
+      }
+    } else {
+      activeVerses.push(versePart);
+    }
+  }
+
+  // Filter notes based on toggle and specific verse
   const filteredNotes = studyNotes.filter(note => {
+    // 1. Filter by tier
     const noteTier = note.tier || 'basic';
-    return goDeeper ? noteTier === 'advanced' : noteTier === 'basic';
+    const matchesTier = goDeeper ? noteTier === 'advanced' : noteTier === 'basic';
+    if (!matchesTier) return false;
+
+    // 2. Filter by specific verse
+    if (!note.usfm_start) return false;
+    const noteRefParts = note.usfm_start.split(' '); // e.g. ["PRO", "19:17"]
+    if (noteRefParts.length >= 2) {
+      const chapterVerse = noteRefParts[1]; // "19:17"
+      const cvParts = chapterVerse.split(':');
+      if (cvParts.length >= 2) {
+        const noteVerse = cvParts[1]; // "17"
+        
+        // If noteVerse is a range like "17-18", check overlap
+        if (noteVerse.includes('-')) {
+          const [sStr, eStr] = noteVerse.split('-');
+          const s = parseInt(sStr, 10);
+          const e = parseInt(eStr, 10);
+          if (!isNaN(s) && !isNaN(e)) {
+            for (let v = s; v <= e; v++) {
+              if (activeVerses.includes(v.toString())) return true;
+            }
+          }
+        }
+        
+        return activeVerses.includes(noteVerse);
+      }
+    }
+    return false;
   });
 
   return (
@@ -150,15 +202,27 @@ export function VerseOfTheWeek({ versionId, showStudyNotes = false }: { versionI
       <div 
         onClick={() => handleCardClick(activePassage)}
         className="space-y-1 cursor-pointer hover:opacity-90 transition-opacity p-2 -m-2 rounded-2xl group text-left"
-        title="Click to read full chapter in Bible"
+        title="Click to read specific verse in Bible"
       >
         <div className="relative">
           <BibleTextView reference={activePassage} versionId={overrideVersionId || versionId} />
           <div className="mt-2.5 text-xs font-black text-[#1CABB9] select-none tracking-wider">
             — {getDisplayReference(activePassage)}
           </div>
-          <div className="mt-4 text-xs font-black text-[#372f58] group-hover:text-[#1CABB9] transition-colors flex items-center justify-between select-none">
-            <span>Read full chapter &rarr;</span>
+          <div className="mt-4 text-xs font-black text-[#372f58] transition-colors flex items-center justify-between select-none">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                const pathParts = activePassage.split('.');
+                if (pathParts.length >= 2) {
+                  navigateToBible(pathParts[0], pathParts[1]); // Navigate to chapter (no verse param)
+                }
+              }}
+              className="text-[#372f58] hover:text-[#1CABB9] transition-colors font-bold text-xs cursor-pointer bg-transparent border-0 p-0 flex items-center outline-none"
+            >
+              Read full chapter &rarr;
+            </button>
             {showStudyNotes && (
               <button
                 type="button"

@@ -57,11 +57,14 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
     
     const savedVersion = localStorage.getItem('yv_version_id');
     const defaultVersion = savedVersion ? Number(savedVersion) : 3034;
+    const verseParam = searchParams.get('verse');
+    const startVerse = verseParam ? Number(verseParam) : null;
 
     return {
       book,
       chapter,
       versionId: versionId || defaultVersion,
+      startVerse
     };
   };
 
@@ -120,7 +123,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
   const [searchShortcutText, setSearchShortcutText] = useState('Ctrl+K');
 
   // Selection and Highlight Layer
-  const [selectedVerses, setSelectedVerses] = useState<number[]>([]);
+  const [selectedVerses, setSelectedVerses] = useState<number[]>(initial.startVerse ? [initial.startVerse] : []);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isHighlightMenuOpen, setIsHighlightMenuOpen] = useState(false);
 
@@ -129,7 +132,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [searchValue, setSearchValue] = useState('');
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
-  const [pendingScrollVerse, setPendingScrollVerse] = useState<number | null>(null);
+  const [pendingScrollVerse, setPendingScrollVerse] = useState<number | null>(initial.startVerse);
   const lastScrollY = useRef(0);
   const [translationInView, setTranslationInView] = useState(true);
   const observerRef = useRef<IntersectionObserver | null>(null);
@@ -261,6 +264,12 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
       setBook(current.book);
       setChapter(current.chapter);
       setVersionId(current.versionId);
+      if (current.startVerse) {
+        setPendingScrollVerse(current.startVerse);
+        setSelectedVerses([current.startVerse]);
+      } else {
+        setSelectedVerses([]);
+      }
     };
     window.addEventListener('popstate', handlePop);
     return () => window.removeEventListener('popstate', handlePop);
