@@ -3,6 +3,7 @@ import { Audience, ChatMessage } from '../types';
 import { generateFaithAssistantResponse } from '../services/geminiService';
 import { Send, Bot, Loader2, User, Sparkles, Heart, HelpCircle, Share2, Flame, AlertCircle } from 'lucide-react';
 import { Christicon } from '@christicons/react';
+import { logAnalyticsEvent } from '../lib/supabase';
 
 const PrayingHands = (props: { className?: string }) => {
   const sizeMatch = props.className?.match(/w-(\d+)\s+h-(\d+)/) || props.className?.match(/h-(\d+)\s+w-(\d+)/);
@@ -73,6 +74,8 @@ const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ audience }) => {
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setIsLoading(true);
+
+    logAnalyticsEvent('chat_message_sent', audience.toLowerCase(), { input_length: input.length });
 
     try {
       const responseText = await generateFaithAssistantResponse(input, audience);

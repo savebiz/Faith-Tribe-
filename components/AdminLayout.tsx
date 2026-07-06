@@ -9,6 +9,9 @@ import { AdminContentView } from './AdminContentView';
 import { AdminVotdView } from './AdminVotdView';
 import { AdminHomepageView } from './AdminHomepageView';
 import { AdminBibleVersionsView } from './AdminBibleVersionsView';
+import { AdminReviewView } from './AdminReviewView';
+import { AdminEscalationsView } from './AdminEscalationsView';
+import { AdminAnalyticsView } from './AdminAnalyticsView';
 
 interface AdminLayoutProps {
   currentStaff: StaffMember;
@@ -26,6 +29,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentStaff, onSignOu
     if (path.endsWith('/bible') && ['super_admin', 'content_editor'].includes(currentStaff.role)) return 'bible';
     if (path.endsWith('/review') && ['super_admin', 'reviewer'].includes(currentStaff.role)) return 'review';
     if (path.endsWith('/escalations') && ['super_admin', 'teacher_volunteer'].includes(currentStaff.role)) return 'escalations';
+    if (path.endsWith('/analytics') && ['super_admin', 'content_editor', 'zone_manager'].includes(currentStaff.role)) return 'analytics';
     return 'dashboard';
   });
 
@@ -40,6 +44,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentStaff, onSignOu
     { id: 'bible', label: 'Bible Config', icon: Book, roles: ['super_admin', 'content_editor'] },
     { id: 'review', label: 'Review Queue', icon: ClipboardList, roles: ['super_admin', 'reviewer'] },
     { id: 'escalations', label: 'Escalations', icon: AlertCircle, roles: ['super_admin', 'teacher_volunteer'] },
+    { id: 'analytics', label: 'Analytics', icon: LayoutDashboard, roles: ['super_admin', 'content_editor', 'zone_manager'] },
   ].filter(item => item.roles.includes(currentStaff.role));
 
   const changeTab = (tabId: string) => {
@@ -292,19 +297,10 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentStaff, onSignOu
           {activeTab === 'content' && <AdminContentView currentStaff={currentStaff} />}
           {activeTab === 'votd' && <AdminVotdView currentStaff={currentStaff} />}
           {activeTab === 'homepage' && <AdminHomepageView currentStaff={currentStaff} />}
-          {activeTab === 'bible' && <AdminBibleVersionsView currentStaff={currentStaff} />}
-
-          {['review', 'escalations'].includes(activeTab) && (
-            <div className="bg-white p-8 rounded-3xl border border-gray-150 shadow-sm text-center py-16">
-              <div className="mx-auto w-12 h-12 rounded-full bg-teal-50 text-teal-600 flex items-center justify-center mb-4">
-                <BookOpen size={24} />
-              </div>
-              <h3 className="text-lg font-black text-gray-900">Module Under Construction</h3>
-              <p className="text-sm text-gray-500 max-w-sm mx-auto mt-1 font-medium">
-                This area (role-gated `/admin/{activeTab}`) is reserved for future admin content management modules.
-              </p>
-            </div>
-          )}
+          {activeTab === 'bible' && <AdminBibleVersionsView />}
+          {activeTab === 'review' && <AdminReviewView currentStaff={currentStaff} />}
+          {activeTab === 'escalations' && <AdminEscalationsView currentStaff={currentStaff} />}
+          {activeTab === 'analytics' && <AdminAnalyticsView currentStaff={currentStaff} />}
         </main>
       </div>
     </div>

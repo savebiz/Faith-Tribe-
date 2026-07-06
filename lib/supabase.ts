@@ -343,6 +343,10 @@ export interface BibleStudyNote {
   review_level: string;
   language?: string;
   source_version?: string;
+  tier?: 'basic' | 'advanced';
+  review_status?: 'draft' | 'approved' | 'rejected';
+  reviewed_by?: string;
+  reviewed_at?: string;
 }
 
 const USFM_BOOK_ORDER = [
@@ -1075,6 +1079,34 @@ export async function updateBroadcastStatus(
     };
     localStorage.setItem('ft_mock_broadcast_status', JSON.stringify(payload));
     await logAuditLocalOrDB(actorId, 'broadcast.updated', 'broadcast_status', '1', { isLive, title });
+  }
+}
+
+// ------------------------------------------------------------------------------------------------
+// Analytics
+// ------------------------------------------------------------------------------------------------
+
+export async function logAnalyticsEvent(
+  eventType: 'verse_reaction' | 'content_viewed' | 'chat_message_sent' | 'bible_version_selected',
+  zone: string | null,
+  metadata?: any
+) {
+  if (!isRealSupabase || !supabase) return;
+
+  try {
+    const { error } = await supabase
+      .from('analytics_events')
+      .insert({
+        event_type: eventType,
+        zone: zone,
+        metadata: metadata || {}
+      });
+
+    if (error) {
+      console.warn("Analytics logging failed:", error.message);
+    }
+  } catch (e) {
+    console.warn("Analytics logging failed:", e);
   }
 }
 

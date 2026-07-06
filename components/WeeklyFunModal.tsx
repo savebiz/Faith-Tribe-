@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import DOMPurify from 'isomorphic-dompurify';
 import { marked } from 'marked';
 import { WeeklyFunItem } from '../lib/weeklyFunConfig';
+import { logAnalyticsEvent } from '../lib/supabase';
 
 interface WeeklyFunModalProps {
   item: WeeklyFunItem | null;
@@ -264,6 +265,12 @@ const KidsColoringActivity: React.FC<{ item: WeeklyFunItem }> = ({ item }) => {
 };
 
 export function WeeklyFunModal({ item, onClose }: WeeklyFunModalProps) {
+  useEffect(() => {
+    if (item) {
+      logAnalyticsEvent('content_viewed', item.zone || null, { item_id: item.id, item_title: item.title, item_type: item.type });
+    }
+  }, [item]);
+
   if (!item) return null;
 
   return (

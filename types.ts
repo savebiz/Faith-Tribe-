@@ -105,3 +105,21 @@ export interface ChatMessage {
   text: string;
   isError?: boolean;
 }
+
+export interface Escalation {
+  id: string;
+  message: string;
+  status: 'queued' | 'claimed' | 'resolved';
+  claimed_by?: string | null;
+  created_at: string;
+}
+
+export type AnalyticsEventType = 'verse_reaction' | 'content_viewed' | 'chat_message_sent' | 'bible_version_selected';
+
+export interface AnalyticsEvent {
+  id?: string;
+  event_type: AnalyticsEventType;
+  zone: string | null;
+  metadata?: any;
+  created_at?: string;
+}

@@ -357,3 +357,84 @@ CREATE POLICY "staff can upload content media"
 CREATE POLICY "public can view content media"
   ON storage.objects FOR SELECT
   USING (bucket_id = 'content-media');
+
+-- ----------------------------------------------------
+-- Phase 4: Safety & Moderation
+-- ----------------------------------------------------
+
+-- Add Review fields to bible_study_notes
+ALTER TABLE bible_study_notes ADD COLUMN IF NOT EXISTS tier text DEFAULT 'basic';
+ALTER TABLE bible_study_notes ADD COLUMN IF NOT EXISTS review_status text DEFAULT 'draft';
+ALTER TABLE bible_study_notes ADD COLUMN IF NOT EXISTS reviewed_by uuid REFERENCES staff(id);
+ALTER TABLE bible_study_notes ADD COLUMN IF NOT EXISTS reviewed_at timestamptz;
+
+-- Update RLS for bible_study_notes
+DROP POLICY IF EXISTS "Allow anonymous read access for study notes" ON bible_study_notes;
+CREATE POLICY "public reads approved content"
+  ON bible_study_notes FOR SELECT
+  USING (tier = 'advanced' OR review_status = 'approved');
+
+CREATE POLICY "reviewers manage basic tier drafts"
+  ON bible_study_notes FOR ALL
+  USING (current_staff_role() IN ('super_admin', 'reviewer'));
+
+-- Create escalations table
+CREATE TABLE IF NOT EXISTS escalations (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  message text NOT NULL,
+  status text DEFAULT 'queued',
+  claimed_by uuid REFERENCES staff(id),
+  created_at timestamptz DEFAULT now()
+);
+
+-- Escalations RLS
+ALTER TABLE escalations ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "teachers and admins read escalations"
+  ON escalations FOR SELECT
+  USING (current_staff_role() IN ('super_admin', 'teacher_volunteer'));
+
+CREATE POLICY "claim owner or admin can update"
+  ON escalations FOR UPDATE
+  USING (
+    current_staff_role() = 'super_admin'
+    OR claimed_by = auth.uid()
+  );
+
+-- ----------------------------------------------------
+-- Phase 5: Analytics Dashboard
+-- ----------------------------------------------------
+
+-- Create analytics ENUM if it doesn't exist
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'analytics_event_type') THEN
+        CREATE TYPE analytics_event_type AS ENUM (
+          'verse_reaction',
+          'content_viewed',
+          'chat_message_sent',
+          'bible_version_selected'
+        );
+    END IF;
+END
+$$;
+
+-- Create analytics_events table
+CREATE TABLE IF NOT EXISTS analytics_events (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  event_type analytics_event_type NOT NULL,
+  zone text,
+  metadata jsonb,
+  created_at timestamptz DEFAULT now()
+);
+
+-- Analytics RLS
+ALTER TABLE analytics_events ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "any request can insert events"
+  ON analytics_events FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "content staff read analytics"
+  ON analytics_events FOR SELECT
+  USING (current_staff_role() IN ('super_admin', 'content_editor', 'zone_manager'));
+

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { BibleReader } from '@youversion/platform-react-ui';
 import { ArrowLeft, Book, BookOpen, Flame, Share2, MoreVertical, Copy, AlertTriangle, Check, Award, Download, Highlighter, Trash2, X, ArrowRight, Search } from 'lucide-react';
 import { toast } from 'sonner';
-import { fetchReactionCount, incrementReactionCount, hasReacted, fetchStudyNotesForChapter, BibleStudyNote, fetchActiveBibleVersions, fetchZoneDefaultVersions } from '../supabase';
+import { fetchReactionCount, incrementReactionCount, hasReacted, fetchStudyNotesForChapter, BibleStudyNote, fetchActiveBibleVersions, fetchZoneDefaultVersions, logAnalyticsEvent } from '../supabase';
 import { StudyNote } from '../../components/StudyNote';
 import { useReadingPreferences } from './useReadingPreferences';
 import { ChapterSelector } from './ChapterSelector';
@@ -550,6 +550,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
     // Only accept approved versions (Part B)
     if (approvedVersions.some((v) => v.id === id)) {
       setVersionId(id);
+      logAnalyticsEvent('bible_version_selected', null, { version_id: id, book, chapter });
     }
   };
 
@@ -559,6 +560,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
     setReactionsCount((prev) => prev + 1);
     const updatedCount = await incrementReactionCount(book, chapter);
     setReactionsCount(updatedCount);
+    logAnalyticsEvent('verse_reaction', null, { book, chapter, action: 'amen' });
   };
 
   const currentVersionLabel = approvedVersions.find((v) => v.id === versionId)?.label || 'Berean Standard Bible (BSB)';
