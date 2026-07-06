@@ -5,7 +5,8 @@ const MODEL_NAME = 'gemini-3-flash-preview';
 
 // Initialize the client lazily
 const getAiClient = () => {
-  const apiKey = process.env.API_KEY;
+  // Try Vite env first, then fallback to process.env for server-side if applicable
+  const apiKey = (typeof import.meta !== 'undefined' && import.meta.env ? import.meta.env.VITE_GEMINI_API_KEY : null) || process.env.VITE_GEMINI_API_KEY || process.env.API_KEY;
   if (!apiKey || apiKey === "undefined" || apiKey === "null") {
     console.warn("Gemini API Key is missing. Operating in offline demo mode.");
     return null;
