@@ -121,7 +121,13 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 const isRealSupabase = !!(supabaseUrl && supabaseAnonKey);
 
 export const supabase = isRealSupabase 
-  ? createClient(supabaseUrl, supabaseAnonKey) 
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      global: {
+        fetch: (url, options) => {
+          return fetch(url, { ...options, cache: 'no-store' });
+        }
+      }
+    }) 
   : null;
 
 // Mock reactions system using localStorage if Supabase is offline/unconfigured
