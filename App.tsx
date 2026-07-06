@@ -15,7 +15,7 @@ import { VerseOfTheWeek } from './lib/bible/VerseOfTheWeek';
 import { BibleReaderView } from './lib/bible/BibleReaderView';
 import { StudyNote } from './components/StudyNote';
 import { parseScriptureReference } from './lib/bible/bookCodes';
-import { getCurriculumCache, saveCurriculumCache, fetchCustomVerse, updateCustomVerse, fetchStudyNotesForChapter, signInStaff, signOutStaff, getCurrentStaff, fetchBroadcastStatus, fetchContentItems } from './lib/supabase';
+import { getCurriculumCache, saveCurriculumCache, fetchCustomVerse, updateCustomVerse, fetchStudyNotesForChapter, signInStaff, signOutStaff, getCurrentStaff, fetchBroadcastStatus, fetchContentItems, supabase } from './lib/supabase';
 import { WEEKLY_FUN_ITEMS, WeeklyFunItem } from './lib/weeklyFunConfig';
 import { WeeklyFunModal } from './components/WeeklyFunModal';
 import { AdminLayout } from './components/AdminLayout';
@@ -129,6 +129,7 @@ const App: React.FC = () => {
   }, [currentView]);
 
   // -- State for Live Stream Status (conditional UI) --
+  const [dbError, setDbError] = useState<string | null>(null);
   const [broadcastStatus, setBroadcastStatus] = useState({
     isLive: false,
     title: "",
@@ -163,8 +164,9 @@ const App: React.FC = () => {
             heroImageUrl: newImageUrl
           };
         });
-      } catch (err) {
+      } catch (err: any) {
         console.error("Failed to fetch broadcast status:", err);
+        setDbError(err.message || String(err));
       }
     };
 
@@ -708,8 +710,9 @@ const App: React.FC = () => {
             }));
             setWeeklyFunItems(mapped);
           }
-        } catch (err) {
+        } catch (err: any) {
           console.error('Failed to fetch kids content:', err);
+          setDbError(err.message || String(err));
         }
       }
       loadKidsContent();
@@ -1905,9 +1908,12 @@ const App: React.FC = () => {
 
           {/* Copyright & Attribution Row */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/50 pt-8 border-t border-[#4d4475] mb-8">
-            <div className="flex items-center gap-0.5">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <span>&copy; {new Date().getFullYear()} Faith Tribe</span>
               <img src="/Faith_Tribe_Grey-rbg.png" className="w-8 h-8 sm:w-9 sm:h-9 object-contain" alt="Faith Tribe logo" />
+              <span className="text-[10px] bg-white/5 border border-white/10 px-2 py-0.5 rounded-full font-mono text-white/60">
+                DB: {supabase ? 'Supabase' : 'Offline Sandbox'}
+              </span>
             </div>
             <div>
               A digital ministry of RCCG Region 63 Junior Church
