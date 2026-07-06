@@ -390,7 +390,7 @@ const App: React.FC = () => {
           <div className="w-full flex justify-center lg:justify-end mt-6 sm:mt-12 lg:mt-0">
             <div className="w-full max-w-md sm:max-w-lg p-3 bg-white/40 backdrop-blur-md rounded-[2.5rem] border border-white/40 shadow-2xl flex">
               <video
-                key={broadcastStatus.heroVideoUrl || "/faith-tribe-hero.mp4"}
+                key={`${broadcastStatus.heroVideoUrl}-${broadcastStatus.heroImageUrl}`}
                 autoPlay
                 muted
                 loop
@@ -400,7 +400,7 @@ const App: React.FC = () => {
                 aria-hidden="true"
               >
                 {broadcastStatus.heroVideoUrl ? (
-                  <source src={broadcastStatus.heroVideoUrl} type="video/mp4" />
+                  <source src={broadcastStatus.heroVideoUrl} />
                 ) : (
                   <>
                     <source src="/faith-tribe-hero-w.webm" type="video/webm" />
