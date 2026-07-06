@@ -15,6 +15,21 @@ interface GeminiAssistantProps {
   audience: Audience;
 }
 
+const formatText = (text: string) => {
+  // Simple escape
+  const safeText = text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+  
+  // Parse bold and italics
+  return safeText
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>');
+};
+
 const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ audience }) => {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -164,7 +179,7 @@ const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ audience }) => {
                   {msg.isError && <AlertCircle size={16} className="shrink-0 mt-0.5" />}
                   <div className="space-y-1.5">
                     {msg.text.split('\n').map((line, i) => (
-                      <p key={i}>{line}</p>
+                      <p key={i} dangerouslySetInnerHTML={{ __html: formatText(line) }} />
                     ))}
                   </div>
                 </div>
