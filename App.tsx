@@ -123,6 +123,10 @@ const App: React.FC = () => {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentView]);
+
   // -- State for Live Stream Status (conditional UI) --
   const [broadcastStatus, setBroadcastStatus] = useState({
     isLive: false,
@@ -136,12 +140,27 @@ const App: React.FC = () => {
     const fetchStatus = async () => {
       try {
         const data = await fetchBroadcastStatus();
-        setBroadcastStatus({
-          isLive: !!data.is_live,
-          title: data.title || "",
-          watchUrl: data.url || "",
-          heroVideoUrl: data.hero_video_url || "",
-          heroImageUrl: data.hero_image_url || ""
+        const newIsLive = !!data.is_live;
+        const newTitle = data.title || "";
+        const newUrl = data.url || "";
+        const newVideoUrl = data.hero_video_url || "";
+        const newImageUrl = data.hero_image_url || "";
+        
+        setBroadcastStatus(prev => {
+          if (prev.isLive === newIsLive && 
+              prev.title === newTitle && 
+              prev.watchUrl === newUrl && 
+              prev.heroVideoUrl === newVideoUrl && 
+              prev.heroImageUrl === newImageUrl) {
+            return prev; // Prevent unnecessary re-render
+          }
+          return {
+            isLive: newIsLive,
+            title: newTitle,
+            watchUrl: newUrl,
+            heroVideoUrl: newVideoUrl,
+            heroImageUrl: newImageUrl
+          };
         });
       } catch (err) {
         console.error("Failed to fetch broadcast status:", err);
