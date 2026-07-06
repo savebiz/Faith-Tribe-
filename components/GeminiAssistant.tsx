@@ -19,10 +19,15 @@ const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ audience }) => {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({
+        top: scrollContainerRef.current.scrollHeight,
+        behavior: 'smooth'
+      });
+    }
   };
 
   useEffect(() => {
@@ -116,7 +121,9 @@ const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ audience }) => {
       </div>
 
       {/* Messages */}
-      <div className={`flex-1 overflow-y-auto p-4 space-y-4 transition-colors duration-300
+      <div 
+        ref={scrollContainerRef}
+        className={`flex-1 overflow-y-auto p-4 space-y-4 transition-colors duration-300
         ${audience === Audience.TEENS ? 'bg-gray-950/40' : 'bg-gray-50/50'}`}>
         
         {messages.map((msg) => {
@@ -180,7 +187,6 @@ const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ audience }) => {
              </div>
           </div>
         )}
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Quick Prompts - Soul Winning Focus (Cleaned from emojis) */}
