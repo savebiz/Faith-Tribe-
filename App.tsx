@@ -701,7 +701,7 @@ const App: React.FC = () => {
               thumbnailUrl: item.thumbnail_url || 'https://picsum.photos/seed/jesuslove/400/250',
               type: item.type as any,
               duration: item.duration || '',
-              videoId: item.video_id || '',
+              youtubeVideoId: item.video_id || '',
               videoSource: item.video_source as any || 'youtube',
               storyContent: item.story_content || '',
               writingPrompt: item.writing_prompt || '',
