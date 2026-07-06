@@ -13,6 +13,7 @@ const PrayingHands = (props: { className?: string }) => {
 
 interface GeminiAssistantProps {
   audience: Audience;
+  onSelectAction?: (actionType: 'get_saved' | 'share_faith') => void;
 }
 
 const formatText = (text?: string) => {
@@ -31,7 +32,7 @@ const formatText = (text?: string) => {
     .replace(/\*(.*?)\*/g, '<em>$1</em>');
 };
 
-const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ audience }) => {
+const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ audience, onSelectAction }) => {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -222,14 +223,14 @@ const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ audience }) => {
         {audience === Audience.TEENS && (
           <>
             <button 
-              onClick={() => handleQuickPrompt("How do I get saved?")} 
+              onClick={() => onSelectAction ? onSelectAction('get_saved') : handleQuickPrompt("How do I get saved?")} 
               className="whitespace-nowrap flex items-center gap-1.5 px-3.5 py-1.5 bg-gray-800 border border-emerald-500/30 text-emerald-300 rounded-full text-xs font-bold hover:bg-emerald-500/10 hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-sm"
             >
               <Heart size={12} className="text-emerald-400 fill-emerald-400/20" />
               <span>I want to get saved</span>
             </button>
             <button 
-              onClick={() => handleQuickPrompt("How do I tell my friends about God?")} 
+              onClick={() => onSelectAction ? onSelectAction('share_faith') : handleQuickPrompt("How do I tell my friends about God?")} 
               className="whitespace-nowrap flex items-center gap-1.5 px-3.5 py-1.5 bg-gray-800 border border-emerald-500/30 text-emerald-300 rounded-full text-xs font-bold hover:bg-emerald-500/10 hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-sm"
             >
               <Share2 size={12} className="text-emerald-400" />

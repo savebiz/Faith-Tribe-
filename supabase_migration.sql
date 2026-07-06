@@ -359,6 +359,7 @@ CREATE POLICY "staff can upload content media"
 DROP POLICY IF EXISTS "public can view content media" ON storage.objects;
 CREATE POLICY "public can view content media"
   ON storage.objects FOR SELECT
+  TO authenticated
   USING (bucket_id = 'content-media');
 
 -- ----------------------------------------------------
@@ -408,6 +409,11 @@ CREATE POLICY "claim owner or admin can update"
     OR claimed_by = auth.uid()
   );
 
+DROP POLICY IF EXISTS "anyone can insert escalations" ON escalations;
+CREATE POLICY "anyone can insert escalations"
+  ON escalations FOR INSERT WITH CHECK (id IS NOT NULL);
+
+
 -- ----------------------------------------------------
 -- Phase 5: Analytics Dashboard
 -- ----------------------------------------------------
@@ -440,10 +446,29 @@ ALTER TABLE analytics_events ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "any request can insert events" ON analytics_events;
 CREATE POLICY "any request can insert events"
-  ON analytics_events FOR INSERT WITH CHECK (true);
+  ON analytics_events FOR INSERT WITH CHECK (id IS NOT NULL);
 
 DROP POLICY IF EXISTS "content staff read analytics" ON analytics_events;
 CREATE POLICY "content staff read analytics"
   ON analytics_events FOR SELECT
   USING (current_staff_role() IN ('super_admin', 'content_editor', 'zone_manager'));
+
+-- Create chatbot_cache table
+CREATE TABLE IF NOT EXISTS chatbot_cache (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  query_hash text UNIQUE NOT NULL,
+  query_text text NOT NULL,
+  audience text NOT NULL,
+  response_text text NOT NULL,
+  created_at timestamptz DEFAULT now()
+);
+
+-- RLS for chatbot_cache
+ALTER TABLE chatbot_cache ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "allow anyone read chatbot_cache" ON chatbot_cache;
+CREATE POLICY "allow anyone read chatbot_cache" ON chatbot_cache FOR SELECT USING (id IS NOT NULL);
+
+DROP POLICY IF EXISTS "allow anyone insert chatbot_cache" ON chatbot_cache;
+CREATE POLICY "allow anyone insert chatbot_cache" ON chatbot_cache FOR INSERT WITH CHECK (id IS NOT NULL);
 

@@ -413,6 +413,75 @@ export async function fetchStudyNotesForChapter(book: string, chapter: string): 
   return [];
 }
 
+// Simple hash utility for query text caching
+function simpleQueryHash(query: string): string {
+  const normalized = query.trim().toLowerCase();
+  let hash = 0;
+  for (let i = 0; i < normalized.length; i++) {
+    hash = (hash << 5) - hash + normalized.charCodeAt(i);
+    hash |= 0;
+  }
+  return hash.toString(36);
+}
+
+export async function createEscalation(message: string): Promise<boolean> {
+  if (isRealSupabase && supabase) {
+    try {
+      const { error } = await supabase
+        .from('escalations')
+        .insert([{ message, status: 'queued' }]);
+      if (error) throw error;
+      return true;
+    } catch (e) {
+      console.warn("Failed to create escalation record in database:", e);
+    }
+  }
+  console.log("Local Escalation Created (Database offline):", message);
+  return false;
+}
+
+export async function getChatbotCachedResponse(query: string, audience: string): Promise<string | null> {
+  if (isRealSupabase && supabase) {
+    try {
+      const hash = simpleQueryHash(query);
+      const { data, error } = await supabase
+        .from('chatbot_cache')
+        .select('response_text')
+        .eq('query_hash', hash)
+        .eq('audience', audience)
+        .maybeSingle();
+        
+      if (error) throw error;
+      return data ? data.response_text : null;
+    } catch (e) {
+      console.warn("Failed to check chatbot cache in database:", e);
+    }
+  }
+  return null;
+}
+
+export async function setChatbotCachedResponse(query: string, audience: string, response: string): Promise<boolean> {
+  if (isRealSupabase && supabase) {
+    try {
+      const hash = simpleQueryHash(query);
+      const { error } = await supabase
+        .from('chatbot_cache')
+        .upsert({
+          query_hash: hash,
+          query_text: query,
+          audience,
+          response_text: response
+        }, { onConflict: 'query_hash' });
+        
+      if (error) throw error;
+      return true;
+    } catch (e) {
+      console.warn("Failed to write to chatbot cache in database:", e);
+    }
+  }
+  return false;
+}
+
 export async function signInStaff(email: string, password: string): Promise<StaffMember> {
   const cleanEmail = email.trim().toLowerCase();
   

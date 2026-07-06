@@ -6,9 +6,10 @@ interface ContentSectionProps {
   title: string;
   items: ContentItem[];
   colorTheme: string; // e.g., "text-brand-accent", "text-teens-primary", "text-teachers-secondary"
+  onItemClick?: (item: ContentItem) => void;
 }
 
-const ContentSection: React.FC<ContentSectionProps> = ({ title, items, colorTheme }) => {
+const ContentSection: React.FC<ContentSectionProps> = ({ title, items, colorTheme, onItemClick }) => {
   
   // Helper to resolve card tag icon and style
   const getTypeMeta = (type: string) => {
@@ -72,6 +73,7 @@ const ContentSection: React.FC<ContentSectionProps> = ({ title, items, colorThem
           return (
             <div 
               key={item.id} 
+              onClick={() => onItemClick && onItemClick(item)}
               className={`group overflow-hidden cursor-pointer transition-all duration-300 rounded-2xl ${getCardStyle()}`}
             >
               {/* Media Thumbnail */}

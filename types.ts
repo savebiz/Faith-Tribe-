@@ -42,6 +42,11 @@ export interface ContentItem {
   thumbnail: string;
   type: 'VIDEO' | 'ARTICLE' | 'ACTIVITY' | 'LESSON_PLAN';
   duration?: string;
+  youtubeVideoId?: string;
+  articleContent?: string;
+  readTime?: string;
+  videoSource?: string;
+  documentUrl?: string;
 }
 
 export interface DbContentItem {

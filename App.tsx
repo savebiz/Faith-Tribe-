@@ -18,6 +18,7 @@ import { parseScriptureReference } from './lib/bible/bookCodes';
 import { getCurriculumCache, saveCurriculumCache, fetchCustomVerse, updateCustomVerse, fetchStudyNotesForChapter, signInStaff, signOutStaff, getCurrentStaff, fetchBroadcastStatus, fetchContentItems, supabase } from './lib/supabase';
 import { WEEKLY_FUN_ITEMS, WeeklyFunItem } from './lib/weeklyFunConfig';
 import { WeeklyFunModal } from './components/WeeklyFunModal';
+import { TeensContentModal } from './components/TeensContentModal';
 import { AdminLayout } from './components/AdminLayout';
 
 // --- Mock Data ---
@@ -851,91 +852,190 @@ const App: React.FC = () => {
     );
   };
 
-  const TeensView = () => (
-    <div className="mesh-gradient-teens min-h-screen text-gray-100 pb-16">
-      {/* Teens Header Banner */}
-      <div className="relative h-72 overflow-hidden border-b border-gray-800">
-        <img
-          src="https://picsum.photos/seed/teens/1200/400"
-          className="w-full h-full object-cover opacity-25 filter grayscale"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-900/60 to-transparent flex items-end">
-          <div className="max-w-7xl mx-auto px-6 pb-8 w-full flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
-            <div>
-              <div className="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full text-xs font-bold mb-3 shadow-md">
-                <Sparkles size={12} />
-                <span>Identity & Hope</span>
+  const TeensView = () => {
+    const [selectedTeensItem, setSelectedTeensItem] = useState<ContentItem | null>(null);
+    const [teensContentItems, setTeensContentItems] = useState<ContentItem[]>(TEENS_CONTENT);
+    const [isLoadingTeens, setIsLoadingTeens] = useState(false);
+    const [teensStreak] = useState(() => {
+      const saved = localStorage.getItem('ft_bible_streak');
+      return saved ? Number(saved) : 0;
+    });
+
+    useEffect(() => {
+      async function loadTeensContent() {
+        try {
+          setIsLoadingTeens(true);
+          const dbItems = await fetchContentItems('teens', undefined, 'published');
+          if (dbItems && dbItems.length > 0) {
+            const mapped: ContentItem[] = dbItems.map(item => ({
+              id: item.id,
+              title: item.title,
+              description: item.description || '',
+              thumbnail: item.thumbnail_url || 'https://picsum.photos/seed/teens/400/250',
+              type: (item.type === 'video' ? 'VIDEO' : 'ARTICLE') as any,
+              duration: item.duration || undefined,
+              youtubeVideoId: item.video_id || undefined,
+              articleContent: item.story_content || undefined,
+              videoSource: item.video_source || undefined,
+              documentUrl: item.document_url || undefined
+            }));
+            setTeensContentItems(mapped);
+          }
+        } catch (err: any) {
+          console.error('Failed to fetch teens content:', err);
+        } finally {
+          setIsLoadingTeens(false);
+        }
+      }
+      loadTeensContent();
+    }, []);
+
+    const triggerShareFriends = async () => {
+      const shareData = {
+        title: 'Faith Tribe Teens',
+        text: 'Join me on Faith Tribe Teens — a place for genuine questions and real faith!',
+        url: window.location.origin + '/teens'
+      };
+      
+      if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+        try {
+          await navigator.share(shareData);
+          toast.success('Shared successfully! 🔗');
+        } catch (err) {
+          console.warn('Share failed:', err);
+        }
+      } else {
+        try {
+          await navigator.clipboard.writeText(shareData.url);
+          toast.success('Invite link copied to clipboard! Share with your friends. 🔗', { duration: 4000 });
+        } catch (cErr) {
+          toast.error('Failed to copy link. Please copy the URL bar!');
+        }
+      }
+    };
+
+    const sermonVideoItem: ContentItem = {
+      id: 'sermon-identity',
+      title: 'Identity in a Filtered World',
+      description: 'Who are you when the screen is turned off? Learn how Christ defines your worth, potential, and future far beyond likes and comments.',
+      thumbnail: 'https://picsum.photos/seed/teens/1200/400',
+      type: 'VIDEO',
+      youtubeVideoId: 'dQw4w9WgXcQ' // default placeholder sermon video
+    };
+
+    return (
+      <div className="mesh-gradient-teens min-h-screen text-gray-100 pb-16">
+        {/* Teens Header Banner */}
+        <div className="relative h-72 overflow-hidden border-b border-gray-800">
+          <img
+            src="https://picsum.photos/seed/teens/1200/400"
+            className="w-full h-full object-cover opacity-25 filter grayscale"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-900/60 to-transparent flex items-end">
+            <div className="max-w-7xl mx-auto px-6 pb-8 w-full flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+              <div>
+                <div className="inline-flex items-center gap-1.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full text-xs font-bold mb-3 shadow-md">
+                  <Sparkles size={12} />
+                  <span>Identity & Hope</span>
+                </div>
+                <h1 className="text-4xl md:text-6xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-indigo-400">
+                  Faith Teens
+                </h1>
+                <p className="text-gray-400 mt-2.5 text-base sm:text-lg max-w-md">
+                  Genuine questions. Real faith. No performance, just raw truth.
+                </p>
               </div>
-              <h1 className="text-4xl md:text-6xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-indigo-400">
-                Faith Teens
-              </h1>
-              <p className="text-gray-400 mt-2.5 text-base sm:text-lg max-w-md">
-                Genuine questions. Real faith. No performance, just raw truth.
+              <button
+                onClick={triggerShareFriends}
+                className="flex items-center gap-2 bg-emerald-400 hover:bg-emerald-300 text-gray-950 px-5 py-2.5 rounded-full font-bold hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-500/10 cursor-pointer"
+              >
+                <Share2 size={16} /> Invite Friends
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-6 mt-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-8">
+
+            {/* Monthly Topic Featured Panel */}
+            <div className="p-6 sm:p-8 rounded-3xl bg-gray-900/80 border border-gray-800 shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full filter blur-2xl"></div>
+              <h2 className="text-xl font-bold mb-3 flex items-center gap-2 text-emerald-400">
+                <Zap className="text-yellow-400" /> Topic of the Month
+              </h2>
+              <p className="text-2xl font-black text-white">"Identity in a Filtered World"</p>
+              <p className="text-gray-400 mt-2 text-sm leading-relaxed max-w-xl">
+                Who are you when the screen is turned off? Learn how Christ defines your worth, potential, and future far beyond likes and comments.
               </p>
+
+              <div className="flex flex-wrap gap-3 mt-6">
+                <button
+                  onClick={() => setSelectedTeensItem(sermonVideoItem)}
+                  className="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-gray-950 rounded-lg text-sm font-bold transition-all hover:scale-102 cursor-pointer"
+                >
+                  Watch Message
+                </button>
+                <button
+                  onClick={() => setIsPrayerModalOpen(true)}
+                  className="px-5 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 rounded-lg text-sm font-bold transition-all hover:scale-102 cursor-pointer"
+                >
+                  Need Advice / Prayer?
+                </button>
+              </div>
             </div>
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(window.location.href).catch(() => { });
-                toast.success('Invite link copied to clipboard! Share with your friends. 🔗', { duration: 4000 });
-              }}
-              className="flex items-center gap-2 bg-emerald-400 hover:bg-emerald-300 text-gray-950 px-5 py-2.5 rounded-full font-bold hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-500/10 cursor-pointer"
-            >
-              <Share2 size={16} /> Invite Friends
-            </button>
+
+            {isLoadingTeens ? (
+              <div className="bg-gray-900/60 p-12 rounded-3xl border border-gray-800 text-center">
+                <p className="text-sm text-gray-400 animate-pulse">Loading latest drops...</p>
+              </div>
+            ) : (
+              <ContentSection 
+                title="Latest Drops" 
+                items={teensContentItems} 
+                colorTheme="text-emerald-400" 
+                onItemClick={(item) => setSelectedTeensItem(item)}
+              />
+            )}
+
+            {/* Bible Verse Spotlight */}
+            <div className="bg-white p-8 rounded-[2rem] shadow-sm border-4 border-emerald-200/60 relative overflow-hidden text-gray-700 animate-in fade-in duration-300">
+              <div className="absolute top-0 right-0 p-3 bg-emerald-400 text-white rounded-bl-2xl flex items-center gap-1 font-bold text-xs">
+                <Flame size={14} className="fill-current text-yellow-300 animate-pulse" />
+                <span>{teensStreak} Day Streak</span>
+              </div>
+              <h3 className="text-2xl text-emerald-600 mb-4 font-sans font-bold">Verse of the Day</h3>
+              <VerseOfTheWeek versionId={1588} showStudyNotes={true} />
+            </div>
+          </div>
+
+          <div className="lg:col-span-1">
+            <div className="sticky top-24">
+              <GeminiAssistant 
+                audience={Audience.TEENS} 
+                onSelectAction={(action) => {
+                  if (action === 'get_saved') {
+                    setIsSalvationModalOpen(true);
+                    setSalvationStep(1);
+                  } else if (action === 'share_faith') {
+                    triggerShareFriends();
+                  }
+                }}
+              />
+            </div>
           </div>
         </div>
+
+        {/* In-app Teens Content Viewer Modal */}
+        {selectedTeensItem && (
+          <TeensContentModal 
+            item={selectedTeensItem} 
+            onClose={() => setSelectedTeensItem(null)} 
+          />
+        )}
       </div>
-
-      <div className="max-w-7xl mx-auto px-6 mt-10 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-
-          {/* Monthly Topic Featured Panel */}
-          <div className="p-6 sm:p-8 rounded-3xl bg-gray-900/80 border border-gray-800 shadow-xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full filter blur-2xl"></div>
-            <h2 className="text-xl font-bold mb-3 flex items-center gap-2 text-emerald-400">
-              <Zap className="text-yellow-400" /> Topic of the Month
-            </h2>
-            <p className="text-2xl font-black text-white">"Identity in a Filtered World"</p>
-            <p className="text-gray-400 mt-2 text-sm leading-relaxed max-w-xl">
-              Who are you when the screen is turned off? Learn how Christ defines your worth, potential, and future far beyond likes and comments.
-            </p>
-
-            <div className="flex flex-wrap gap-3 mt-6">
-              <button
-                onClick={() => toast('Loading sermon video... 🎬', { duration: 3000 })}
-                className="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-gray-950 rounded-lg text-sm font-bold transition-all hover:scale-102 cursor-pointer"
-              >
-                Watch Message
-              </button>
-              <button
-                onClick={() => setIsPrayerModalOpen(true)}
-                className="px-5 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 border border-gray-700 rounded-lg text-sm font-bold transition-all hover:scale-102 cursor-pointer"
-              >
-                Need Advice / Prayer?
-              </button>
-            </div>
-          </div>
-
-          <ContentSection title="Latest Drops" items={TEENS_CONTENT} colorTheme="text-emerald-400" />
-
-          {/* Bible Verse Spotlight */}
-          <div className="bg-white p-8 rounded-[2rem] shadow-sm border-4 border-emerald-200/60 relative overflow-hidden text-gray-700 animate-in fade-in duration-300">
-            <div className="absolute top-0 right-0 p-3 bg-emerald-400 text-white rounded-bl-2xl">
-              <Trophy size={18} />
-            </div>
-            <h3 className="text-2xl text-emerald-600 mb-4 font-sans font-bold">Verse of the Day</h3>
-            <VerseOfTheWeek versionId={1588} />
-          </div>
-        </div>
-
-        <div className="lg:col-span-1">
-          <div className="sticky top-24">
-            <GeminiAssistant audience={Audience.TEENS} />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const TeachersView = () => {
     const [curriculumTrack, setCurriculumTrack] = useState<'kids' | 'teens'>('kids');

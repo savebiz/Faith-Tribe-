@@ -1,5 +1,6 @@
 import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import { Audience } from "../types";
+import { createEscalation, getChatbotCachedResponse, setChatbotCachedResponse } from "../lib/supabase";
 
 const MODEL_NAME = 'gemini-3-flash-preview';
 
@@ -49,7 +50,61 @@ export const generateFaithAssistantResponse = async (
   query: string, 
   audience: Audience
 ): Promise<string> => {
+  // 1. Distress detection (Any audience, but special customized text for Teens)
+  const lowercaseQuery = query.toLowerCase();
+  const distressKeywords = [
+    'self harm', 'kill myself', 'suicide', 'hurt myself', 'end my life', 
+    'want to die', 'cutting myself', 'abuse', 'abusing me', 'hit me', 
+    'sexual abuse', 'rape', 'assaulted', 'depressed', 'worthless', 
+    'no reason to live'
+  ];
+  const isDistress = distressKeywords.some(word => lowercaseQuery.includes(word));
+  
+  if (isDistress) {
+    // Escalate to database queue
+    await createEscalation(`${audience.toUpperCase()} Chat Alert: ${query}`);
+    
+    if (audience === Audience.TEENS) {
+      return `Hey, I hear you, and I want you to know you are incredibly valuable and not alone. But since I'm just an AI, I want to make sure you get real support. Please talk to a trusted adult, parent, or church leader right now. 
+
+📞 You can also call or text the Suicide & Crisis Lifeline at **988** (available 24/7, free and confidential). 
+❤️ We care about you deeply.`;
+    } else if (audience === Audience.KIDS) {
+      return `Hi friend, if you are feeling sad or hurt, please tell a parent, teacher, or another trusted adult right away. God loves you so much and wants you to be safe and happy! ❤️`;
+    } else {
+      return `If you or someone you know is in crisis, please seek immediate help. Talk to a trusted adult, church pastor, or contact the Suicide & Crisis Lifeline by calling or texting **988**.`;
+    }
+  }
+
+  // 2. Rate limiting (Only for Teens audience)
+  if (audience === Audience.TEENS) {
+    const today = new Date().toISOString().split('T')[0];
+    const storedDate = localStorage.getItem('ft_teens_chat_date');
+    const storedCount = localStorage.getItem('ft_teens_chat_count');
+    
+    let count = 0;
+    if (storedDate === today) {
+      count = storedCount ? Number(storedCount) : 0;
+    } else {
+      localStorage.setItem('ft_teens_chat_date', today);
+      localStorage.setItem('ft_teens_chat_count', '0');
+    }
+    
+    if (count >= 30) {
+      return "Whoa! You've reached your daily limit of 30 questions. Take a break, search through our study notes, or talk to a leader at church!";
+    }
+    
+    localStorage.setItem('ft_teens_chat_count', (count + 1).toString());
+  }
+
+  // 3. Global response caching lookup
+  const cached = await getChatbotCachedResponse(query, audience);
+  if (cached) {
+    return cached;
+  }
+
   let systemInstruction = "";
+  let maxOutputTokens = 150; // default for Kids and Teachers
 
   switch (audience) {
     case Audience.KIDS:
@@ -65,6 +120,7 @@ export const generateFaithAssistantResponse = async (
       - Keep answers short (under 100 words).`;
       break;
     case Audience.TEENS:
+      maxOutputTokens = 300; // Teens get double budget for substantive insights
       systemInstruction = `You are "Tribe Mentor", a cool, relatable, but spiritually grounded mentor for teenagers (13-19).
       
       CORE MISSION: EVANGELISM & DISCIPLESHIP
@@ -73,9 +129,10 @@ export const generateFaithAssistantResponse = async (
       - Encourage peer-to-peer evangelism: help them formulate how to tell their friends about Jesus without being "cringe".
       
       TONE & STYLE:
-      - Use modern language but remain respectful. 
-      - Provide biblical scripture references (NIV or NKJV).
-      - Be empathetic and non-judgmental.`;
+      - Use an exploratory, comforting tone.
+      - Be comfortable engaging real, hard questions (e.g. "why does God allow suffering", "how do I know what's true").
+      - DO NOT be preachy, dismissive, or lecturing. Keep it real, respectful, empathetic, and non-judgmental.
+      - Provide helpful biblical scripture references (NIV or NKJV).`;
       break;
     case Audience.TEACHERS:
       systemInstruction = `You are "Ministry Co-Pilot", an advanced assistant for Junior Church teachers.
@@ -93,28 +150,36 @@ export const generateFaithAssistantResponse = async (
       systemInstruction = "You are a helpful Christian ministry assistant focused on spreading the Gospel.";
   }
 
+  let finalResponse = "";
+
   try {
     const ai = getAiClient();
     if (!ai) {
-      // Simulate network delay for realistic feel
       await new Promise(resolve => setTimeout(resolve, 800));
-      return getMockResponse(query, audience);
+      finalResponse = getMockResponse(query, audience);
+    } else {
+      const response: GenerateContentResponse = await ai.models.generateContent({
+        model: MODEL_NAME,
+        contents: query,
+        config: {
+          systemInstruction: systemInstruction,
+          maxOutputTokens: maxOutputTokens,
+          thinkingConfig: { thinkingBudget: 0 }, // Disable thinking for faster chat response
+        }
+      });
+      finalResponse = response.text || "I'm having a little trouble hearing you right now. Can we try again?";
     }
-
-    const response: GenerateContentResponse = await ai.models.generateContent({
-      model: MODEL_NAME,
-      contents: query,
-      config: {
-        systemInstruction: systemInstruction,
-        thinkingConfig: { thinkingBudget: 0 }, // Disable thinking for faster chat response
-      }
-    });
-
-    return response.text || "I'm having a little trouble hearing you right now. Can we try again?";
   } catch (error) {
     console.error("Gemini API Error:", error);
-    return getMockResponse(query, audience);
+    finalResponse = getMockResponse(query, audience);
   }
+
+  // 4. Save response to global cache
+  if (finalResponse) {
+    await setChatbotCachedResponse(query, audience, finalResponse);
+  }
+
+  return finalResponse;
 };
 
 /**
