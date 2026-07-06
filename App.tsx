@@ -29,13 +29,78 @@ const KIDS_CONTENT: ContentItem[] = [
 ];
 
 const TEENS_CONTENT: ContentItem[] = [
-  { id: '4', title: 'Why Faith? Why Now?', description: 'Is God real? A real talk for skeptics and seekers.', thumbnail: 'https://picsum.photos/seed/skeptic/400/250', type: 'VIDEO', duration: '12:45' },
-  { id: '5', title: 'How to Share Without Being Cringe', description: 'Practical tips on inviting friends to Faith Tribe.', thumbnail: 'https://picsum.photos/seed/share/400/250', type: 'ARTICLE', duration: '4 min read' },
-  { id: '6', title: 'My Salvation Story', description: 'Community members share how they found purpose.', thumbnail: 'https://picsum.photos/seed/testimony/400/250', type: 'VIDEO', duration: '8:30' },
+  { 
+    id: '4', 
+    title: 'Why Faith? Why Now?', 
+    description: 'Is God real? A real talk for skeptics and seekers.', 
+    thumbnail: 'https://picsum.photos/seed/skeptic/400/250', 
+    type: 'VIDEO', 
+    duration: '12:45',
+    youtubeVideoId: 'kP_S45J0p48'
+  },
+  { 
+    id: '5', 
+    title: 'How to Share Without Being Cringe', 
+    description: 'Practical tips on inviting friends to Faith Tribe.', 
+    thumbnail: 'https://picsum.photos/seed/share/400/250', 
+    type: 'ARTICLE', 
+    duration: '4 min read',
+    articleContent: `# How to Share Without Being Cringe
+
+Sharing your faith doesn't mean standing on a soapbox with a megaphone or sending weird unsolicited DMs. It's about genuine connection, real relationships, and being yourself.
+
+Here are **3 practical tips** to share Jesus with your friends without it feeling forced or cringe:
+
+### 1. Just Be Real (No "Holy" Filter)
+You don't need to speak in old English or pretend your life is perfect. Share your honest struggles and how God helped you through them. Authenticity is magnetic.
+
+> *"People don't want a perfect Christian. They want a real one."*
+
+### 2. Focus on Inviting, Not Arguing
+Don't get dragged into online debates or theological arguments. Instead, invite them to something fun. 
+*"Hey, we're hanging out at Faith Tribe Teens this Friday. We have free food, great music, and a lot of laughs. Do you want to tag along?"* 
+
+### 3. Live It Out Loud
+Your actions speak louder than any post. Show up for people when they are hurting. Be the friend who listens, supports, and stays when others leave. 
+When people notice you're different, they'll ask why. That's your open door!`
+  },
+  { 
+    id: '6', 
+    title: 'My Salvation Story', 
+    description: 'Community members share how they found purpose.', 
+    thumbnail: 'https://picsum.photos/seed/testimony/400/250', 
+    type: 'VIDEO', 
+    duration: '8:30',
+    youtubeVideoId: 'yV7n-vY5d6U'
+  },
 ];
 
 const TEACHERS_CONTENT: ContentItem[] = [
-  { id: '7', title: 'The Art of the Altar Call', description: 'How to lead children to Christ effectively.', thumbnail: 'https://picsum.photos/seed/altar/400/250', type: 'ARTICLE', duration: '8 min read' },
+  { 
+    id: '7', 
+    title: 'The Art of the Altar Call', 
+    description: 'How to lead children to Christ effectively.', 
+    thumbnail: 'https://picsum.photos/seed/altar/400/250', 
+    type: 'ARTICLE', 
+    duration: '8 min read',
+    articleContent: `# The Art of the Altar Call
+
+Leading children to Christ is one of the most rewarding aspects of children's ministry. However, it requires care, simplicity, and sensitivity.
+
+Here is a simple framework to guide children through a meaningful decision:
+
+### 1. Keep It Simple (The ABCs)
+Avoid complex theological jargon. Use simple, concrete terms that children understand:
+- **A**dmit: Agree with God that you have done things wrong (sinned).
+- **B**elieve: Believe that Jesus died for your sins and rose again to give you life.
+- **C**hoose: Choose to follow Jesus and make Him the leader of your life.
+
+### 2. Make It Safe
+Never pressure or coerce children. An altar call should be a response to love, not fear. Give them space to ask questions and explain their choice in their own words.
+
+### 3. Follow Up Immediately
+Once a child makes a decision, celebrate with them! Give them a simple bible resource or a congratulations card, and ensure their parents are informed.`
+  },
   { id: '8', title: 'Q3 Curriculum: The Great Commission', description: '12-week plan focused on outreach and evangelism.', thumbnail: 'https://picsum.photos/seed/plan/400/250', type: 'LESSON_PLAN', duration: 'Curriculum' },
   { id: '9', title: 'Follow-Up Guide', description: 'What to do in the first 24 hours after a child gets saved.', thumbnail: 'https://picsum.photos/seed/followup/400/250', type: 'LESSON_PLAN', duration: 'Checklist' },
 ];
@@ -867,18 +932,21 @@ const App: React.FC = () => {
           setIsLoadingTeens(true);
           const dbItems = await fetchContentItems('teens', undefined, 'published');
           if (dbItems && dbItems.length > 0) {
-            const mapped: ContentItem[] = dbItems.map(item => ({
-              id: item.id,
-              title: item.title,
-              description: item.description || '',
-              thumbnail: item.thumbnail_url || 'https://picsum.photos/seed/teens/400/250',
-              type: (item.type === 'video' ? 'VIDEO' : 'ARTICLE') as any,
-              duration: item.duration || undefined,
-              youtubeVideoId: item.video_id || undefined,
-              articleContent: item.story_content || undefined,
-              videoSource: item.video_source || undefined,
-              documentUrl: item.document_url || undefined
-            }));
+            const mapped: ContentItem[] = dbItems.map(item => {
+              const fallback = TEENS_CONTENT.find(t => t.id === item.id || t.title.toLowerCase() === item.title.toLowerCase());
+              return {
+                id: item.id,
+                title: item.title,
+                description: item.description || fallback?.description || '',
+                thumbnail: item.thumbnail_url || fallback?.thumbnail || 'https://picsum.photos/seed/teens/400/250',
+                type: (item.type === 'video' ? 'VIDEO' : 'ARTICLE') as any,
+                duration: item.duration || fallback?.duration || undefined,
+                youtubeVideoId: item.video_id || fallback?.youtubeVideoId || undefined,
+                articleContent: item.story_content || fallback?.articleContent || undefined,
+                videoSource: item.video_source || fallback?.videoSource || undefined,
+                documentUrl: item.document_url || fallback?.documentUrl || undefined
+              };
+            });
             setTeensContentItems(mapped);
           }
         } catch (err: any) {
