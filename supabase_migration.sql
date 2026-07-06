@@ -350,10 +350,12 @@ VALUES ('content-media', 'content-media', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- Storage RLS Policies
+DROP POLICY IF EXISTS "staff can upload content media" ON storage.objects;
 CREATE POLICY "staff can upload content media"
   ON storage.objects FOR INSERT
   WITH CHECK (bucket_id = 'content-media' AND current_staff_role() IS NOT NULL);
 
+DROP POLICY IF EXISTS "public can view content media" ON storage.objects;
 CREATE POLICY "public can view content media"
   ON storage.objects FOR SELECT
   USING (bucket_id = 'content-media');
@@ -370,10 +372,12 @@ ALTER TABLE bible_study_notes ADD COLUMN IF NOT EXISTS reviewed_at timestamptz;
 
 -- Update RLS for bible_study_notes
 DROP POLICY IF EXISTS "Allow anonymous read access for study notes" ON bible_study_notes;
+DROP POLICY IF EXISTS "public reads approved content" ON bible_study_notes;
 CREATE POLICY "public reads approved content"
   ON bible_study_notes FOR SELECT
   USING (tier = 'advanced' OR review_status = 'approved');
 
+DROP POLICY IF EXISTS "reviewers manage basic tier drafts" ON bible_study_notes;
 CREATE POLICY "reviewers manage basic tier drafts"
   ON bible_study_notes FOR ALL
   USING (current_staff_role() IN ('super_admin', 'reviewer'));
@@ -390,10 +394,12 @@ CREATE TABLE IF NOT EXISTS escalations (
 -- Escalations RLS
 ALTER TABLE escalations ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "teachers and admins read escalations" ON escalations;
 CREATE POLICY "teachers and admins read escalations"
   ON escalations FOR SELECT
   USING (current_staff_role() IN ('super_admin', 'teacher_volunteer'));
 
+DROP POLICY IF EXISTS "claim owner or admin can update" ON escalations;
 CREATE POLICY "claim owner or admin can update"
   ON escalations FOR UPDATE
   USING (
@@ -431,9 +437,11 @@ CREATE TABLE IF NOT EXISTS analytics_events (
 -- Analytics RLS
 ALTER TABLE analytics_events ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "any request can insert events" ON analytics_events;
 CREATE POLICY "any request can insert events"
   ON analytics_events FOR INSERT WITH CHECK (true);
 
+DROP POLICY IF EXISTS "content staff read analytics" ON analytics_events;
 CREATE POLICY "content staff read analytics"
   ON analytics_events FOR SELECT
   USING (current_staff_role() IN ('super_admin', 'content_editor', 'zone_manager'));
