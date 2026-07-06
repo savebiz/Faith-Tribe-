@@ -1,6 +1,6 @@
 import React from 'react';
 import { ContentItem } from '../types';
-import { Play, FileText, BookOpen, Sparkles, Award } from 'lucide-react';
+import { Play, FileText, BookOpen, Sparkles, Award, Volume2 } from 'lucide-react';
 
 interface ContentSectionProps {
   title: string;
@@ -19,6 +19,12 @@ const ContentSection: React.FC<ContentSectionProps> = ({ title, items, colorThem
           icon: <Play size={12} fill="currentColor" />,
           label: 'Watch Video',
           badgeClass: 'bg-red-500/10 text-red-500 border border-red-500/20'
+        };
+      case 'AUDIO':
+        return {
+          icon: <Volume2 size={12} />,
+          label: 'Listen to Message',
+          badgeClass: 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
         };
       case 'ARTICLE':
         return {
@@ -90,6 +96,11 @@ const ContentSection: React.FC<ContentSectionProps> = ({ title, items, colorThem
                   {item.type === 'VIDEO' && (
                     <div className="bg-white text-gray-900 p-3.5 rounded-full shadow-lg scale-90 group-hover:scale-100 transition-transform duration-300">
                       <Play size={20} fill="currentColor" className="ml-0.5" />
+                    </div>
+                  )}
+                  {item.type === 'AUDIO' && (
+                    <div className="bg-white text-gray-900 p-3.5 rounded-full shadow-lg scale-90 group-hover:scale-100 transition-transform duration-300">
+                      <Volume2 size={20} className="text-amber-500" />
                     </div>
                   )}
                 </div>

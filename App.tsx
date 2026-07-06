@@ -942,7 +942,7 @@ const App: React.FC = () => {
                 title: item.title,
                 description: item.description || fallback?.description || '',
                 thumbnail: item.thumbnail_url || fallback?.thumbnail || 'https://picsum.photos/seed/teens/400/250',
-                type: (item.type === 'video' ? 'VIDEO' : 'ARTICLE') as any,
+                type: (item.type === 'video' ? 'VIDEO' : item.type === 'audio' ? 'AUDIO' : 'ARTICLE') as any,
                 duration: item.duration || fallback?.duration || undefined,
                 youtubeVideoId: item.video_id || fallback?.youtubeVideoId || undefined,
                 articleContent: item.story_content || fallback?.articleContent || undefined,

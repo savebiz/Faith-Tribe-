@@ -40,7 +40,7 @@ export interface ContentItem {
   title: string;
   description: string;
   thumbnail: string;
-  type: 'VIDEO' | 'ARTICLE' | 'ACTIVITY' | 'LESSON_PLAN';
+  type: 'VIDEO' | 'ARTICLE' | 'ACTIVITY' | 'LESSON_PLAN' | 'AUDIO';
   duration?: string;
   youtubeVideoId?: string;
   articleContent?: string;
@@ -52,7 +52,7 @@ export interface ContentItem {
 export interface DbContentItem {
   id: string;
   zone: 'kids' | 'teens' | 'teachers';
-  type: 'video' | 'reading' | 'writing' | 'painting' | 'document';
+  type: 'video' | 'reading' | 'writing' | 'painting' | 'document' | 'audio';
   title: string;
   description?: string | null;
   thumbnail_url?: string | null;

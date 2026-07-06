@@ -477,3 +477,6 @@ ALTER TABLE broadcast_status ADD COLUMN IF NOT EXISTS teens_topic_title TEXT DEF
 ALTER TABLE broadcast_status ADD COLUMN IF NOT EXISTS teens_topic_desc TEXT DEFAULT 'Who are you when the screen is turned off? Learn how Christ defines your worth, potential, and future far beyond likes and comments.';
 ALTER TABLE broadcast_status ADD COLUMN IF NOT EXISTS teens_topic_video_id TEXT DEFAULT 'dQw4w9WgXcQ';
 
+-- Add audio value to content_type enum
+ALTER TYPE content_type ADD VALUE IF NOT EXISTS 'audio';
+

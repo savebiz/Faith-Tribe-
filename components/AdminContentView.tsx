@@ -4,7 +4,7 @@ import { fetchContentItems, upsertContentItem, deleteContentItem } from '../lib/
 import { 
   Plus, Edit, Trash2, Eye, EyeOff, Search, Calendar, Film, BookOpen, 
   FileText, PenTool, Image, AlertCircle, Sparkles, X, Check, Link as LinkIcon, Video, Type,
-  ArrowUp, ArrowDown, Undo, Redo
+  ArrowUp, ArrowDown, Undo, Redo, Volume2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { RichTextEditor } from './admin/RichTextEditor';
@@ -30,7 +30,7 @@ export const AdminContentView: React.FC<AdminContentViewProps> = ({ currentStaff
 
   // Form Fields
   const [formZone, setFormZone] = useState<'kids' | 'teens' | 'teachers'>('kids');
-  const [formType, setFormType] = useState<'video' | 'reading' | 'writing' | 'painting' | 'document'>('video');
+  const [formType, setFormType] = useState<'video' | 'reading' | 'writing' | 'painting' | 'document' | 'audio'>('video');
   const [editorMode, setEditorMode] = useState<'markdown' | 'richtext'>('markdown');
   const [formTitle, setFormTitle] = useState('');
   const [formDescription, setFormDescription] = useState('');
@@ -39,9 +39,9 @@ export const AdminContentView: React.FC<AdminContentViewProps> = ({ currentStaff
   const [formPublishDate, setFormPublishDate] = useState('');
   const [formUnpublishDate, setFormUnpublishDate] = useState('');
 
-  // Video Fields
+  // Video/Audio Fields
   const [videoUrlInput, setVideoUrlInput] = useState('');
-  const [formVideoSource, setFormVideoSource] = useState<'youtube' | 'vimeo'>('youtube');
+  const [formVideoSource, setFormVideoSource] = useState<string>('youtube');
   const [formVideoId, setFormVideoId] = useState('');
   const [formDuration, setFormDuration] = useState('');
   const [isFetchingMetadata, setIsFetchingMetadata] = useState(false);
@@ -159,8 +159,14 @@ export const AdminContentView: React.FC<AdminContentViewProps> = ({ currentStaff
       setFormUnpublishDate(item.unpublish_date ? new Date(item.unpublish_date).toISOString().slice(0, 16) : '');
       
       // Type specific loads
-      setVideoUrlInput(item.video_source === 'youtube' ? `https://youtube.com/watch?v=${item.video_id}` : item.video_source === 'vimeo' ? `https://vimeo.com/${item.video_id}` : '');
-      setFormVideoSource(item.video_source as any || 'youtube');
+      if (item.type === 'video') {
+        setVideoUrlInput(item.video_source === 'youtube' ? `https://youtube.com/watch?v=${item.video_id}` : item.video_source === 'vimeo' ? `https://vimeo.com/${item.video_id}` : '');
+      } else if (item.type === 'audio') {
+        setVideoUrlInput(item.video_id || '');
+      } else {
+        setVideoUrlInput('');
+      }
+      setFormVideoSource(item.video_source || 'youtube');
       setFormVideoId(item.video_id || '');
       setFormDuration(item.duration || '');
       setFormStoryContent(item.story_content || '');
@@ -210,7 +216,7 @@ export const AdminContentView: React.FC<AdminContentViewProps> = ({ currentStaff
       };
 
       // Type specific payloads
-      if (formType === 'video') {
+      if (formType === 'video' || formType === 'audio') {
         payload.video_source = formVideoSource;
         payload.video_id = formVideoId.trim();
         payload.duration = formDuration.trim() || null;
@@ -390,6 +396,7 @@ export const AdminContentView: React.FC<AdminContentViewProps> = ({ currentStaff
       case 'reading': return <BookOpen size={16} className="text-blue-500" />;
       case 'writing': return <PenTool size={16} className="text-purple-500" />;
       case 'painting': return <Image size={16} className="text-teal-500" />;
+      case 'audio': return <Volume2 size={16} className="text-amber-500" />;
       default: return <FileText size={16} className="text-gray-500" />;
     }
   };
@@ -643,11 +650,12 @@ export const AdminContentView: React.FC<AdminContentViewProps> = ({ currentStaff
                     onChange={(e) => setFormType(e.target.value as any)}
                     className="block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold focus:border-teal-600 focus:outline-none"
                   >
-                    <option value="video">Video Embed</option>
-                    <option value="reading">Reading (Story Markdown)</option>
-                    <option value="writing">Writing Prompt</option>
-                    <option value="painting">Coloring Outlines</option>
-                    <option value="document">Document Outline</option>
+                    <option value="video">Watch Message (Video Embed)</option>
+                    <option value="reading">Read Message (Article/Markdown)</option>
+                    <option value="audio">Listen to Message / Podcast (Audio)</option>
+                    <option value="writing">Writing Prompt (Activity)</option>
+                    <option value="painting">Coloring Outlines (Kids Paint)</option>
+                    <option value="document">Document Link (PDFs / Guides)</option>
                   </select>
                 </div>
 
@@ -742,6 +750,46 @@ export const AdminContentView: React.FC<AdminContentViewProps> = ({ currentStaff
                         onChange={(e) => setFormDuration(e.target.value)}
                         placeholder="e.g. 5:24"
                         className="block w-full rounded-lg border border-gray-200 px-3 py-2 text-xs focus:border-teal-600 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Audio specific fields */}
+                {formType === 'audio' && (
+                  <div className="grid grid-cols-3 gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-200/60">
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Source</label>
+                      <select
+                        value={formVideoSource}
+                        onChange={(e) => setFormVideoSource(e.target.value)}
+                        className="block w-full rounded-lg border border-gray-200 px-2 py-2 text-xs font-semibold focus:border-teal-600 focus:outline-none bg-white"
+                      >
+                        <option value="direct">Direct Audio Link (.mp3)</option>
+                        <option value="spotify">Spotify Track Embed</option>
+                        <option value="soundcloud">SoundCloud Embed</option>
+                        <option value="youtube">YouTube Link</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Audio URL / ID</label>
+                      <input
+                        type="text"
+                        required
+                        value={formVideoId}
+                        onChange={(e) => setFormVideoId(e.target.value)}
+                        placeholder="e.g. https://.../audio.mp3"
+                        className="block w-full rounded-lg border border-gray-200 px-3 py-2 text-xs focus:border-teal-600 focus:outline-none bg-white font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Duration</label>
+                      <input
+                        type="text"
+                        value={formDuration}
+                        onChange={(e) => setFormDuration(e.target.value)}
+                        placeholder="e.g. 10:15"
+                        className="block w-full rounded-lg border border-gray-200 px-3 py-2 text-xs focus:border-teal-600 focus:outline-none bg-white"
                       />
                     </div>
                   </div>

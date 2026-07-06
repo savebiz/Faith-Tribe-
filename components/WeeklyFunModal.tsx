@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, BookOpen, Sparkles, Award, X, Check, CheckCircle2 } from 'lucide-react';
+import { Play, BookOpen, Sparkles, Award, X, Check, CheckCircle2, Volume2, Music } from 'lucide-react';
 import { toast } from 'sonner';
 import DOMPurify from 'isomorphic-dompurify';
 import { marked } from 'marked';
@@ -285,6 +285,7 @@ export function WeeklyFunModal({ item, onClose }: WeeklyFunModalProps) {
             {item.type === 'reading' && <BookOpen size={18} />}
             {item.type === 'writing' && <Sparkles size={18} />}
             {item.type === 'painting' && <Award size={18} />}
+            {item.type === 'audio' && <Volume2 size={18} />}
             <span>{item.title}</span>
           </h3>
           <button 
@@ -309,6 +310,69 @@ export function WeeklyFunModal({ item, onClose }: WeeklyFunModalProps) {
                   title={item.title}
                 />
               </div>
+              <p className="text-xs sm:text-sm text-gray-500 leading-relaxed font-sans text-left">
+                {item.description}
+              </p>
+            </div>
+          )}
+
+          {item.type === 'audio' && item.youtubeVideoId && (
+            <div className="space-y-4">
+              {/* Direct File Link Player */}
+              {(!item.videoSource || item.videoSource === 'direct') && (
+                <div className="bg-amber-50/50 p-6 rounded-2xl border-2 border-amber-100 flex flex-col items-center justify-center space-y-4 shadow-inner">
+                  <div className="w-16 h-16 rounded-full bg-amber-400/10 border border-amber-400/20 flex items-center justify-center animate-bounce">
+                    <Music size={28} className="text-amber-500" />
+                  </div>
+                  <div className="text-center font-display">
+                    <p className="text-sm font-black text-amber-900">Listen to Audio</p>
+                    {item.duration && <p className="text-xs text-gray-500 mt-0.5 font-sans">Duration: {item.duration}</p>}
+                  </div>
+                  <audio controls className="w-full max-w-md mt-2 outline-none" src={item.youtubeVideoId} />
+                </div>
+              )}
+
+              {/* Spotify Embed Player */}
+              {item.videoSource === 'spotify' && (
+                <div className="w-full overflow-hidden rounded-2xl border-2 border-amber-100 shadow-inner bg-black">
+                  <iframe 
+                    src={item.youtubeVideoId.includes('embed') ? item.youtubeVideoId : `https://open.spotify.com/embed/track/${item.youtubeVideoId.split('/').pop()?.split('?')[0]}`}
+                    width="100%" 
+                    height="152" 
+                    frameBorder="0" 
+                    allowFullScreen 
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                    loading="lazy"
+                  />
+                </div>
+              )}
+
+              {/* SoundCloud Embed Player */}
+              {item.videoSource === 'soundcloud' && (
+                <div className="w-full overflow-hidden rounded-2xl border-2 border-amber-100 shadow-inner">
+                  <iframe 
+                    width="100%" 
+                    height="166" 
+                    scrolling="no" 
+                    frameBorder="no" 
+                    allow="autoplay" 
+                    src={item.youtubeVideoId.includes('api.soundcloud.com') ? item.youtubeVideoId : `https://w.soundcloud.com/player/?url=${encodeURIComponent(item.youtubeVideoId)}&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true`}
+                  />
+                </div>
+              )}
+
+              {/* YouTube Player */}
+              {item.videoSource === 'youtube' && (
+                <div className="aspect-video w-full rounded-2xl overflow-hidden border-2 border-amber-100 bg-black shadow-inner">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${item.youtubeVideoId}?modestbranding=1&rel=0`}
+                    className="w-full h-full"
+                    allow="encrypted-media; picture-in-picture"
+                    allowFullScreen
+                    title={item.title}
+                  />
+                </div>
+              )}
               <p className="text-xs sm:text-sm text-gray-500 leading-relaxed font-sans text-left">
                 {item.description}
               </p>

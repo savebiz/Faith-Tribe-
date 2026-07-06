@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Play, BookOpen, X } from 'lucide-react';
+import { Play, BookOpen, X, Volume2, Music } from 'lucide-react';
 import DOMPurify from 'isomorphic-dompurify';
 import { marked } from 'marked';
 import { ContentItem } from '../types';
@@ -50,12 +50,18 @@ export const TeensContentModal: React.FC<TeensContentModalProps> = ({ item, onCl
         <div className="flex items-center justify-between p-5 border-b border-gray-800 bg-gray-900/60 sticky top-0 backdrop-blur-md z-10">
           <div className="flex items-center gap-2">
             <span className={`p-1.5 rounded-lg ${
-              item.type === 'VIDEO' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+              item.type === 'VIDEO' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 
+              item.type === 'AUDIO' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
+              'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
             }`}>
-              {item.type === 'VIDEO' ? <Play size={16} fill="currentColor" /> : <BookOpen size={16} />}
+              {item.type === 'VIDEO' ? <Play size={16} fill="currentColor" /> : 
+               item.type === 'AUDIO' ? <Volume2 size={16} /> :
+               <BookOpen size={16} />}
             </span>
             <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
-              {item.type === 'VIDEO' ? 'Teens Video Drop' : 'Teens Article Drop'}
+              {item.type === 'VIDEO' ? 'Teens Video Drop' : 
+               item.type === 'AUDIO' ? 'Teens Audio Message' : 
+               'Teens Article Drop'}
             </span>
           </div>
           <button 
@@ -88,6 +94,67 @@ export const TeensContentModal: React.FC<TeensContentModalProps> = ({ item, onCl
                 allowFullScreen
                 title={item.title}
               />
+            </div>
+          )}
+
+          {/* Audio Player Templates */}
+          {item.type === 'AUDIO' && item.youtubeVideoId && (
+            <div className="space-y-4">
+              {/* Direct File Link Player */}
+              {(!item.videoSource || item.videoSource === 'direct') && (
+                <div className="bg-gray-950 p-6 rounded-2xl border border-gray-800 flex flex-col items-center justify-center space-y-4 shadow-inner">
+                  <div className="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                    <Music size={28} className="text-amber-400" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-black text-white">Listen to Message</p>
+                    {item.duration && <p className="text-xs text-gray-500 mt-0.5">Duration: {item.duration}</p>}
+                  </div>
+                  <audio controls className="w-full max-w-md mt-2 outline-none" src={item.youtubeVideoId} />
+                </div>
+              )}
+
+              {/* Spotify Embed Player */}
+              {item.videoSource === 'spotify' && (
+                <div className="w-full overflow-hidden rounded-2xl border border-gray-800 shadow-inner bg-black">
+                  <iframe 
+                    src={item.youtubeVideoId.includes('embed') ? item.youtubeVideoId : `https://open.spotify.com/embed/track/${item.youtubeVideoId.split('/').pop()?.split('?')[0]}`}
+                    width="100%" 
+                    height="152" 
+                    frameBorder="0" 
+                    allowFullScreen 
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+                    loading="lazy"
+                  />
+                </div>
+              )}
+
+              {/* SoundCloud Embed Player */}
+              {item.videoSource === 'soundcloud' && (
+                <div className="w-full overflow-hidden rounded-2xl border border-gray-800 shadow-inner">
+                  <iframe 
+                    width="100%" 
+                    height="166" 
+                    scrolling="no" 
+                    frameBorder="no" 
+                    allow="autoplay" 
+                    src={item.youtubeVideoId.includes('api.soundcloud.com') ? item.youtubeVideoId : `https://w.soundcloud.com/player/?url=${encodeURIComponent(item.youtubeVideoId)}&color=%23ff5500&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true`}
+                  />
+                </div>
+              )}
+
+              {/* YouTube Link (Embedded Player) */}
+              {item.videoSource === 'youtube' && (
+                <div className="aspect-video w-full rounded-2xl overflow-hidden border border-gray-800 bg-black shadow-inner">
+                  <iframe
+                    src={`https://www.youtube.com/embed/${item.youtubeVideoId}?modestbranding=1&rel=0`}
+                    className="w-full h-full"
+                    allow="encrypted-media; picture-in-picture"
+                    allowFullScreen
+                    title={item.title}
+                  />
+                </div>
+              )}
             </div>
           )}
 
