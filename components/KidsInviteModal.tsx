@@ -23,36 +23,42 @@ export const KidsInviteModal: React.FC<KidsInviteModalProps> = ({ isOpen, onClos
         // Draw the background image
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
+        // Add a semi-transparent white overlay in the center to help text readability
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.beginPath();
+        ctx.roundRect(40, 70, canvas.width - 80, canvas.height - 130, 30);
+        ctx.fill();
+
         // Add fun text overlaid on the image
         ctx.textAlign = 'center';
         
+        const drawTextWithOutline = (text: string, x: number, y: number, color: string, fontSize: string) => {
+            ctx.font = `bold ${fontSize} "Comic Sans MS", "Chalkboard SE", sans-serif`;
+            ctx.lineJoin = 'round';
+            ctx.miterLimit = 2;
+            
+            // Draw thick white outline
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 8;
+            ctx.strokeText(text, x, y);
+            
+            // Draw inner text
+            ctx.fillStyle = color;
+            ctx.fillText(text, x, y);
+        };
+        
         // Title
-        ctx.font = 'bold 50px "Comic Sans MS", "Chalkboard SE", sans-serif';
-        ctx.fillStyle = '#D97706'; // Amber 600
-        ctx.shadowColor = 'rgba(255,255,255,0.8)';
-        ctx.shadowBlur = 10;
-        ctx.shadowOffsetX = 3;
-        ctx.shadowOffsetY = 3;
-        ctx.fillText("YOU'RE INVITED!", canvas.width / 2, 120);
+        drawTextWithOutline("YOU'RE INVITED!", canvas.width / 2, 130, '#D97706', '50px'); // Amber 600
 
         // Subtitle
-        ctx.font = 'bold 32px "Comic Sans MS", "Chalkboard SE", sans-serif';
-        ctx.fillStyle = '#0D9488'; // Teal 600
-        ctx.shadowBlur = 0;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
-        ctx.fillText("Join me at Faith Tribe Kids!", canvas.width / 2, 180);
+        drawTextWithOutline("Join me at Faith Tribe Kids!", canvas.width / 2, 190, '#0D9488', '32px'); // Teal 600
 
         // Body text
-        ctx.font = '24px "Comic Sans MS", "Chalkboard SE", sans-serif';
-        ctx.fillStyle = '#374151'; // Gray 700
-        ctx.fillText("We learn about Jesus, play games,", canvas.width / 2, 240);
-        ctx.fillText("and have the best time together!", canvas.width / 2, 280);
+        drawTextWithOutline("We learn about Jesus, play games,", canvas.width / 2, 250, '#374151', '24px'); // Gray 700
+        drawTextWithOutline("and have the best time together!", canvas.width / 2, 290, '#374151', '24px');
 
         // Footer
-        ctx.font = 'bold 28px "Comic Sans MS", "Chalkboard SE", sans-serif';
-        ctx.fillStyle = '#E11D48'; // Rose 600
-        ctx.fillText("Can't wait to see you there! 🌟", canvas.width / 2, 360);
+        drawTextWithOutline("Can't wait to see you there! 🌟", canvas.width / 2, 350, '#E11D48', '28px'); // Rose 600
 
         setIsImageReady(true);
       };
