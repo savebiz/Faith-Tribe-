@@ -123,8 +123,8 @@ const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ audience }) => {
       {/* Header */}
       <div className={`p-4.5 ${getThemeColors()} flex items-center justify-between shadow-sm`}>
         <div className="flex items-center space-x-3">
-          <div className={`p-2 rounded-full backdrop-blur-md ${audience === Audience.TEENS ? 'bg-emerald-500/10 text-emerald-400' : 'bg-white/20 text-white'}`}>
-            <Sparkles size={18} className={audience === Audience.KIDS ? 'animate-spin-slow' : 'animate-pulse'} />
+          <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm border border-white/30 shadow-inner">
+            <Christicon name="dove" size={24} style={{ color: 'currentColor' }} />
           </div>
           <div>
             <h3 className="font-extrabold text-base tracking-tight">
@@ -249,27 +249,27 @@ const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ audience }) => {
       </div>
 
       {/* Message Input Form */}
-      <form onSubmit={handleSubmit} className="p-4 bg-white border-t border-gray-100 flex items-center">
-        <div className="flex gap-2 w-full relative">
+      <form onSubmit={handleSubmit} className={`p-4 border-t flex items-center gap-2 ${audience === Audience.TEENS ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-100'}`}>
+        <div className="flex-1 relative">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={audience === Audience.KIDS ? "Ask Faith Buddy..." : "Type your message..."}
-            className={`flex-1 px-4.5 py-2.5 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm
-              ${audience === Audience.TEENS ? 'bg-gray-50 border-gray-200' : 'bg-gray-50'}`}
+            className={`w-full px-5 py-3 border rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm transition-colors
+              ${audience === Audience.TEENS ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400' : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-500 font-medium'}`}
           />
-          <button 
-            type="submit" 
-            disabled={isLoading || !input.trim()}
-            className={`p-2.5 rounded-full text-white transition-all disabled:opacity-50 hover:scale-105 active:scale-95 shadow-md flex items-center justify-center cursor-pointer
-              ${audience === Audience.KIDS ? 'bg-amber-400 hover:bg-amber-500 shadow-amber-300/40' : 
-                audience === Audience.TEENS ? 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-400/40' : 
-                'bg-teal-700 hover:bg-teal-800 shadow-teal-700/40'}`}
-          >
-            <Send size={16} />
-          </button>
         </div>
+        <button 
+          type="submit" 
+          disabled={isLoading || !input.trim()}
+          className={`h-[46px] w-[46px] rounded-full text-white transition-all disabled:opacity-50 hover:scale-105 active:scale-95 shadow-md flex items-center justify-center shrink-0 cursor-pointer
+            ${audience === Audience.KIDS ? 'bg-amber-400 hover:bg-amber-500 shadow-amber-300/40' : 
+              audience === Audience.TEENS ? 'bg-emerald-500 hover:bg-emerald-600 shadow-emerald-400/40' : 
+              'bg-teal-700 hover:bg-teal-800 shadow-teal-700/40'}`}
+        >
+          <Send size={18} className="-ml-0.5" />
+        </button>
       </form>
     </div>
   );
