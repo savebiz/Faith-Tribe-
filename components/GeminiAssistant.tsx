@@ -125,7 +125,7 @@ const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ audience }) => {
       <div className={`p-4.5 ${getThemeColors()} flex items-center justify-between shadow-sm`}>
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm border border-white/30 shadow-inner">
-            <Christicon name="dove" size={24} style={{ color: 'currentColor' }} />
+            <Christicon name="star" size={24} style={{ color: 'currentColor' }} />
           </div>
           <div>
             <h3 className="font-extrabold text-base tracking-tight">
