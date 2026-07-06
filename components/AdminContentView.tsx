@@ -3,7 +3,8 @@ import { DbContentItem, StaffMember } from '../types';
 import { fetchContentItems, upsertContentItem, deleteContentItem } from '../lib/supabase';
 import { 
   Plus, Edit, Trash2, Eye, EyeOff, Search, Calendar, Film, BookOpen, 
-  FileText, PenTool, Image, AlertCircle, Sparkles, X, Check, Link as LinkIcon, Video, Type
+  FileText, PenTool, Image, AlertCircle, Sparkles, X, Check, Link as LinkIcon, Video, Type,
+  ArrowUp, ArrowDown, Undo, Redo
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { RichTextEditor } from './admin/RichTextEditor';
@@ -56,6 +57,11 @@ export const AdminContentView: React.FC<AdminContentViewProps> = ({ currentStaff
 
   // Document Fields
   const [formDocumentUrl, setFormDocumentUrl] = useState('');
+
+  // Undo/Redo Stacks for Reordering
+  const [undoStack, setUndoStack] = useState<DbContentItem[][]>([]);
+  const [redoStack, setRedoStack] = useState<DbContentItem[][]>([]);
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
 
   const isZoneManager = currentStaff.role === 'zone_manager';
   const managerZone = currentStaff.scoped_zone;
@@ -238,6 +244,109 @@ export const AdminContentView: React.FC<AdminContentViewProps> = ({ currentStaff
     }
   };
 
+  // Save the reordered items to database (bulk update)
+  const saveItemsOrder = async (itemsToSave: DbContentItem[]) => {
+    setIsSavingOrder(true);
+    try {
+      await Promise.all(itemsToSave.map(item => upsertContentItem(item)));
+    } catch (e: any) {
+      console.error("Failed to save reordered items:", e);
+      toast.error(`Failed to save order to database: ${e.message}`);
+    } finally {
+      setIsSavingOrder(false);
+    }
+  };
+
+  // Reorder Handler
+  const handleMoveItem = async (filteredIndex: number, direction: 'up' | 'down') => {
+    const filteredItems = getFilteredItems();
+    const targetIndex = direction === 'up' ? filteredIndex - 1 : filteredIndex + 1;
+
+    if (targetIndex < 0 || targetIndex >= filteredItems.length) return;
+
+    // Save previous state to undo stack
+    setUndoStack(prev => [...prev, [...items]]);
+    setRedoStack([]); // Clear redo stack on new action
+
+    const itemA = filteredItems[filteredIndex];
+    const itemB = filteredItems[targetIndex];
+
+    const idxA = items.findIndex(i => i.id === itemA.id);
+    const idxB = items.findIndex(i => i.id === itemB.id);
+
+    if (idxA === -1 || idxB === -1) return;
+
+    // Use current display_order or fallback to indexes
+    const orderA = itemA.display_order ?? idxA;
+    const orderB = itemB.display_order ?? idxB;
+
+    // Swap orders
+    const updatedItemA = { ...itemA, display_order: orderB };
+    const updatedItemB = { ...itemB, display_order: orderA };
+
+    const updatedItems = [...items];
+    updatedItems[idxA] = updatedItemA;
+    updatedItems[idxB] = updatedItemB;
+
+    // Sort immediately for visual feedback
+    const sorted = updatedItems.sort((a, b) => {
+      const oA = a.display_order ?? 0;
+      const oB = b.display_order ?? 0;
+      if (oA !== oB) return oA - oB;
+      return (b.created_at || '').localeCompare(a.created_at || '');
+    });
+
+    setItems(sorted);
+
+    // Persist changes
+    await saveItemsOrder([updatedItemA, updatedItemB]);
+    toast.success(`Moved "${itemA.title}" ${direction}`);
+  };
+
+  // Undo Handler
+  const handleUndo = async () => {
+    if (undoStack.length === 0) return;
+
+    const previousState = undoStack[undoStack.length - 1];
+    setUndoStack(prev => prev.slice(0, -1));
+    setRedoStack(prev => [...prev, [...items]]);
+
+    setItems(previousState);
+
+    // Save changes to database (only for items whose display_order changed)
+    const itemsToUpdate = previousState.filter(prevItem => {
+      const currentItem = items.find(i => i.id === prevItem.id);
+      return currentItem && currentItem.display_order !== prevItem.display_order;
+    });
+
+    if (itemsToUpdate.length > 0) {
+      await saveItemsOrder(itemsToUpdate);
+      toast.success('Undo successful');
+    }
+  };
+
+  // Redo Handler
+  const handleRedo = async () => {
+    if (redoStack.length === 0) return;
+
+    const nextState = redoStack[redoStack.length - 1];
+    setRedoStack(prev => prev.slice(0, -1));
+    setUndoStack(prev => [...prev, [...items]]);
+
+    setItems(nextState);
+
+    // Save changes to database (only for items whose display_order changed)
+    const itemsToUpdate = nextState.filter(nextItem => {
+      const currentItem = items.find(i => i.id === nextItem.id);
+      return currentItem && currentItem.display_order !== nextItem.display_order;
+    });
+
+    if (itemsToUpdate.length > 0) {
+      await saveItemsOrder(itemsToUpdate);
+      toast.success('Redo successful');
+    }
+  };
+
   const getFilteredItems = () => {
     return items.filter(item => {
       if (filterZone !== 'all' && item.zone !== filterZone) return false;
@@ -346,6 +455,33 @@ export const AdminContentView: React.FC<AdminContentViewProps> = ({ currentStaff
           <option value="scheduled">Scheduled Only</option>
           <option value="archived">Archived</option>
         </select>
+
+        {/* Undo / Redo controls */}
+        <div className="sm:ml-auto flex items-center gap-2 border-t sm:border-t-0 sm:border-l border-gray-150 pt-3 sm:pt-0 sm:pl-4 w-full sm:w-auto justify-end">
+          <button
+            disabled={undoStack.length === 0 || isSavingOrder}
+            onClick={handleUndo}
+            title="Undo reorder"
+            className="p-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-teal-700 disabled:opacity-40 disabled:pointer-events-none cursor-pointer transition-colors flex items-center gap-1 text-xs font-semibold"
+          >
+            <Undo size={13} />
+            <span>Undo</span>
+          </button>
+          <button
+            disabled={redoStack.length === 0 || isSavingOrder}
+            onClick={handleRedo}
+            title="Redo reorder"
+            className="p-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-teal-700 disabled:opacity-40 disabled:pointer-events-none cursor-pointer transition-colors flex items-center gap-1 text-xs font-semibold"
+          >
+            <Redo size={13} />
+            <span>Redo</span>
+          </button>
+          {isSavingOrder && (
+            <span className="text-[10px] text-gray-450 font-medium animate-pulse ml-1">
+              Saving order...
+            </span>
+          )}
+        </div>
       </div>
 
       {isLoading ? (
@@ -358,6 +494,7 @@ export const AdminContentView: React.FC<AdminContentViewProps> = ({ currentStaff
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-150">
+                  <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-gray-400 w-24">Sort</th>
                   <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-gray-400">Content Title</th>
                   <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-gray-400">Zone</th>
                   <th className="px-6 py-4 text-xs font-black uppercase tracking-wider text-gray-400">Type</th>
@@ -369,13 +506,39 @@ export const AdminContentView: React.FC<AdminContentViewProps> = ({ currentStaff
               <tbody className="divide-y divide-gray-100">
                 {getFilteredItems().length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center text-gray-400 font-semibold">
+                    <td colSpan={7} className="px-6 py-12 text-center text-gray-400 font-semibold">
                       No content items found matching the filter criteria.
                     </td>
                   </tr>
                 ) : (
-                  getFilteredItems().map((item) => (
+                  getFilteredItems().map((item, index) => (
                     <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {filterZone === 'all' ? (
+                          <span className="text-[10px] text-gray-400 font-medium cursor-help" title="Select a single Zone filter to enable sorting">
+                            Select zone
+                          </span>
+                        ) : (
+                          <div className="flex items-center gap-1">
+                            <button
+                              disabled={index === 0 || isSavingOrder}
+                              onClick={() => handleMoveItem(index, 'up')}
+                              title="Move Up"
+                              className="p-1 text-gray-400 hover:text-teal-600 disabled:opacity-30 disabled:pointer-events-none cursor-pointer rounded hover:bg-gray-100 transition-colors"
+                            >
+                              <ArrowUp size={14} />
+                            </button>
+                            <button
+                              disabled={index === getFilteredItems().length - 1 || isSavingOrder}
+                              onClick={() => handleMoveItem(index, 'down')}
+                              title="Move Down"
+                              className="p-1 text-gray-400 hover:text-teal-600 disabled:opacity-30 disabled:pointer-events-none cursor-pointer rounded hover:bg-gray-100 transition-colors"
+                            >
+                              <ArrowDown size={14} />
+                            </button>
+                          </div>
+                        )}
+                      </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
                           {item.thumbnail_url ? (

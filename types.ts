@@ -62,6 +62,7 @@ export interface DbContentItem {
   publish_date?: string | null;
   unpublish_date?: string | null;
   created_by?: string | null;
+  display_order?: number | null;
   created_at?: string;
   updated_at?: string;
 }

@@ -708,7 +708,9 @@ export async function fetchContentItems(
     if (type) query = query.eq('type', type);
     if (status) query = query.eq('status', status);
     
-    const { data, error } = await query.order('created_at', { ascending: false });
+    const { data, error } = await query
+      .order('display_order', { ascending: true })
+      .order('created_at', { ascending: false });
     if (error) throw error;
     return data || [];
   } else {
@@ -716,7 +718,12 @@ export async function fetchContentItems(
     if (zone) list = list.filter(i => i.zone === zone);
     if (type) list = list.filter(i => i.type === type);
     if (status) list = list.filter(i => i.status === status);
-    return list.sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
+    return list.sort((a, b) => {
+      const orderA = a.display_order ?? 0;
+      const orderB = b.display_order ?? 0;
+      if (orderA !== orderB) return orderA - orderB;
+      return (b.created_at || '').localeCompare(a.created_at || '');
+    });
   }
 }
 

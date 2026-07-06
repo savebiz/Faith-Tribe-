@@ -185,6 +185,7 @@ CREATE TABLE IF NOT EXISTS content_items (
   publish_date TIMESTAMPTZ,
   unpublish_date TIMESTAMPTZ,
   created_by UUID REFERENCES staff(id),
+  display_order INTEGER DEFAULT 0,
   updated_at TIMESTAMPTZ DEFAULT now(),
   created_at TIMESTAMPTZ DEFAULT now()
 );
