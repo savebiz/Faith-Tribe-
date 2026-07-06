@@ -5,6 +5,7 @@ import { fetchCustomVerse, fetchVotdOverrides, fetchStudyNotesForChapter, BibleS
 import { BOOK_NAMES } from './bookCodes';
 import DOMPurify from 'isomorphic-dompurify';
 import { toast } from 'sonner';
+import { BookOpen } from 'lucide-react';
 
 function getDayOfYear(): number {
   const now = new Date();
