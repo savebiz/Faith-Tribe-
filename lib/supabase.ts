@@ -1106,7 +1106,10 @@ export async function fetchBroadcastStatus(): Promise<DbBroadcastStatus> {
       title: 'Sunday Morning Glory Service',
       url: 'https://www.youtube.com/embed/qH5HIPl0hRo',
       hero_video_url: '/faith-tribe-hero.mp4',
-      hero_image_url: '/faith-tribe-hero-poster-1080.jpg'
+      hero_image_url: '/faith-tribe-hero-poster-1080.jpg',
+      teens_topic_title: 'Identity in a Filtered World',
+      teens_topic_desc: 'Who are you when the screen is turned off? Learn how Christ defines your worth, potential, and future far beyond likes and comments.',
+      teens_topic_video_id: 'dQw4w9WgXcQ'
     };
   } else {
     return JSON.parse(localStorage.getItem('ft_mock_broadcast_status') || '{}');
@@ -1118,7 +1121,10 @@ export async function updateBroadcastStatus(
   title: string,
   url: string,
   heroVideoUrl: string,
-  heroImageUrl: string
+  heroImageUrl: string,
+  teensTopicTitle?: string,
+  teensTopicDesc?: string,
+  teensTopicVideoId?: string
 ): Promise<void> {
   const currentStaff = await getCurrentStaff();
   const actorId = currentStaff?.id || 'unknown';
@@ -1130,6 +1136,9 @@ export async function updateBroadcastStatus(
       url,
       hero_video_url: heroVideoUrl,
       hero_image_url: heroImageUrl,
+      teens_topic_title: teensTopicTitle || null,
+      teens_topic_desc: teensTopicDesc || null,
+      teens_topic_video_id: teensTopicVideoId || null,
       updated_by: actorId,
       updated_at: new Date().toISOString()
     };
@@ -1158,6 +1167,9 @@ export async function updateBroadcastStatus(
       url,
       hero_video_url: heroVideoUrl,
       hero_image_url: heroImageUrl,
+      teens_topic_title: teensTopicTitle || null,
+      teens_topic_desc: teensTopicDesc || null,
+      teens_topic_video_id: teensTopicVideoId || null,
       updated_by: actorId,
       updated_at: new Date().toISOString()
     };

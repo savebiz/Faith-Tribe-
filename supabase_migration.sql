@@ -472,3 +472,8 @@ CREATE POLICY "allow anyone read chatbot_cache" ON chatbot_cache FOR SELECT USIN
 DROP POLICY IF EXISTS "allow anyone insert chatbot_cache" ON chatbot_cache;
 CREATE POLICY "allow anyone insert chatbot_cache" ON chatbot_cache FOR INSERT WITH CHECK (id IS NOT NULL);
 
+-- Topic of the Month Columns
+ALTER TABLE broadcast_status ADD COLUMN IF NOT EXISTS teens_topic_title TEXT DEFAULT 'Identity in a Filtered World';
+ALTER TABLE broadcast_status ADD COLUMN IF NOT EXISTS teens_topic_desc TEXT DEFAULT 'Who are you when the screen is turned off? Learn how Christ defines your worth, potential, and future far beyond likes and comments.';
+ALTER TABLE broadcast_status ADD COLUMN IF NOT EXISTS teens_topic_video_id TEXT DEFAULT 'dQw4w9WgXcQ';
+

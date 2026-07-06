@@ -921,6 +921,9 @@ const App: React.FC = () => {
     const [selectedTeensItem, setSelectedTeensItem] = useState<ContentItem | null>(null);
     const [teensContentItems, setTeensContentItems] = useState<ContentItem[]>(TEENS_CONTENT);
     const [isLoadingTeens, setIsLoadingTeens] = useState(false);
+    const [topicTitle, setTopicTitle] = useState('Identity in a Filtered World');
+    const [topicDesc, setTopicDesc] = useState('Who are you when the screen is turned off? Learn how Christ defines your worth, potential, and future far beyond likes and comments.');
+    const [topicVideoId, setTopicVideoId] = useState('dQw4w9WgXcQ');
     const [teensStreak] = useState(() => {
       const saved = localStorage.getItem('ft_bible_streak');
       return saved ? Number(saved) : 0;
@@ -955,7 +958,20 @@ const App: React.FC = () => {
           setIsLoadingTeens(false);
         }
       }
+      
+      async function loadBroadcastSettings() {
+        try {
+          const status = await fetchBroadcastStatus();
+          if (status.teens_topic_title) setTopicTitle(status.teens_topic_title);
+          if (status.teens_topic_desc) setTopicDesc(status.teens_topic_desc);
+          if (status.teens_topic_video_id) setTopicVideoId(status.teens_topic_video_id);
+        } catch (err) {
+          console.error('Failed to load teens topic of the month:', err);
+        }
+      }
+
       loadTeensContent();
+      loadBroadcastSettings();
     }, []);
 
     const triggerShareFriends = async () => {
@@ -984,11 +1000,11 @@ const App: React.FC = () => {
 
     const sermonVideoItem: ContentItem = {
       id: 'sermon-identity',
-      title: 'Identity in a Filtered World',
-      description: 'Who are you when the screen is turned off? Learn how Christ defines your worth, potential, and future far beyond likes and comments.',
+      title: topicTitle,
+      description: topicDesc,
       thumbnail: 'https://picsum.photos/seed/teens/1200/400',
       type: 'VIDEO',
-      youtubeVideoId: 'dQw4w9WgXcQ' // default placeholder sermon video
+      youtubeVideoId: topicVideoId
     };
 
     return (
@@ -1032,9 +1048,9 @@ const App: React.FC = () => {
               <h2 className="text-xl font-bold mb-3 flex items-center gap-2 text-emerald-400">
                 <Zap className="text-yellow-400" /> Topic of the Month
               </h2>
-              <p className="text-2xl font-black text-white">"Identity in a Filtered World"</p>
+              <p className="text-2xl font-black text-white">"{topicTitle}"</p>
               <p className="text-gray-400 mt-2 text-sm leading-relaxed max-w-xl">
-                Who are you when the screen is turned off? Learn how Christ defines your worth, potential, and future far beyond likes and comments.
+                {topicDesc}
               </p>
 
               <div className="flex flex-wrap gap-3 mt-6">

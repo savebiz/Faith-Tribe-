@@ -14,6 +14,9 @@ export const AdminHomepageView: React.FC<AdminHomepageViewProps> = ({ currentSta
   const [streamUrl, setStreamUrl] = useState('');
   const [heroVideoUrl, setHeroVideoUrl] = useState('');
   const [heroImageUrl, setHeroImageUrl] = useState('');
+  const [teensTopicTitle, setTeensTopicTitle] = useState('');
+  const [teensTopicDesc, setTeensTopicDesc] = useState('');
+  const [teensTopicVideoId, setTeensTopicVideoId] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -26,6 +29,9 @@ export const AdminHomepageView: React.FC<AdminHomepageViewProps> = ({ currentSta
       setStreamUrl(status.url || '');
       setHeroVideoUrl(status.hero_video_url || '');
       setHeroImageUrl(status.hero_image_url || '');
+      setTeensTopicTitle(status.teens_topic_title || '');
+      setTeensTopicDesc(status.teens_topic_desc || '');
+      setTeensTopicVideoId(status.teens_topic_video_id || '');
     } catch (e: any) {
       toast.error(`Error loading broadcast status: ${e.message}`);
     } finally {
@@ -46,7 +52,10 @@ export const AdminHomepageView: React.FC<AdminHomepageViewProps> = ({ currentSta
         title.trim(),
         streamUrl.trim(),
         heroVideoUrl.trim(),
-        heroImageUrl.trim()
+        heroImageUrl.trim(),
+        teensTopicTitle.trim(),
+        teensTopicDesc.trim(),
+        teensTopicVideoId.trim()
       );
       toast.success('Homepage and broadcast status updated successfully!');
       await loadData();
@@ -166,6 +175,59 @@ export const AdminHomepageView: React.FC<AdminHomepageViewProps> = ({ currentSta
                   placeholder="/faith-tribe-hero-poster-1080.jpg"
                   className="block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none font-medium"
                 />
+              </div>
+            </div>
+          </div>
+
+          {/* Teens Topic of the Month Settings */}
+          <div className="bg-white p-6 md:p-8 rounded-3xl border border-gray-150 shadow-sm space-y-6">
+            <h3 className="font-black text-lg text-gray-900 flex items-center gap-2 border-b border-gray-100 pb-3">
+              <Sparkles className="text-emerald-500" size={20} />
+              <span>Teens Topic of the Month</span>
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">
+                  Topic Title
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={teensTopicTitle}
+                  onChange={(e) => setTeensTopicTitle(e.target.value)}
+                  placeholder="e.g. Identity in a Filtered World"
+                  className="block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none font-semibold text-gray-800"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">
+                  Topic Description
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={teensTopicDesc}
+                  onChange={(e) => setTeensTopicDesc(e.target.value)}
+                  placeholder="e.g. Who are you when the screen is turned off? Learn how Christ defines your worth..."
+                  className="block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none font-medium text-gray-800 leading-relaxed"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">
+                  YouTube Video ID (Watch Message)
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={teensTopicVideoId}
+                  onChange={(e) => setTeensTopicVideoId(e.target.value)}
+                  placeholder="e.g. dQw4w9WgXcQ"
+                  className="block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none font-mono"
+                />
+                <p className="text-[10px] text-gray-400 mt-1">Provide only the 11-character YouTube video ID (e.g. the part after watch?v=).</p>
               </div>
             </div>
           </div>

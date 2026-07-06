@@ -101,6 +101,9 @@ export interface DbBroadcastStatus {
   url?: string | null;
   hero_video_url?: string | null;
   hero_image_url?: string | null;
+  teens_topic_title?: string | null;
+  teens_topic_desc?: string | null;
+  teens_topic_video_id?: string | null;
   updated_by?: string | null;
   updated_at?: string;
 }
