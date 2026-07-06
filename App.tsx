@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import GeminiAssistant from './components/GeminiAssistant';
+import { KidsInviteModal } from './components/KidsInviteModal';
 import ContentSection from './components/ContentSection';
 import LiveStreamPlayer from './components/LiveStreamPlayer';
 import { Audience, ContentItem, StaffMember } from './types';
@@ -679,6 +680,7 @@ const App: React.FC = () => {
 
   const KidsView = () => {
     const [selectedWeeklyFunItem, setSelectedWeeklyFunItem] = useState<WeeklyFunItem | null>(null);
+    const [isInviteModalOpen, setIsInviteModalOpen] = useState(false);
     const [kidsStreak, setKidsStreak] = useState(() => {
       const saved = localStorage.getItem('ft_bible_streak');
       return saved ? Number(saved) : 0;
@@ -750,7 +752,7 @@ const App: React.FC = () => {
                 </div>
               </div>
               <button
-                onClick={() => toast('Invite Card generated! 🎉 Download and send to your friends.', { duration: 4000 })}
+                onClick={() => setIsInviteModalOpen(true)}
                 className="px-5 py-2.5 bg-amber-400 text-white font-black rounded-2xl hover:bg-amber-500 transition-all hover:scale-105 active:scale-95 shadow-md shadow-amber-200 cursor-pointer text-sm shrink-0 border-b-4 border-amber-500"
               >
                 Get Invite Card
@@ -837,6 +839,10 @@ const App: React.FC = () => {
         <WeeklyFunModal 
           item={selectedWeeklyFunItem} 
           onClose={() => setSelectedWeeklyFunItem(null)} 
+        />
+        <KidsInviteModal 
+          isOpen={isInviteModalOpen} 
+          onClose={() => setIsInviteModalOpen(false)} 
         />
       </div>
     );
