@@ -4,19 +4,15 @@ import { useVerseOfTheDay } from '@youversion/platform-react-hooks';
 import { fetchCustomVerse, fetchVotdOverrides } from '../supabase';
 import { BOOK_NAMES } from './bookCodes';
 
-function getMondayDayOfYear(): number {
+function getDayOfYear(): number {
   const now = new Date();
-  const day = now.getDay(); // 0 = Sunday
-  const diffToMonday = day === 0 ? -6 : 1 - day;
-  const monday = new Date(now);
-  monday.setDate(now.getDate() + diffToMonday);
-  const start = new Date(monday.getFullYear(), 0, 0);
-  const diffMs = monday.getTime() - start.getTime();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diffMs = now.getTime() - start.getTime();
   return Math.floor(diffMs / 86400000);
 }
 
 export function VerseOfTheWeek({ versionId }: { versionId: number }) {
-  const dayOfYear = getMondayDayOfYear();
+  const dayOfYear = getDayOfYear();
   const { data: votd, loading: votdLoading, error: votdError } = useVerseOfTheDay(dayOfYear);
   
   const [customVerse, setCustomVerse] = useState<string | null>(null);

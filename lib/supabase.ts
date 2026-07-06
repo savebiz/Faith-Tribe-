@@ -313,8 +313,10 @@ export async function fetchCustomVerse(): Promise<string | null> {
       if (!error && data) {
         return data.value;
       }
+      return null;
     } catch (e) {
-      console.warn("Supabase custom verse fetch failed, using local storage:", e);
+      console.warn("Supabase custom verse fetch failed:", e);
+      return null;
     }
   }
 
