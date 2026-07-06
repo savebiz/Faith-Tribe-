@@ -341,3 +341,19 @@ VALUES
   ('teachers', 3034)
 ON CONFLICT (zone) DO UPDATE
 SET bible_id = EXCLUDED.bible_id;
+
+-- ----------------------------------------------------
+-- Storage Bucket for Content Media
+-- ----------------------------------------------------
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('content-media', 'content-media', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Storage RLS Policies
+CREATE POLICY "staff can upload content media"
+  ON storage.objects FOR INSERT
+  WITH CHECK (bucket_id = 'content-media' AND current_staff_role() IS NOT NULL);
+
+CREATE POLICY "public can view content media"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'content-media');

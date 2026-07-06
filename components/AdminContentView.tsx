@@ -3,9 +3,10 @@ import { DbContentItem, StaffMember } from '../types';
 import { fetchContentItems, upsertContentItem, deleteContentItem } from '../lib/supabase';
 import { 
   Plus, Edit, Trash2, Eye, EyeOff, Search, Calendar, Film, BookOpen, 
-  FileText, PenTool, Image, AlertCircle, Sparkles, X, Check
+  FileText, PenTool, Image, AlertCircle, Sparkles, X, Check, Link as LinkIcon, Video, Type
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { RichTextEditor } from './admin/RichTextEditor';
 
 interface AdminContentViewProps {
   currentStaff: StaffMember;
@@ -29,6 +30,7 @@ export const AdminContentView: React.FC<AdminContentViewProps> = ({ currentStaff
   // Form Fields
   const [formZone, setFormZone] = useState<'kids' | 'teens' | 'teachers'>('kids');
   const [formType, setFormType] = useState<'video' | 'reading' | 'writing' | 'painting' | 'document'>('video');
+  const [editorMode, setEditorMode] = useState<'markdown' | 'richtext'>('markdown');
   const [formTitle, setFormTitle] = useState('');
   const [formDescription, setFormDescription] = useState('');
   const [formThumbnailUrl, setFormThumbnailUrl] = useState('');
@@ -584,14 +586,48 @@ export const AdminContentView: React.FC<AdminContentViewProps> = ({ currentStaff
 
                 {formType === 'reading' && (
                   <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Story Content (Markdown)</label>
-                    <textarea
-                      value={formStoryContent}
-                      onChange={(e) => setFormStoryContent(e.target.value)}
-                      placeholder="# Markdown Header\n\nWrite story contents..."
-                      rows={6}
-                      className="block w-full rounded-lg border border-gray-200 px-3 py-2 text-xs font-mono focus:border-teal-600 focus:outline-none"
-                    />
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500">Story Content</label>
+                      <div className="flex items-center bg-gray-100 rounded-lg p-0.5">
+                        <button
+                          type="button"
+                          onClick={() => setEditorMode('markdown')}
+                          className={`px-3 py-1.5 text-xs font-bold rounded-md flex items-center gap-1.5 transition-colors ${
+                            editorMode === 'markdown' 
+                              ? 'bg-white text-teal-700 shadow-sm' 
+                              : 'text-gray-500 hover:text-gray-700'
+                          }`}
+                        >
+                          <Type size={14} /> Markdown
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEditorMode('richtext')}
+                          className={`px-3 py-1.5 text-xs font-bold rounded-md flex items-center gap-1.5 transition-colors ${
+                            editorMode === 'richtext' 
+                              ? 'bg-white text-teal-700 shadow-sm' 
+                              : 'text-gray-500 hover:text-gray-700'
+                          }`}
+                        >
+                          <Edit size={14} /> Rich Text
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {editorMode === 'markdown' ? (
+                      <textarea
+                        value={formStoryContent}
+                        onChange={(e) => setFormStoryContent(e.target.value)}
+                        placeholder="# Markdown Header\n\nWrite story contents...\n\nUse ![Image Description](https://image-url) to insert images."
+                        rows={10}
+                        className="block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm font-mono focus:border-teal-600 focus:outline-none"
+                      />
+                    ) : (
+                      <RichTextEditor 
+                        content={formStoryContent} 
+                        onChange={setFormStoryContent} 
+                      />
+                    )}
                   </div>
                 )}
 

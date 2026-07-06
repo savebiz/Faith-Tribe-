@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Play, BookOpen, Sparkles, Award, X, Check, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
+import DOMPurify from 'isomorphic-dompurify';
+import { marked } from 'marked';
 import { WeeklyFunItem } from '../lib/weeklyFunConfig';
 
 interface WeeklyFunModalProps {
@@ -8,98 +10,7 @@ interface WeeklyFunModalProps {
   onClose: () => void;
 }
 
-// A simple custom markdown renderer to format stories beautifully without extra npm deps
-function renderSimpleMarkdown(md: string) {
-  // Helper to parse inline bold (**text**) and italic (*text*)
-  const parseInline = (text: string) => {
-    // Split by bold first
-    const boldParts = text.split('**');
-    return boldParts.map((bPart, bIndex) => {
-      const isBold = bIndex % 2 === 1;
-      // Split each part by italic
-      const italicParts = bPart.split('*');
-      const content = italicParts.map((iPart, iIndex) => {
-        const isItalic = iIndex % 2 === 1;
-        if (isItalic) return <em key={iIndex} className="italic">{iPart}</em>;
-        return <React.Fragment key={iIndex}>{iPart}</React.Fragment>;
-      });
-
-      if (isBold) {
-        return <strong key={bIndex} className="text-amber-800 font-extrabold">{content}</strong>;
-      }
-      return <React.Fragment key={bIndex}>{content}</React.Fragment>;
-    });
-  };
-
-  return md.split('\n\n').map((paragraph, index) => {
-    const trimmed = paragraph.trim();
-    if (!trimmed) return null;
-
-    if (trimmed.startsWith('# ')) {
-      return (
-        <h2 key={index} className="text-2xl font-black text-amber-700 mt-4 mb-2 font-display text-left">
-          {parseInline(trimmed.replace('# ', ''))}
-        </h2>
-      );
-    }
-    if (trimmed.startsWith('## ')) {
-      return (
-        <h3 key={index} className="text-xl font-bold text-amber-600 mt-3 mb-2 font-display text-left">
-          {parseInline(trimmed.replace('## ', ''))}
-        </h3>
-      );
-    }
-    if (trimmed.startsWith('### ')) {
-      // If it contains a list immediately after the heading, split it out
-      if (trimmed.includes('\n1. ') || trimmed.includes('\n* ')) {
-        const lines = trimmed.split('\n');
-        const heading = lines[0].replace('### ', '');
-        const listItems = lines.slice(1).map(li => li.replace(/^(\d+\.|\*)\s*/, ''));
-        return (
-          <div key={index}>
-            <h4 className="text-lg font-bold text-gray-800 mt-2 mb-1 text-left">
-              {parseInline(heading)}
-            </h4>
-            <ol className="list-decimal pl-5 my-2 space-y-1 text-sm text-gray-600 text-left">
-              {listItems.map((item, i) => <li key={i}>{parseInline(item)}</li>)}
-            </ol>
-          </div>
-        );
-      }
-      return (
-        <h4 key={index} className="text-lg font-bold text-gray-800 mt-2 mb-1 text-left">
-          {parseInline(trimmed.replace('### ', ''))}
-        </h4>
-      );
-    }
-    if (trimmed.startsWith('* ') && trimmed.includes('\n')) {
-      const items = trimmed.split('\n').map(li => li.replace(/^\*\s*/, ''));
-      return (
-        <ul key={index} className="list-disc pl-5 my-2 space-y-1 text-sm text-gray-600 text-left">
-          {items.map((item, i) => <li key={i}>{parseInline(item)}</li>)}
-        </ul>
-      );
-    }
-    if (trimmed.startsWith('1. ')) {
-      const items = trimmed.split('\n').map(li => li.replace(/^\d+\.\s*/, ''));
-      return (
-        <ol key={index} className="list-decimal pl-5 my-2 space-y-1 text-sm text-gray-600 text-left">
-          {items.map((item, i) => <li key={i}>{parseInline(item)}</li>)}
-        </ol>
-      );
-    }
-    if (trimmed === '---') {
-      return <hr key={index} className="my-4 border-amber-100" />;
-    }
-    
-    // Handle standard paragraph
-    return (
-      <p key={index} className="text-sm text-gray-650 leading-relaxed my-2 text-left">
-        {parseInline(trimmed)}
-      </p>
-    );
-  });
-}
+// Removed renderSimpleMarkdown in favor of marked + DOMPurify
 
 // In-App Writing Activity Component
 const KidsWritingActivity: React.FC<{ item: WeeklyFunItem }> = ({ item }) => {
@@ -397,11 +308,19 @@ export function WeeklyFunModal({ item, onClose }: WeeklyFunModalProps) {
             </div>
           )}
 
-          {item.type === 'reading' && (
-            <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
-              {renderSimpleMarkdown(item.storyContent || '')}
-            </div>
-          )}
+                    {item.type === 'reading' && item.storyContent && (
+                      <div 
+                        className="prose prose-sm md:prose-base max-w-none prose-headings:font-display prose-headings:text-amber-700 prose-h2:text-2xl prose-h2:font-black prose-h3:text-xl prose-h3:font-bold prose-h4:text-lg prose-h4:text-gray-800 prose-p:text-gray-650 prose-p:leading-relaxed prose-strong:text-amber-800 prose-strong:font-extrabold prose-hr:border-amber-100 prose-ul:text-gray-600 prose-ol:text-gray-600 prose-img:rounded-lg prose-img:shadow-sm"
+                        dangerouslySetInnerHTML={{
+                          __html: DOMPurify.sanitize(
+                            // If it contains HTML tags, assume it's Rich Text. Otherwise, parse as Markdown.
+                            /<[a-z][\s\S]*>/i.test(item.storyContent) 
+                              ? item.storyContent 
+                              : marked.parse(item.storyContent) as string
+                          )
+                        }}
+                      />
+                    )}
 
           {item.type === 'writing' && (
             <KidsWritingActivity item={item} />
