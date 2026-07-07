@@ -15,7 +15,7 @@ import { VerseOfTheWeek } from './lib/bible/VerseOfTheWeek';
 import { BibleReaderView } from './lib/bible/BibleReaderView';
 import { StudyNote } from './components/StudyNote';
 import { parseScriptureReference } from './lib/bible/bookCodes';
-import { getCurriculumCache, saveCurriculumCache, fetchCustomVerse, updateCustomVerse, fetchStudyNotesForChapter, signInStaff, signOutStaff, getCurrentStaff, fetchBroadcastStatus, fetchContentItems, supabase, registerConvert, fetchConverts, fetchFollowUpTasks, toggleFollowUpTask, fetchActiveClassGoal, updateOrCreateClassGoal } from './lib/supabase';
+import { getCurriculumCache, saveCurriculumCache, fetchCustomVerse, updateCustomVerse, fetchStudyNotesForChapter, signInStaff, signOutStaff, getCurrentStaff, fetchBroadcastStatus, fetchContentItems, supabase, registerConvert, fetchConverts, fetchFollowUpTasks, toggleFollowUpTask, fetchActiveClassGoal, updateOrCreateClassGoal, isRealSupabase } from './lib/supabase';
 import { WEEKLY_FUN_ITEMS, WeeklyFunItem } from './lib/weeklyFunConfig';
 import { WeeklyFunModal } from './components/WeeklyFunModal';
 import { TeensContentModal } from './components/TeensContentModal';
@@ -1594,14 +1594,20 @@ const App: React.FC = () => {
                         {note.title}
                       </h4>
                       <div className="text-xs text-gray-700 leading-relaxed font-sans prose prose-sm max-w-none">
-                        <StudyNote contentHtml={note.content_html} />
+                        <StudyNote 
+                          contentHtml={note.content_html} 
+                          showAttribution={true}
+                          attribution={note.resource_collection_attribution}
+                        />
                       </div>
                     </div>
                   ))}
                   
-                  <div className="text-[10px] text-gray-400 italic pt-2 mt-2 border-t border-gray-100 text-left">
-                    Tyndale Open Study Notes &copy; 2019 Tyndale House Publishers. Used under CC BY-SA 4.0.
-                  </div>
+                  {!studyNotesResults.some(note => note.source === 'aquifer_api') && (
+                    <div className="text-[10px] text-gray-400 italic pt-2 mt-2 border-t border-gray-100 text-left">
+                      Tyndale Open Study Notes &copy; 2019 Tyndale House Publishers. Used under CC BY-SA 4.0.
+                    </div>
+                  )}
                 </div>
               )}
 

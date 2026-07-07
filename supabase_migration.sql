@@ -584,3 +584,41 @@ DROP POLICY IF EXISTS "allow anyone manage class_goals" ON class_goals;
 CREATE POLICY "allow anyone manage class_goals" ON class_goals FOR ALL USING (true) WITH CHECK (true);
 
 
+-- ----------------------------------------------------
+-- Teachers Hub & Teens Tribe: Aquifer API Sync Support
+-- ----------------------------------------------------
+
+-- Add new columns for Aquifer API resources
+ALTER TABLE bible_study_notes ADD COLUMN IF NOT EXISTS source text DEFAULT 'github_raw';
+ALTER TABLE bible_study_notes ADD COLUMN IF NOT EXISTS aquifer_resource_id integer;
+ALTER TABLE bible_study_notes ADD COLUMN IF NOT EXISTS aquifer_reference_id integer;
+ALTER TABLE bible_study_notes ADD COLUMN IF NOT EXISTS resource_name text;
+ALTER TABLE bible_study_notes ADD COLUMN IF NOT EXISTS resource_type text;
+ALTER TABLE bible_study_notes ADD COLUMN IF NOT EXISTS resource_collection_code text;
+ALTER TABLE bible_study_notes ADD COLUMN IF NOT EXISTS resource_collection_attribution text;
+ALTER TABLE bible_study_notes ADD COLUMN IF NOT EXISTS last_synced_at timestamptz;
+
+-- Add UNIQUE constraint on aquifer_resource_id for upsert support
+ALTER TABLE bible_study_notes DROP CONSTRAINT IF EXISTS unique_aquifer_resource_id;
+ALTER TABLE bible_study_notes ADD CONSTRAINT unique_aquifer_resource_id UNIQUE (aquifer_resource_id);
+
+-- Create table to track Aquifer sync checkpoint state (singleton row)
+CREATE TABLE IF NOT EXISTS aquifer_sync_state (
+  id integer PRIMARY KEY DEFAULT 1,
+  last_sync_timestamp timestamptz NOT NULL DEFAULT '2020-01-01T00:00:00Z',
+  CHECK (id = 1)
+);
+
+-- Seed singleton sync state row
+INSERT INTO aquifer_sync_state (id) VALUES (1) ON CONFLICT DO NOTHING;
+
+-- Enable RLS for aquifer_sync_state
+ALTER TABLE aquifer_sync_state ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "allow public read aquifer_sync_state" ON aquifer_sync_state;
+CREATE POLICY "allow public read aquifer_sync_state" ON aquifer_sync_state FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "allow anyone manage aquifer_sync_state" ON aquifer_sync_state;
+CREATE POLICY "allow anyone manage aquifer_sync_state" ON aquifer_sync_state FOR ALL USING (true) WITH CHECK (true);
+
+

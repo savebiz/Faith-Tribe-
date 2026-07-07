@@ -299,7 +299,8 @@ export function VerseOfTheWeek({ versionId, showStudyNotes = false }: { versionI
                   <StudyNote 
                     contentHtml={note.content_html} 
                     currentVersionId={overrideVersionId || versionId}
-                    showAttribution={false}
+                    showAttribution={true}
+                    attribution={note.resource_collection_attribution}
                     onNavigateToPassage={(newBook, newChapter, _, newVerse) => {
                       navigateToBible(newBook, newChapter, newVerse);
                     }}

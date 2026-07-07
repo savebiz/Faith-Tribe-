@@ -7,6 +7,7 @@ export interface StudyNoteProps {
   currentVersionId?: number;
   onNavigateToPassage?: (book: string, chapter: string, versionId?: number, verse?: string) => void;
   showAttribution?: boolean;
+  attribution?: string;
 }
 
 // Convert ref.ly URL to internal Bible reader route
@@ -49,7 +50,8 @@ export function StudyNote({
   contentHtml,
   currentVersionId,
   onNavigateToPassage,
-  showAttribution = true
+  showAttribution = true,
+  attribution
 }: StudyNoteProps) {
   
   // Sanitize and re-route links on render
@@ -164,7 +166,7 @@ export function StudyNote({
       />
       {showAttribution && (
         <div className="text-[10px] text-gray-400 italic pt-1 border-t border-gray-100/60 select-none text-left">
-          Tyndale Open Study Notes &copy; 2019 Tyndale House Publishers. Used under CC BY-SA 4.0.
+          {attribution || "Tyndale Open Study Notes \u00a9 2019 Tyndale House Publishers. Used under CC BY-SA 4.0."}
         </div>
       )}
     </div>

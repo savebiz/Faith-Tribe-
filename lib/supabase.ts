@@ -118,7 +118,7 @@ if (typeof window !== 'undefined') {
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
-const isRealSupabase = !!(supabaseUrl && supabaseAnonKey);
+export const isRealSupabase = !!(supabaseUrl && supabaseAnonKey);
 
 export const supabase = isRealSupabase 
   ? createClient(supabaseUrl, supabaseAnonKey, {
@@ -355,6 +355,14 @@ export interface BibleStudyNote {
   review_status?: 'draft' | 'approved' | 'rejected';
   reviewed_by?: string;
   reviewed_at?: string;
+  source?: 'github_raw' | 'aquifer_api';
+  aquifer_resource_id?: number;
+  aquifer_reference_id?: number;
+  resource_name?: string;
+  resource_type?: string;
+  resource_collection_code?: string;
+  resource_collection_attribution?: string;
+  last_synced_at?: string;
 }
 
 const USFM_BOOK_ORDER = [
