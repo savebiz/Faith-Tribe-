@@ -13,7 +13,7 @@ const PrayingHands = (props: { className?: string }) => {
 
 interface GeminiAssistantProps {
   audience: Audience;
-  onSelectAction?: (actionType: 'get_saved' | 'share_faith') => void;
+  onSelectAction?: (actionType: 'get_saved' | 'share_faith' | 'altar_script') => void;
 }
 
 const formatText = (text?: string) => {
@@ -126,7 +126,13 @@ const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ audience, onSelectAct
       <div className={`p-4.5 ${getThemeColors()} flex items-center justify-between shadow-sm`}>
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm border border-white/30 shadow-inner">
-            <Christicon name="star" size={24} style={{ color: 'currentColor' }} />
+            {audience === Audience.KIDS ? (
+              <PrayingHands className="w-6 h-6 text-white" />
+            ) : audience === Audience.TEENS ? (
+              <Christicon name="star" size={24} style={{ color: 'currentColor' }} />
+            ) : (
+              <Christicon name="scroll" size={24} style={{ color: 'currentColor' }} />
+            )}
           </div>
           <div>
             <h3 className="font-extrabold text-base tracking-tight">
@@ -164,8 +170,10 @@ const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ audience, onSelectAct
                     <div className="faith-buddy-avatar flex items-center justify-center">
                       <PrayingHands className="w-5 h-5 text-white" />
                     </div>
+                  ) : audience === Audience.TEENS ? (
+                    <Christicon name="star" size={14} style={{ color: 'currentColor' }} />
                   ) : (
-                    <Bot size={14} />
+                    <Christicon name="scroll" size={14} style={{ color: 'currentColor' }} />
                   )}
                 </div>
 
@@ -241,7 +249,7 @@ const GeminiAssistant: React.FC<GeminiAssistantProps> = ({ audience, onSelectAct
         
         {audience === Audience.TEACHERS && (
           <button 
-            onClick={() => handleQuickPrompt("Create an altar call script")} 
+            onClick={() => onSelectAction ? onSelectAction('altar_script') : handleQuickPrompt("Create an altar call script")} 
             className="whitespace-nowrap flex items-center gap-1.5 px-3.5 py-1.5 bg-white border border-teal-300 text-teal-800 rounded-full text-xs font-bold hover:bg-teal-50 hover:scale-105 active:scale-95 transition-all cursor-pointer shadow-sm"
           >
             <Flame size={12} className="text-teal-600 fill-teal-600/10" />

@@ -521,3 +521,66 @@ DROP POLICY IF EXISTS "allow anyone manage audio_chapter_cache" ON audio_chapter
 CREATE POLICY "allow anyone manage audio_chapter_cache" ON audio_chapter_cache FOR ALL USING (true) WITH CHECK (true);
 
 
+-- ----------------------------------------------------
+-- Teachers Hub: Converts & Follow-up Tracking
+-- ----------------------------------------------------
+CREATE TABLE IF NOT EXISTS converts (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  age integer,
+  class_notes text,
+  registered_by uuid REFERENCES staff(id) ON DELETE SET NULL,
+  registered_at timestamptz DEFAULT now(),
+  follow_up_status text DEFAULT 'pending' -- 'pending' | 'contacted' | 'completed'
+);
+
+CREATE TABLE IF NOT EXISTS follow_up_tasks (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  convert_id uuid REFERENCES converts(id) ON DELETE CASCADE,
+  task_description text NOT NULL,
+  due_at timestamptz, -- e.g. registered_at + 24 hours
+  completed boolean DEFAULT false,
+  completed_at timestamptz
+);
+
+CREATE TABLE IF NOT EXISTS class_goals (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  teacher_id uuid REFERENCES staff(id) ON DELETE CASCADE,
+  goal_title text NOT NULL,      -- e.g. "Evangelism Focus"
+  goal_description text,
+  target_count integer NOT NULL, -- e.g. 5
+  current_count integer DEFAULT 0,
+  status text DEFAULT 'active',  -- 'active' | 'completed' | 'archived'
+  created_at timestamptz DEFAULT now()
+);
+
+-- Enable RLS
+ALTER TABLE converts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE follow_up_tasks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE class_goals ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies for converts
+DROP POLICY IF EXISTS "allow public read converts" ON converts;
+CREATE POLICY "allow public read converts" ON converts FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "allow anyone insert converts" ON converts;
+CREATE POLICY "allow anyone insert converts" ON converts FOR INSERT WITH CHECK (true);
+
+DROP POLICY IF EXISTS "allow anyone update converts" ON converts;
+CREATE POLICY "allow anyone update converts" ON converts FOR UPDATE USING (true);
+
+-- RLS Policies for follow_up_tasks
+DROP POLICY IF EXISTS "allow public read follow_up_tasks" ON follow_up_tasks;
+CREATE POLICY "allow public read follow_up_tasks" ON follow_up_tasks FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "allow anyone manage follow_up_tasks" ON follow_up_tasks;
+CREATE POLICY "allow anyone manage follow_up_tasks" ON follow_up_tasks FOR ALL USING (true) WITH CHECK (true);
+
+-- RLS Policies for class_goals
+DROP POLICY IF EXISTS "allow public read class_goals" ON class_goals;
+CREATE POLICY "allow public read class_goals" ON class_goals FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "allow anyone manage class_goals" ON class_goals;
+CREATE POLICY "allow anyone manage class_goals" ON class_goals FOR ALL USING (true) WITH CHECK (true);
+
+

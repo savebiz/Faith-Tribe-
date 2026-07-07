@@ -15,7 +15,7 @@ import { VerseOfTheWeek } from './lib/bible/VerseOfTheWeek';
 import { BibleReaderView } from './lib/bible/BibleReaderView';
 import { StudyNote } from './components/StudyNote';
 import { parseScriptureReference } from './lib/bible/bookCodes';
-import { getCurriculumCache, saveCurriculumCache, fetchCustomVerse, updateCustomVerse, fetchStudyNotesForChapter, signInStaff, signOutStaff, getCurrentStaff, fetchBroadcastStatus, fetchContentItems, supabase } from './lib/supabase';
+import { getCurriculumCache, saveCurriculumCache, fetchCustomVerse, updateCustomVerse, fetchStudyNotesForChapter, signInStaff, signOutStaff, getCurrentStaff, fetchBroadcastStatus, fetchContentItems, supabase, registerConvert, fetchConverts, fetchFollowUpTasks, toggleFollowUpTask, fetchActiveClassGoal, updateOrCreateClassGoal } from './lib/supabase';
 import { WEEKLY_FUN_ITEMS, WeeklyFunItem } from './lib/weeklyFunConfig';
 import { WeeklyFunModal } from './components/WeeklyFunModal';
 import { TeensContentModal } from './components/TeensContentModal';
@@ -289,15 +289,9 @@ const App: React.FC = () => {
 
   // -- State for Teachers Hub Sub-Modals & Trackers --
   const [activeTeacherModal, setActiveTeacherModal] = useState<'convert' | 'decision' | 'schedule' | null>(null);
+  const [isAltarScriptModalOpen, setIsAltarScriptModalOpen] = useState(false);
 
-  // -- State for Real-Time Converts Tracking (Teachers Hub) --
-  const [newConverts, setNewConverts] = useState<NewConvert[]>([
-    { name: "John Doe", age: "14", decisionDate: "2026-06-28", notes: "First-time decision at Sunday service." },
-    { name: "Mary Smith", age: "11", decisionDate: "2026-06-29", notes: "Responded during class altar call." }
-  ]);
-  const [convertNameInput, setConvertNameInput] = useState('');
-  const [convertAgeInput, setConvertAgeInput] = useState('');
-  const [convertNotesInput, setConvertNotesInput] = useState('');
+
 
   // -- Handlers --
   const handlePrayerSubmit = (e: React.FormEvent) => {
@@ -352,19 +346,15 @@ const App: React.FC = () => {
     }
   };
 
-  const handleSalvationSubmit = (e: React.FormEvent) => {
+  const handleSalvationSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSalvationFormSubmitted(true);
-    // Add to converts tracker dynamically if name is filled
     if (salvationName) {
-      const today = new Date().toISOString().split('T')[0];
-      const newDecision: NewConvert = {
-        name: salvationName,
-        age: "Teens/Youth",
-        decisionDate: today,
-        notes: "Online decision card submission."
-      };
-      setNewConverts(prev => [newDecision, ...prev]);
+      try {
+        await registerConvert(salvationName, null, "Online decision card submission.", adminStaff?.id || null);
+      } catch (err) {
+        console.warn("Failed to register convert from salvation guide:", err);
+      }
     }
   };
 
@@ -374,24 +364,6 @@ const App: React.FC = () => {
     setSalvationName('');
     setSalvationEmail('');
     setSalvationFormSubmitted(false);
-  };
-
-  const handleAddConvertSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!convertNameInput.trim()) return;
-
-    const today = new Date().toISOString().split('T')[0];
-    const item: NewConvert = {
-      name: convertNameInput,
-      age: convertAgeInput || "Unknown",
-      decisionDate: today,
-      notes: convertNotesInput || "Registered manually"
-    };
-
-    setNewConverts(prev => [item, ...prev]);
-    setConvertNameInput('');
-    setConvertAgeInput('');
-    setConvertNotesInput('');
   };
 
   // --- Views ---
@@ -1117,22 +1089,131 @@ const App: React.FC = () => {
             onClose={() => setSelectedTeensItem(null)} 
           />
         )}
-      </div>
-    );
-  };
+   const TeachersView = () => {
+    // Phase 2 converts and goals states
+    const [converts, setConverts] = useState<any[]>([]);
+    const [tasks, setTasks] = useState<any[]>([]);
+    const [goal, setGoal] = useState<any | null>(null);
+    const [isEditingGoal, setIsEditingGoal] = useState(false);
+    const [goalTargetInput, setGoalTargetInput] = useState(5);
+    const [goalTitleInput, setGoalTitleInput] = useState('Evangelism Focus');
 
-  const TeachersView = () => {
-    const [curriculumTrack, setCurriculumTrack] = useState<'kids' | 'teens'>('kids');
-    const [liveLessons, setLiveLessons] = useState<any[]>([]);
-    const [isLoadingLive, setIsLoadingLive] = useState(false);
-    const [useFallback, setUseFallback] = useState(false);
-    const [flags, setFlags] = useState({ enableCurriculumPhase1: true, enableCurriculumPhase2: true });
+    // Form inputs
+    const [convertNameInput, setConvertNameInput] = useState('');
+    const [convertAgeInput, setConvertAgeInput] = useState('');
+    const [convertNotesInput, setConvertNotesInput] = useState('');
 
-    // Study Notes states for lesson prep
+    // Phase 3 search and resource states
     const [studyNotesQuery, setStudyNotesQuery] = useState('');
     const [studyNotesResults, setStudyNotesResults] = useState<any[]>([]);
     const [isLoadingNotes, setIsLoadingNotes] = useState(false);
     const [studyNotesSearched, setStudyNotesSearched] = useState(false);
+
+    const [curriculumSearchText, setCurriculumSearchText] = useState('');
+    const [curriculumResults, setCurriculumResults] = useState<any[]>([]);
+    const [isLoadingCurriculum, setIsLoadingCurriculum] = useState(false);
+    const [curriculumSearchSearched, setCurriculumSearchSearched] = useState(false);
+
+    const [evangelismResources, setEvangelismResources] = useState<any[]>([]);
+    const [isLoadingEvangelism, setIsLoadingEvangelism] = useState(false);
+
+    const loadData = async () => {
+      try {
+        const userId = adminStaff?.id || null;
+        const [convertsData, tasksData, goalData] = await Promise.all([
+          fetchConverts(userId),
+          fetchFollowUpTasks(userId),
+          fetchActiveClassGoal(userId)
+        ]);
+        setConverts(convertsData);
+        setTasks(tasksData);
+        setGoal(goalData);
+        if (goalData) {
+          setGoalTargetInput(goalData.target_count);
+          setGoalTitleInput(goalData.goal_title);
+        }
+      } catch (err) {
+        console.error("Failed to load Teachers data:", err);
+      }
+    };
+
+    const loadEvangelismResources = async () => {
+      setIsLoadingEvangelism(true);
+      try {
+        if (isRealSupabase && supabase) {
+          const { data, error } = await supabase
+            .from('bible_study_notes')
+            .select('*')
+            .eq('tier', 'advanced')
+            .limit(4);
+          if (error) throw error;
+          setEvangelismResources(data || []);
+        } else {
+          // Mock seeds
+          setEvangelismResources([
+            { ref: "GEN 1:1", title: "Introduction to Creation Guide", content_html: "<p>Understanding creation as a foundation for young minds. Teach them that God created everything with a plan.</p><p><em>Source: Tyndale Advanced Guides</em></p>" },
+            { ref: "JHN 3:16", title: "Eternal Life & Love Study Guide", content_html: "<p>The ultimate promise of salvation. Use this guide to lead altar calls and explain commitment to children.</p><p><em>Source: Tyndale Advanced Guides</em></p>" },
+            { ref: "ROM 12:1", title: "Living Sacrifices Discipleship Notes", content_html: "<p>Practical discipleship for daily living. Helping youth dedicate their lives to service.</p><p><em>Source: Tyndale Advanced Guides</em></p>" }
+          ]);
+        }
+      } catch (err) {
+        console.warn("Failed to query evangelism resources:", err);
+      } finally {
+        setIsLoadingEvangelism(false);
+      }
+    };
+
+    useEffect(() => {
+      if (isTeacherLoggedIn) {
+        loadData();
+        loadEvangelismResources();
+      }
+    }, [isTeacherLoggedIn]);
+
+    // Handlers
+    const handleRegisterDecision = async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!convertNameInput.trim()) return;
+      const ageNum = convertAgeInput ? Number(convertAgeInput) : null;
+      try {
+        const userId = adminStaff?.id || null;
+        await registerConvert(convertNameInput, ageNum, convertNotesInput || 'Registered manually', userId);
+        toast.success(`Successfully registered decision for ${convertNameInput}! ✨`);
+        setConvertNameInput('');
+        setConvertAgeInput('');
+        setConvertNotesInput('');
+        loadData();
+      } catch (err) {
+        toast.error("Failed to register decision.");
+      }
+    };
+
+    const handleToggleTask = async (taskId: string, currentCompleted: boolean) => {
+      try {
+        const ok = await toggleFollowUpTask(taskId, !currentCompleted);
+        if (ok) {
+          toast.success("Follow-up task updated!");
+          loadData();
+        } else {
+          toast.error("Could not update task.");
+        }
+      } catch (err) {
+        toast.error("Error updating task.");
+      }
+    };
+
+    const handleUpdateGoal = async (e: React.FormEvent) => {
+      e.preventDefault();
+      try {
+        const userId = adminStaff?.id || null;
+        await updateOrCreateClassGoal(userId, goalTargetInput, goalTitleInput);
+        toast.success("Sunday Goal updated successfully!");
+        setIsEditingGoal(false);
+        loadData();
+      } catch (err) {
+        toast.error("Failed to update goal.");
+      }
+    };
 
     const handleSearchStudyNotes = async (e: React.FormEvent) => {
       e.preventDefault();
@@ -1151,7 +1232,6 @@ const App: React.FC = () => {
 
         const allNotes = await fetchStudyNotesForChapter(parsed.bookCode, parsed.chapter);
         
-        // Filter further if verse is specified (e.g. John 3:16 -> filter notes matching usfm_start === "JHN 3:16" or containing JHN 3:16)
         if (parsed.verse !== null) {
           const expectedStart = `${parsed.bookCode} ${parsed.chapter}:${parsed.verse}`;
           const filtered = allNotes.filter(note => {
@@ -1178,110 +1258,49 @@ const App: React.FC = () => {
       }
     };
 
-    // Scripture Admin Override States
-    const [customVerseInput, setCustomVerseInput] = useState('');
-    const [isSavingCustomVerse, setIsSavingCustomVerse] = useState(false);
-
-    useEffect(() => {
-      const loadCurrentCustom = async () => {
-        try {
-          const current = await fetchCustomVerse();
-          if (current) {
-            setCustomVerseInput(current);
-          }
-        } catch (err) {
-          console.warn("Failed to load current custom verse override:", err);
-        }
-      };
-      if (isTeacherLoggedIn) {
-        loadCurrentCustom();
-      }
-    }, [isTeacherLoggedIn]);
-
-    const handleSaveCustomVerse = async (e: React.FormEvent) => {
+    const handleSearchCurriculum = async (e: React.FormEvent) => {
       e.preventDefault();
-      if (!customVerseInput.trim()) return;
-
-      setIsSavingCustomVerse(true);
+      const text = curriculumSearchText.trim();
+      if (!text) return;
+      setIsLoadingCurriculum(true);
+      setCurriculumSearchSearched(true);
       try {
-        await updateCustomVerse(customVerseInput.trim());
-        toast.success('Verse of the Day updated! ✨ Check the homepage spotlight card to see the changes.', { duration: 5000 });
+        if (isRealSupabase && supabase) {
+          const parsedRef = parseScriptureReference(text);
+          let query = supabase.from('bible_study_notes').select('*');
+          if (parsedRef) {
+            const prefix = `${parsedRef.bookCode.toUpperCase()} ${parsedRef.chapter}`;
+            query = query.or(`usfm_start.eq.${prefix},usfm_start.like.${prefix}:%`);
+          } else {
+            query = query.ilike('title', `%${text}%`);
+          }
+          const { data, error } = await query.limit(20);
+          if (error) throw error;
+          setCurriculumResults(data || []);
+        } else {
+          const allNotes = [
+            { ref: "MAT 19:21", title: "Treasure in Heaven Guide (Kids)", content_html: "<p>Altar call material for kids about letting go of self and seeking God.</p>" },
+            { ref: "JHN 3:16", title: "Eternal Life Study Note (Teens)", content_html: "<p>Apologetics study note on understanding God's love and salvation for teens.</p>" },
+            { ref: "PSA 23:1", title: "The Lord is My Shepherd (Kids)", content_html: "<p>Discipleship guide helping children build a habit of trusting God daily.</p>" }
+          ];
+          const filtered = allNotes.filter(n => 
+            n.title.toLowerCase().includes(text.toLowerCase()) || 
+            n.ref.toLowerCase().includes(text.toLowerCase())
+          );
+          setCurriculumResults(filtered);
+        }
       } catch (err) {
-        console.error(err);
-        toast.error('Failed to update custom verse. Please try again.');
+        toast.error("Failed to query curriculum database.");
       } finally {
-        setIsSavingCustomVerse(false);
+        setIsLoadingCurriculum(false);
       }
     };
 
-    useEffect(() => {
-      const fetchFlagsAndCurriculum = async () => {
-        setIsLoadingLive(true);
-        let activeFlags = {
-          enableCurriculumPhase1: true,
-          enableCurriculumPhase2: true,
-          lessonsApiBaseUrl: 'https://api.lessons.church',
-          lessonsApiKey: ''
-        };
+    // Calculate goals count
+    const targetCount = goal?.target_count || 5;
+    const currentCount = converts.length;
+    const progressPercent = Math.min(100, Math.round((currentCount / targetCount) * 100));
 
-        try {
-          const res = await fetch('/feature_flags.json');
-          if (res.ok) {
-            const data = await res.json();
-            activeFlags = data;
-            setFlags(data);
-          }
-        } catch (err) {
-          console.warn("Failed to load feature flags, using defaults:", err);
-        }
-
-        try {
-          const cached = await getCurriculumCache();
-          if (cached && cached.length > 0) {
-            setLiveLessons(cached);
-            setIsLoadingLive(false);
-            setUseFallback(false);
-            return;
-          }
-
-          const apiBase = activeFlags.lessonsApiBaseUrl || 'https://api.lessons.church';
-          const apiKey = activeFlags.lessonsApiKey || import.meta.env.VITE_LESSONS_API_KEY || '';
-
-          const headers: Record<string, string> = {};
-          if (apiKey) {
-            headers['Authorization'] = `Bearer ${apiKey}`;
-          }
-
-          const response = await fetch(`${apiBase}/programs/public`, { headers });
-          if (response.ok) {
-            const data = await response.json();
-            if (Array.isArray(data) && data.length > 0) {
-              setLiveLessons(data);
-              await saveCurriculumCache(data);
-              setUseFallback(false);
-            } else {
-              throw new Error("Invalid lessons payload");
-            }
-          } else {
-            throw new Error(`HTTP error: ${response.status}`);
-          }
-        } catch (err) {
-          console.warn("LessonsApi fetch failed, using Phase 1 fallback:", err);
-          setUseFallback(true);
-        } finally {
-          setIsLoadingLive(false);
-        }
-      };
-
-      if (isTeacherLoggedIn) {
-        fetchFlagsAndCurriculum();
-      }
-    }, [isTeacherLoggedIn]);
-
-    // -- Login Gate --
-    if (!isTeacherLoggedIn) return null;
-
-    // -- Bento Grid Dashboard for Teachers --
     return (
       <div className="bg-gray-50 min-h-screen pb-16 text-gray-800">
         <div className="bg-white border-b border-gray-150 py-8 shadow-sm">
@@ -1302,34 +1321,75 @@ const App: React.FC = () => {
         <div className="max-w-7xl mx-auto px-6 mt-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
 
           {/* Left Column (Bento grids) */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-8 text-left">
 
             {/* Bento Layout Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
               {/* Tracker Widget Card */}
-              <div className="p-6 rounded-2xl bg-gradient-to-r from-teal-700 to-teal-800 text-white shadow-lg flex flex-col justify-between">
+              <div className="p-6 rounded-2xl bg-gradient-to-r from-teal-700 to-teal-800 text-white shadow-lg flex flex-col justify-between relative group">
                 <div>
                   <div className="flex justify-between items-start">
                     <h3 className="font-bold text-lg text-teal-100 flex items-center gap-2">
                       <Trophy size={18} /> Sunday Class Goal
                     </h3>
-                    <span className="text-[10px] uppercase font-black tracking-widest bg-white/20 px-2 py-0.5 rounded-full">ACTIVE</span>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => setIsEditingGoal(!isEditingGoal)}
+                        className="text-[10px] font-bold bg-white/20 hover:bg-white/30 text-white px-2 py-0.5 rounded transition-all cursor-pointer"
+                      >
+                        {isEditingGoal ? 'Cancel' : 'Edit Goal'}
+                      </button>
+                      <span className="text-[10px] uppercase font-black tracking-widest bg-white/20 px-2 py-0.5 rounded-full">ACTIVE</span>
+                    </div>
                   </div>
-                  <h4 className="text-2xl font-black mt-4">Evangelism Focus</h4>
-                  <p className="text-sm text-teal-100 mt-1">Lead kids to make personal choices for Christ.</p>
+
+                  {isEditingGoal ? (
+                    <form onSubmit={handleUpdateGoal} className="mt-4 space-y-2">
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          required
+                          value={goalTitleInput}
+                          onChange={e => setGoalTitleInput(e.target.value)}
+                          placeholder="Goal Title"
+                          className="w-2/3 text-xs bg-teal-900/40 border border-teal-650 text-white rounded px-2.5 py-1.5 focus:outline-none focus:border-white placeholder-teal-300"
+                        />
+                        <input
+                          type="number"
+                          required
+                          min={1}
+                          value={goalTargetInput}
+                          onChange={e => setGoalTargetInput(Number(e.target.value))}
+                          placeholder="Target Souls"
+                          className="w-1/3 text-xs bg-teal-900/40 border border-teal-650 text-white rounded px-2.5 py-1.5 focus:outline-none focus:border-white"
+                        />
+                      </div>
+                      <button
+                        type="submit"
+                        className="bg-yellow-400 hover:bg-yellow-500 text-teal-950 text-[10px] font-black py-1 px-3 rounded cursor-pointer transition-colors"
+                      >
+                        Save Goal Settings
+                      </button>
+                    </form>
+                  ) : (
+                    <>
+                      <h4 className="text-2xl font-black mt-4">{goal?.goal_title || 'Evangelism Focus'}</h4>
+                      <p className="text-sm text-teal-100 mt-1">{goal?.goal_description || 'Lead kids to make personal choices for Christ.'}</p>
+                    </>
+                  )}
                 </div>
 
                 {/* Visual Progress Bar */}
                 <div className="mt-6">
                   <div className="flex justify-between text-xs font-bold mb-1">
-                    <span>Decisions Target: {newConverts.length}/5 Souls</span>
-                    <span>{Math.min(100, Math.round((newConverts.length / 5) * 100))}%</span>
+                    <span>Decisions Target: {currentCount}/{targetCount} Souls</span>
+                    <span>{progressPercent}%</span>
                   </div>
                   <div className="w-full bg-teal-900/60 rounded-full h-2">
                     <div
                       className="bg-yellow-400 h-2 rounded-full transition-all duration-500"
-                      style={{ width: `${Math.min(100, (newConverts.length / 5) * 100)}%` }}
+                      style={{ width: `${progressPercent}%` }}
                     ></div>
                   </div>
                 </div>
@@ -1341,7 +1401,7 @@ const App: React.FC = () => {
                   <h3 className="font-bold text-gray-800 text-sm uppercase tracking-wider mb-3 flex items-center gap-1.5">
                     <PlusCircle size={16} className="text-teal-600" /> Register Decision
                   </h3>
-                  <form onSubmit={handleAddConvertSubmit} className="space-y-3">
+                  <form onSubmit={handleRegisterDecision} className="space-y-3">
                     <input
                       type="text"
                       required
@@ -1387,7 +1447,7 @@ const App: React.FC = () => {
               >
                 <div className="bg-teal-50 p-3 rounded-full text-teal-600 mb-3"><Users size={20} /></div>
                 <h4 className="font-bold text-sm text-gray-900">New Convert Tracker</h4>
-                <p className="text-[10px] text-gray-400 mt-1">{newConverts.length} Records registered</p>
+                <p className="text-[10px] text-gray-400 mt-1">{converts.length} Records registered</p>
               </div>
 
               <div
@@ -1410,256 +1470,89 @@ const App: React.FC = () => {
 
             </div>
 
-            {/* Phase 1: Curated Curriculum Library Section (Fallback) */}
-            {((flags.enableCurriculumPhase1 && useFallback) || (flags.enableCurriculumPhase1 && !flags.enableCurriculumPhase2)) && (
-              <div className="bg-white p-6 sm:p-8 rounded-[2rem] border border-gray-150 shadow-sm space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <h3 className="text-2xl font-black text-teal-800 tracking-tight flex items-center gap-2">
-                      <BookOpen size={24} className="text-teal-650" /> Curriculum Library
-                    </h3>
-                    <p className="text-xs text-gray-500 mt-1">Curated lesson programs powered by Lessons.church</p>
-                  </div>
-
-                  {/* Curriculum Segment Tabs */}
-                  <div className="flex bg-gray-100 p-1 rounded-xl self-start sm:self-auto">
-                    <button
-                      onClick={() => setCurriculumTrack('kids')}
-                      className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${curriculumTrack === 'kids' ? 'bg-teal-700 text-white shadow-sm' : 'text-gray-655 hover:text-teal-800'}`}
-                    >
-                      Kids Zone (2-12)
-                    </button>
-                    <button
-                      onClick={() => setCurriculumTrack('teens')}
-                      className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${curriculumTrack === 'teens' ? 'bg-teal-700 text-white shadow-sm' : 'text-gray-655 hover:text-teal-800'}`}
-                    >
-                      Teens Tribe (13-15)
-                    </button>
-                  </div>
+            {/* Phase 3: Aquifer-powered Synced Curriculum Library */}
+            <div className="bg-white p-6 sm:p-8 rounded-[2rem] border border-gray-150 shadow-sm space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-2xl font-black text-teal-800 tracking-tight flex items-center gap-2">
+                    <BookOpen size={24} className="text-teal-650" /> Curriculum Library
+                    <span className="text-[9px] font-black tracking-widest text-[#1CABB9] bg-[#1CABB9]/10 px-2.5 py-0.5 rounded-full border border-[#1CABB9]/25 animate-pulse">AQUIFER POWERED</span>
+                  </h3>
+                  <p className="text-xs text-gray-500 mt-1">Browse study resources synchronized directly from the local database</p>
                 </div>
 
-                {/* Curried Curriculum Grid */}
+                <div className="flex bg-gray-100 p-1 rounded-xl self-start sm:self-auto">
+                  <button
+                    onClick={() => setCurriculumTrack('kids')}
+                    className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${curriculumTrack === 'kids' ? 'bg-teal-700 text-white shadow-sm' : 'text-gray-655 hover:text-teal-800'}`}
+                  >
+                    Kids Zone (2-12)
+                  </button>
+                  <button
+                    onClick={() => setCurriculumTrack('teens')}
+                    className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${curriculumTrack === 'teens' ? 'bg-teal-700 text-white shadow-sm' : 'text-gray-655 hover:text-teal-800'}`}
+                  >
+                    Teens Tribe (13-15)
+                  </button>
+                </div>
+              </div>
+
+              <form onSubmit={handleSearchCurriculum} className="flex gap-2">
+                <input
+                  type="text"
+                  required
+                  value={curriculumSearchText}
+                  onChange={e => setCurriculumSearchText(e.target.value)}
+                  placeholder={`Search scripture or topic for ${curriculumTrack === 'kids' ? 'Kids' : 'Teens'} curriculum...`}
+                  className="flex-grow text-xs border border-gray-250 rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
+                />
+                <button
+                  type="submit"
+                  disabled={isLoadingCurriculum}
+                  className="bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all cursor-pointer shadow-sm disabled:opacity-50"
+                >
+                  {isLoadingCurriculum ? 'Searching...' : 'Search'}
+                </button>
+              </form>
+
+              {curriculumResults.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {curriculumTrack === 'kids' ? (
-                    <>
-                      <div className="bg-amber-50/50 hover:bg-amber-50 border border-amber-100 p-5 rounded-2xl transition-all duration-300 hover:shadow-md flex flex-col justify-between h-full group">
-                        <div>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-[10px] font-black uppercase tracking-wider bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full">Ages 2–4</span>
-                            <span className="text-xs text-gray-400">Preschool</span>
-                          </div>
-                          <h4 className="font-display font-bold text-lg text-amber-700 group-hover:text-amber-800 transition-colors">Bible App for Kids</h4>
-                          <p className="text-xs text-gray-600 mt-2 leading-relaxed">Interactive storybook lessons helping preschoolers explore early Bible stories, coloring pages, and leader guides.</p>
+                  {curriculumResults.map((item, idx) => (
+                    <div key={idx} className="p-4 bg-gray-50 border border-gray-150 rounded-2xl flex flex-col justify-between">
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-[9px] font-mono bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full">{item.usfm_start || item.ref}</span>
+                          <span className="text-[10px] text-gray-400 font-bold uppercase">{item.tier || 'Curriculum'}</span>
                         </div>
-                        <div className="mt-4 pt-3 border-t border-amber-100/50 flex items-center justify-between">
-                          <span className="text-[10px] font-bold text-amber-600 bg-white border border-amber-200 px-2 py-0.5 rounded">Focus: Love, Obedience</span>
-                          <a href="https://lessons.church/curriculums" target="_blank" rel="noopener noreferrer" className="text-xs font-black text-amber-700 hover:underline flex items-center gap-1">Open Lessons &rarr;</a>
-                        </div>
+                        <h4 className="font-bold text-sm text-teal-900">{item.title}</h4>
+                        <div className="text-xs text-gray-600 mt-2 line-clamp-3 leading-relaxed font-sans prose prose-sm" dangerouslySetInnerHTML={{ __html: item.content_html }}></div>
                       </div>
-
-                      <div className="bg-teal-50/30 hover:bg-teal-50/60 border border-teal-100 p-5 rounded-2xl transition-all duration-300 hover:shadow-md flex flex-col justify-between h-full group">
-                        <div>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-[10px] font-black uppercase tracking-wider bg-teal-100 text-teal-850 rounded-full">Ages 5–7</span>
-                            <span className="text-xs text-gray-400">Kindergarten</span>
-                          </div>
-                          <h4 className="font-sans font-bold text-lg text-teal-850 group-hover:text-teal-900 transition-colors">Crosstown</h4>
-                          <p className="text-xs text-gray-600 mt-2 leading-relaxed">Fun animated adventures exploring key Bible stories, helping kids develop early habits of prayer and sharing.</p>
-                        </div>
-                        <div className="mt-4 pt-3 border-t border-teal-100/50 flex items-center justify-between">
-                          <span className="text-[10px] font-bold text-teal-700 bg-white border border-teal-200 px-2 py-0.5 rounded">Focus: Kindness, Sharing</span>
-                          <a href="https://lessons.church/curriculums" target="_blank" rel="noopener noreferrer" className="text-xs font-black text-teal-850 hover:underline flex items-center gap-1">Open Lessons &rarr;</a>
-                        </div>
+                      <div className="mt-4 pt-3 border-t border-gray-200/60 flex items-center justify-between text-[10px] text-gray-400">
+                        <span>Tyndale Open Study Notes</span>
+                        <button
+                          onClick={() => {
+                            setStudyNotesResults([item]);
+                            setStudyNotesQuery(item.usfm_start || item.ref);
+                            setStudyNotesSearched(true);
+                            toast.success("Loaded note in detail search viewer below! 📖");
+                          }}
+                          className="text-teal-700 hover:underline font-black cursor-pointer"
+                        >
+                          View Details &rarr;
+                        </button>
                       </div>
-
-                      <div className="bg-indigo-50/30 hover:bg-indigo-50/60 border border-indigo-100 p-5 rounded-2xl transition-all duration-300 hover:shadow-md flex flex-col justify-between h-full group">
-                        <div>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-[10px] font-black uppercase tracking-wider bg-indigo-100 text-indigo-800 px-2.5 py-0.5 rounded-full">Ages 8–9</span>
-                            <span className="text-xs text-gray-400">Grades 1-4</span>
-                          </div>
-                          <h4 className="font-sans font-bold text-lg text-indigo-800 group-hover:text-indigo-900 transition-colors">Konnect</h4>
-                          <p className="text-xs text-gray-600 mt-2 leading-relaxed">Fast-paced, video-based space station adventures teaching kids integrity, peer-choice support, and faith principles.</p>
-                        </div>
-                        <div className="mt-4 pt-3 border-t border-indigo-100/50 flex items-center justify-between">
-                          <span className="text-[10px] font-bold text-indigo-700 bg-white border border-indigo-200 px-2 py-0.5 rounded">Focus: Integrity, Choices</span>
-                          <a href="https://lessons.church/curriculums" target="_blank" rel="noopener noreferrer" className="text-xs font-black text-indigo-800 hover:underline flex items-center gap-1">Open Lessons &rarr;</a>
-                        </div>
-                      </div>
-
-                      <div className="bg-purple-50/30 hover:bg-purple-50/60 border border-purple-100 p-5 rounded-2xl transition-all duration-300 hover:shadow-md flex flex-col justify-between h-full group">
-                        <div>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-[10px] font-black uppercase tracking-wider bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded-full">Ages 10–12</span>
-                            <span className="text-xs text-gray-400">Grades 5-6</span>
-                          </div>
-                          <h4 className="font-sans font-bold text-lg text-purple-800 group-hover:text-purple-900 transition-colors">Loop</h4>
-                          <p className="text-xs text-gray-600 mt-2 leading-relaxed">Tailored pre-teen series tackling transitional growth topics, scripture context, and building personal devotions.</p>
-                        </div>
-                        <div className="mt-4 pt-3 border-t border-purple-100/50 flex items-center justify-between">
-                          <span className="text-[10px] font-bold text-purple-700 bg-white border border-purple-200 px-2 py-0.5 rounded">Focus: Devotion, Apologetics</span>
-                          <a href="https://lessons.church/curriculums" target="_blank" rel="noopener noreferrer" className="text-xs font-black text-purple-800 hover:underline flex items-center gap-1">Open Lessons &rarr;</a>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="col-span-1 md:col-span-2 bg-emerald-50/30 hover:bg-emerald-50/60 border border-emerald-100 p-6 rounded-2xl transition-all duration-300 hover:shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-6 group">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">Ages 13–15</span>
-                          <span className="text-xs text-gray-400">Junior High</span>
-                        </div>
-                        <h4 className="font-sans font-black text-xl text-emerald-800 group-hover:text-emerald-900 transition-colors">Switch Youth</h4>
-                        <p className="text-xs text-gray-600 leading-relaxed max-w-xl">
-                          A robust, interactive discipleship curriculum exploring real-world culture, identity in Christ, bold faith expressions, and daily scripture engagement plans.
-                        </p>
-                        <div className="inline-block mt-2 text-[10px] font-bold text-emerald-700 bg-white border border-emerald-200 px-2.5 py-0.5 rounded">
-                          Focus: Identity, Boldness, Discipleship
-                        </div>
-                      </div>
-                      <a
-                        href="https://lessons.church/curriculums"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-emerald-600 hover:bg-emerald-750 text-white font-bold text-xs px-5 py-3 rounded-xl transition-all hover:scale-105 active:scale-95 shadow-sm text-center whitespace-nowrap cursor-pointer self-stretch md:self-auto flex items-center justify-center gap-1"
-                      >
-                        Open Switch Lessons &rarr;
-                      </a>
                     </div>
-                  )}
+                  ))}
                 </div>
-              </div>
-            )}
-
-            {/* Phase 2: Live API Integration Card Grid */}
-            {flags.enableCurriculumPhase2 && !useFallback && (
-              <div className="bg-white p-6 sm:p-8 rounded-[2rem] border border-gray-150 shadow-sm space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                  <div>
-                    <h3 className="text-2xl font-black text-teal-800 tracking-tight flex items-center gap-2">
-                      <BookOpen size={24} className="text-teal-650" /> Curriculum Library
-                      <span className="text-[9px] font-black tracking-widest text-[#1CABB9] bg-[#1CABB9]/10 px-2.5 py-0.5 rounded-full border border-[#1CABB9]/25 animate-pulse">LIVE SYNC</span>
-                    </h3>
-                    <p className="text-xs text-gray-500 mt-1">Live programs pulled directly from LessonsApi (Staging)</p>
-                  </div>
-
-                  {/* Curriculum Segment Tabs */}
-                  <div className="flex bg-gray-100 p-1 rounded-xl self-start sm:self-auto">
-                    <button
-                      onClick={() => setCurriculumTrack('kids')}
-                      className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${curriculumTrack === 'kids' ? 'bg-teal-700 text-white shadow-sm' : 'text-gray-655 hover:text-teal-800'}`}
-                    >
-                      Kids Zone (2-12)
-                    </button>
-                    <button
-                      onClick={() => setCurriculumTrack('teens')}
-                      className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${curriculumTrack === 'teens' ? 'bg-teal-700 text-white shadow-sm' : 'text-gray-655 hover:text-teal-800'}`}
-                    >
-                      Teens Tribe (13-15)
-                    </button>
-                  </div>
+              ) : curriculumSearchSearched && !isLoadingCurriculum ? (
+                <p className="text-xs italic text-gray-400 text-center py-4">No specific curriculum matches found in this search query.</p>
+              ) : (
+                <div className="p-6 bg-teal-50/20 border border-dashed border-teal-200 rounded-2xl text-center text-xs text-teal-800">
+                  Type a reference or topic to view corresponding study guides, lessons, and tools.
                 </div>
+              )}
+            </div>
 
-                {isLoadingLive ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-8">
-                    <div className="animate-pulse bg-gray-50 border border-gray-100 p-6 rounded-2xl h-44"></div>
-                    <div className="animate-pulse bg-gray-50 border border-gray-100 p-6 rounded-2xl h-44"></div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {(() => {
-                      const filterList = (track: 'kids' | 'teens') => {
-                        if (track === 'kids') {
-                          return liveLessons.filter(l => {
-                            const name = (l.name || '').toLowerCase();
-                            const desc = (l.description || '').toLowerCase();
-                            return name.includes('kid') || name.includes('junior') || name.includes('preschool') || name.includes('voltage') || name.includes('elementary') || desc.includes('children') || desc.includes('grade');
-                          });
-                        } else {
-                          return liveLessons.filter(l => {
-                            const name = (l.name || '').toLowerCase();
-                            const desc = (l.description || '').toLowerCase();
-                            const isKids = name.includes('kid') || name.includes('junior') || name.includes('preschool') || name.includes('elementary');
-                            return !isKids || name.includes('youth') || name.includes('student') || name.includes('story') || name.includes('next') || name.includes('second');
-                          });
-                        }
-                      };
-
-                      const filtered = filterList(curriculumTrack);
-
-                      if (filtered.length === 0) {
-                        return (
-                          <div className="col-span-1 md:col-span-2 text-center py-8 text-sm text-gray-400 italic">
-                            No active live programs matching this age group right now.
-                          </div>
-                        );
-                      }
-
-                      return filtered.map((lesson) => {
-                        const targetSlug = lesson.slug || '';
-                        const isStagingSlug = targetSlug.endsWith('-staging') || targetSlug === 'second' || targetSlug === 'taras';
-                        const fallbackUrl = 'https://lessons.church/';
-                        const lessonsUrl = (targetSlug && !isStagingSlug) ? `https://lessons.church/${targetSlug}` : fallbackUrl;
-                        const isPreTeen = lesson.name?.toLowerCase().includes('loop') || lesson.name?.toLowerCase().includes('elementary');
-
-                        return (
-                          <div
-                            key={lesson.id}
-                            className={`p-5 rounded-2xl border transition-all duration-300 hover:shadow-md flex flex-col justify-between h-full group
-                              ${curriculumTrack === 'kids'
-                                ? (isPreTeen ? 'bg-indigo-50/20 hover:bg-indigo-50/40 border-indigo-100' : 'bg-amber-50/40 hover:bg-amber-50/80 border-amber-100')
-                                : 'bg-emerald-50/30 hover:bg-emerald-50/65 border-emerald-100'
-                              }`}
-                          >
-                            <div>
-                              <div className="flex items-center justify-between mb-2">
-                                <span className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full
-                                  ${curriculumTrack === 'kids'
-                                    ? (isPreTeen ? 'bg-indigo-100 text-indigo-800' : 'bg-amber-100 text-amber-800')
-                                    : 'bg-emerald-100 text-emerald-800'
-                                  }`}
-                                >
-                                  {curriculumTrack === 'kids' ? (isPreTeen ? 'Grades 3-6' : 'Ages 2-7') : 'Ages 13-15'}
-                                </span>
-                                {lesson.image && (
-                                  <img src={lesson.image} className="w-8 h-8 rounded-lg object-cover border border-white/50" alt="" />
-                                )}
-                              </div>
-                              <h4 className={`font-sans font-bold text-lg group-hover:text-teal-900 transition-colors
-                                ${curriculumTrack === 'kids'
-                                  ? (isPreTeen ? 'text-indigo-800' : 'text-amber-800')
-                                  : 'text-emerald-800'
-                                }`}
-                              >
-                                {lesson.name}
-                              </h4>
-                              <p className="text-xs text-gray-600 mt-2 leading-relaxed line-clamp-3">
-                                {lesson.shortDescription || lesson.description || 'No overview available for this program.'}
-                              </p>
-                            </div>
-                            <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
-                              <span className="text-[10px] text-gray-400 font-semibold italic">Powered by ChurchApps</span>
-                              <a
-                                href={lessonsUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={`text-xs font-black hover:underline flex items-center gap-0.5
-                                  ${curriculumTrack === 'kids'
-                                    ? (isPreTeen ? 'text-indigo-750' : 'text-amber-700')
-                                    : 'text-emerald-700'
-                                  }`}
-                              >
-                                View full lesson &rarr;
-                              </a>
-                            </div>
-                          </div>
-                        );
-                      });
-                    })()}
-                  </div>
-                )}
-              </div>
-            )}
             {/* Bible Study Notes Search Panel for Teachers */}
             <div className="bg-white p-6 sm:p-8 rounded-[2rem] border border-gray-150 shadow-sm space-y-4 text-left animate-in fade-in duration-300">
               <h3 className="text-xl font-black text-teal-800 tracking-tight flex items-center gap-2">
@@ -1676,7 +1569,7 @@ const App: React.FC = () => {
                   value={studyNotesQuery}
                   onChange={e => setStudyNotesQuery(e.target.value)}
                   placeholder="e.g. John 3:16"
-                  className="flex-grow text-xs border border-gray-250 rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
+                  className="flex-grow text-xs border border-gray-255 rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
                 />
                 <button
                   type="submit"
@@ -1714,50 +1607,78 @@ const App: React.FC = () => {
               )}
             </div>
 
-            <ContentSection title="Evangelism Resources" items={TEACHERS_CONTENT} colorTheme="text-teal-700" />
+            {/* Dynamic, Auto-populated Evangelism Resources */}
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-2xl font-black text-teal-800 tracking-tight">Evangelism Resources</h3>
+                <span className="text-[10px] text-gray-400 italic font-medium">Auto-populated from Aquifer sync</span>
+              </div>
+              {isLoadingEvangelism ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="animate-pulse bg-gray-100 rounded-2xl h-24"></div>
+                  <div className="animate-pulse bg-gray-100 rounded-2xl h-24"></div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {evangelismResources.map((res, i) => (
+                    <div key={i} className="p-5 bg-white border border-gray-150 rounded-2xl hover:border-teal-500 transition-all shadow-sm flex flex-col justify-between">
+                      <div>
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="bg-teal-50 text-teal-700 text-[10px] font-mono px-2.5 py-0.5 rounded-full font-bold">{res.ref}</span>
+                        </div>
+                        <h4 className="font-bold text-sm text-[#372f58]">{res.title}</h4>
+                        <div className="text-xs text-gray-600 mt-2 line-clamp-3 leading-relaxed font-sans prose prose-sm" dangerouslySetInnerHTML={{ __html: res.content_html }}></div>
+                      </div>
+                      <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-[10px] text-teal-750 font-bold">
+                        <span>Tyndale Guide Collection</span>
+                        <button
+                          onClick={() => {
+                            setStudyNotesResults([res]);
+                            setStudyNotesQuery(res.usfm_start || res.ref);
+                            setStudyNotesSearched(true);
+                            toast.success("Loaded note in detail search viewer below! 📖");
+                          }}
+                          className="hover:underline font-black cursor-pointer"
+                        >
+                          Read Guide &rarr;
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {/* Bible Verse Spotlight */}
             <div className="bg-white p-8 rounded-[2rem] shadow-sm border-4 border-teal-200/60 relative overflow-hidden text-gray-700 animate-in fade-in duration-300">
               <div className="absolute top-0 right-0 p-3 bg-teal-600 text-white rounded-bl-2xl">
                 <Trophy size={18} />
               </div>
-              <h3 className="text-2xl text-teal-700 mb-4 font-sans font-bold">Scripture for the Day</h3>
+              <div className="flex items-center gap-2 mb-4">
+                <h3 className="text-2xl text-teal-700 font-sans font-bold">Scripture for the Day</h3>
+                {localStorage.getItem('ft_bible_streak') && (
+                  <div className="flex items-center gap-1 bg-amber-500/10 text-amber-600 px-3 py-1 rounded-full text-xs font-bold shadow-sm">
+                    <Flame size={14} className="fill-amber-500 text-amber-500" />
+                    <span>{localStorage.getItem('ft_bible_streak')} DAY STREAK</span>
+                  </div>
+                )}
+              </div>
               <VerseOfTheWeek versionId={12} />
             </div>
 
-            {/* Admin: Scripture Override Control Card */}
-            <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-150 relative overflow-hidden text-gray-700 animate-in fade-in duration-300">
-              <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <Sparkles size={16} className="text-teal-650" /> Admin Verse of the Day Control
-              </h3>
-              <p className="text-xs text-gray-500 mb-4">
-                Input any YouVersion Bible reference code (e.g. <code className="bg-gray-100 px-1.5 py-0.5 rounded text-teal-700 font-bold">JHN.3.16</code> or <code className="bg-gray-100 px-1.5 py-0.5 rounded text-teal-700 font-bold">ROM.12.1-2</code>) to override the homepage scripture spotlight.
-              </p>
-
-              <form onSubmit={handleSaveCustomVerse} className="flex gap-2">
-                <input
-                  type="text"
-                  required
-                  value={customVerseInput}
-                  onChange={e => setCustomVerseInput(e.target.value)}
-                  placeholder="e.g. JHN.3.16"
-                  className="flex-grow text-xs border border-gray-200 rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
-                />
-                <button
-                  type="submit"
-                  disabled={isSavingCustomVerse}
-                  className="bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all cursor-pointer shadow-sm flex items-center gap-1.5 disabled:opacity-50"
-                >
-                  {isSavingCustomVerse ? 'Saving...' : 'Update Spotlight'}
-                </button>
-              </form>
-            </div>
           </div>
 
           {/* Right Column (AI Assistant) */}
           <div className="lg:col-span-1">
             <div className="sticky top-24">
-              <GeminiAssistant audience={Audience.TEACHERS} />
+              <GeminiAssistant
+                audience={Audience.TEACHERS}
+                onSelectAction={(action) => {
+                  if (action === 'altar_script') {
+                    setIsAltarScriptModalOpen(true);
+                  }
+                }}
+              />
             </div>
           </div>
 
@@ -1767,9 +1688,9 @@ const App: React.FC = () => {
         {activeTeacherModal !== null && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true">
             <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setActiveTeacherModal(null)}></div>
-            <div className="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all w-full max-w-lg border border-gray-100">
+            <div className="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all w-full max-w-lg border border-gray-100 flex flex-col max-h-[90vh]">
 
-              <div className="bg-teal-700 px-6 py-4 flex justify-between items-center text-white">
+              <div className="bg-teal-700 px-6 py-4 flex justify-between items-center text-white shrink-0">
                 <h3 className="text-base font-bold flex items-center gap-2">
                   {activeTeacherModal === 'convert' && <><Users size={18} /> New Convert Tracker</>}
                   {activeTeacherModal === 'decision' && <><ClipboardList size={18} /> Digital Decision Cards</>}
@@ -1778,23 +1699,23 @@ const App: React.FC = () => {
                 <button onClick={() => setActiveTeacherModal(null)} className="text-white/80 hover:text-white"><X size={18} /></button>
               </div>
 
-              <div className="p-6 max-h-[350px] overflow-y-auto">
+              <div className="p-6 overflow-y-auto flex-grow">
                 {activeTeacherModal === 'convert' && (
                   <div className="space-y-4">
                     <p className="text-xs text-gray-500 mb-2">Registered decisions during junior church services:</p>
-                    {newConverts.length === 0 ? (
+                    {converts.length === 0 ? (
                       <p className="text-sm italic text-gray-400 text-center py-4">No records found.</p>
                     ) : (
                       <div className="space-y-2.5">
-                        {newConverts.map((con, i) => (
+                        {converts.map((con, i) => (
                           <div key={i} className="p-3 bg-gray-50 border border-gray-100 rounded-lg flex justify-between items-start text-xs">
                             <div>
                               <p className="font-bold text-gray-800">{con.name}</p>
-                              <p className="text-[10px] text-gray-500 mt-0.5">Notes: {con.notes}</p>
+                              <p className="text-[10px] text-gray-550 mt-0.5">Notes: {con.class_notes || con.notes}</p>
                             </div>
                             <div className="text-right">
-                              <span className="bg-teal-100 text-teal-700 px-2 py-0.5 rounded font-bold">Age: {con.age}</span>
-                              <p className="text-[10px] text-gray-400 mt-1">{con.decisionDate}</p>
+                              <span className="bg-teal-100 text-teal-700 px-2 py-0.5 rounded font-bold">Age: {con.age || 'N/A'}</span>
+                              <p className="text-[10px] text-gray-450 mt-1">{new Date(con.registered_at || con.decisionDate).toLocaleDateString()}</p>
                             </div>
                           </div>
                         ))}
@@ -1805,61 +1726,129 @@ const App: React.FC = () => {
 
                 {activeTeacherModal === 'decision' && (
                   <div className="space-y-3 text-xs">
-                    <p className="text-gray-500 mb-2">Decision card logs from the online salvation guide:</p>
-                    <div className="p-3 bg-gray-50 border border-gray-150 rounded-lg">
-                      <p className="font-bold text-gray-800">Review altar calls</p>
-                      <p className="text-gray-500 mt-1 leading-relaxed">
-                        Whenever someone completes the online Salvation step guide, their contact email and name are logged here instantly. Use this sheet to contact them.
-                      </p>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="p-3 bg-teal-50 border border-teal-100 rounded-lg flex items-center justify-between">
-                        <div>
-                          <p className="font-bold text-teal-800">Salvation Guidelines</p>
-                          <p className="text-gray-500 mt-0.5">Focus: Confirm ABC commitment details.</p>
-                        </div>
-                        <Check size={14} className="text-teal-600" />
+                    <p className="text-gray-500 mb-2">Review Digital Decision cards for children follow-up and record keeping:</p>
+                    
+                    {converts.length === 0 ? (
+                      <p className="text-sm italic text-gray-400 text-center py-4">No registered converts to generate cards for.</p>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {converts.map((con, idx) => (
+                          <div key={idx} className="border-2 border-dashed border-teal-600/35 p-4 rounded-xl bg-white shadow-sm flex flex-col justify-between min-h-[140px] text-left">
+                            <div>
+                              <div className="flex justify-between items-center pb-2 border-b border-teal-100">
+                                <span className="font-extrabold text-teal-800 tracking-wide text-[9px] uppercase">DECISION CARD</span>
+                                <span className="text-[8px] text-gray-400 font-mono">#{idx + 1}</span>
+                              </div>
+                              <div className="py-2.5 space-y-1">
+                                <p className="text-xs font-black text-[#372f58]">{con.name}</p>
+                                <p className="text-[9px] text-gray-500">Age: <span className="font-bold">{con.age || 'N/A'}</span></p>
+                                <p className="text-[10px] text-gray-500 italic mt-1 leading-relaxed">"I have decided to follow Jesus Christ."</p>
+                              </div>
+                            </div>
+                            <div className="pt-2 border-t border-gray-100 flex justify-between items-center text-[8px] text-gray-400">
+                              <span>Date: {new Date(con.registered_at || con.decisionDate).toLocaleDateString()}</span>
+                              <span className="font-bold text-teal-600">Faith Tribe</span>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    </div>
+                    )}
                   </div>
                 )}
 
                 {activeTeacherModal === 'schedule' && (
-                  <div className="space-y-4 text-xs text-gray-600">
-                    <p className="text-xs text-gray-500">Curriculum standard follow-up list for new converts:</p>
-                    <div className="space-y-2.5">
-                      <div className="flex items-start gap-2.5 p-2 border-b border-gray-100">
-                        <input type="checkbox" defaultChecked className="mt-0.5 h-3.5 w-3.5 text-teal-600 focus:ring-teal-500 border-gray-300 rounded" />
-                        <div>
-                          <p className="font-bold text-gray-800">Checklist Hour 0: Lead Altar Prayer</p>
-                          <p className="text-gray-500 mt-0.5">Confirm they filled their digital Decision Card name and contact.</p>
-                        </div>
+                  <div className="space-y-4 text-xs text-gray-650">
+                    <p className="text-xs text-gray-500">Milestones checklists checklist (Filter: Active first 24 hr follows):</p>
+                    {tasks.length === 0 ? (
+                      <p className="text-sm italic text-gray-400 text-center py-4">No pending checklist follow-up tasks.</p>
+                    ) : (
+                      <div className="space-y-2.5">
+                        {tasks.map((taskItem) => (
+                          <div key={taskItem.id} className="flex items-start gap-2.5 p-3.5 bg-gray-50 border border-gray-150 rounded-xl text-left">
+                            <input
+                              type="checkbox"
+                              checked={taskItem.completed}
+                              onChange={() => handleToggleTask(taskItem.id, taskItem.completed)}
+                              className="mt-0.5 h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded cursor-pointer shrink-0"
+                            />
+                            <div className="min-w-0 flex-1">
+                              <p className={`font-bold text-gray-800 ${taskItem.completed ? 'line-through text-gray-400' : ''}`}>{taskItem.task_description}</p>
+                              <div className="flex items-center gap-2 mt-1 text-[9px] text-gray-450 font-medium">
+                                <span className="bg-teal-100 text-teal-800 px-1.5 py-0.5 rounded font-bold">Convert: {taskItem.convert_name}</span>
+                                <span>Due: {new Date(taskItem.due_at).toLocaleDateString()}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                      <div className="flex items-start gap-2.5 p-2 border-b border-gray-100">
-                        <input type="checkbox" className="mt-0.5 h-3.5 w-3.5 text-teal-600 focus:ring-teal-500 border-gray-300 rounded" />
-                        <div>
-                          <p className="font-bold text-gray-800">Checklist Hour 24: Send SMS/Email</p>
-                          <p className="text-gray-500 mt-0.5">Welcome them to the tribe and send children devotion booklet.</p>
-                        </div>
-                      </div>
-                      <div className="flex items-start gap-2.5 p-2">
-                        <input type="checkbox" className="mt-0.5 h-3.5 w-3.5 text-teal-600 focus:ring-teal-500 border-gray-300 rounded" />
-                        <div>
-                          <p className="font-bold text-gray-800">Checklist Day 7: Connect at Class</p>
-                          <p className="text-gray-500 mt-0.5">Confirm they attended kids zone or teens meeting and check understanding.</p>
-                        </div>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 )}
               </div>
 
-              <div className="bg-gray-50 px-6 py-3.5 flex justify-end">
+              <div className="bg-gray-50 px-6 py-3.5 flex justify-end shrink-0 border-t border-gray-100">
                 <button
                   onClick={() => setActiveTeacherModal(null)}
                   className="bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs px-4 py-2 rounded transition-colors cursor-pointer"
                 >
                   Close Panel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Altar Call Script Modal (Phase 1.6) */}
+        {isAltarScriptModalOpen && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true">
+            <div className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" onClick={() => setIsAltarScriptModalOpen(false)}></div>
+            <div className="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all w-full max-w-lg border border-gray-100 flex flex-col max-h-[90vh]">
+              
+              <div className="bg-[#372f58] px-6 py-4 flex justify-between items-center text-white shrink-0">
+                <h3 className="text-base font-bold flex items-center gap-2">
+                  <Flame size={18} className="text-[#F8B229]" /> Altar Call Script: RCCG ABC Method
+                </h3>
+                <button onClick={() => setIsAltarScriptModalOpen(false)} className="text-white/80 hover:text-white"><X size={18} /></button>
+              </div>
+
+              <div className="p-6 overflow-y-auto flex-grow space-y-5 text-left text-sm leading-relaxed text-gray-700">
+                <div className="bg-amber-500/10 border border-amber-500/25 p-4 rounded-xl text-amber-800 text-xs">
+                  <strong>RCCG Junior Church Standard:</strong> Use this script during Sunday altar calls. Speak slowly, inviting kids/teens to repeat each phrase from their hearts.
+                </div>
+
+                <div className="space-y-4">
+                  <div className="border-l-4 border-teal-600 pl-3">
+                    <h4 className="font-extrabold text-[#372f58] text-xs uppercase tracking-wider">Step A: Admit (Repentance)</h4>
+                    <p className="italic text-gray-600 mt-1">"Lord Jesus, I admit that I have sinned and gone my own way. I need Your forgiveness. I am sorry for my past life."</p>
+                  </div>
+
+                  <div className="border-l-4 border-teal-600 pl-3">
+                    <h4 className="font-extrabold text-[#372f58] text-xs uppercase tracking-wider">Step B: Believe (Faith)</h4>
+                    <p className="italic text-gray-600 mt-1">"I believe that You are the Son of God, and that You died on the cross to take away my sins, and rose again to give me life."</p>
+                  </div>
+
+                  <div className="border-l-4 border-teal-600 pl-3">
+                    <h4 className="font-extrabold text-[#372f58] text-xs uppercase tracking-wider">Step C: Confess (Commitment)</h4>
+                    <p className="italic text-gray-600 mt-1">"I confess You today as my Lord and Savior. Come into my heart, wash me clean, and lead me from this day forward. Amen."</p>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-gray-150 space-y-2">
+                  <h5 className="font-bold text-xs text-gray-800">Teacher's Follow-up Instructions:</h5>
+                  <ul className="list-disc pl-5 text-xs text-gray-500 space-y-1">
+                    <li>Have the children fill out their Digital Decision Cards immediately.</li>
+                    <li>Record their details in the "Register Decision" form to start the 24-hour follow-up scheduler.</li>
+                    <li>Hand out the new convert welcomes package and booklets.</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 px-6 py-3.5 flex justify-end shrink-0 border-t border-gray-100">
+                <button
+                  onClick={() => setIsAltarScriptModalOpen(false)}
+                  className="bg-[#372f58] hover:bg-[#282142] text-white font-bold text-xs px-4 py-2 rounded transition-colors cursor-pointer"
+                >
+                  Close Script
                 </button>
               </div>
             </div>

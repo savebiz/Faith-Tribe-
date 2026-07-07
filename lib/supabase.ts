@@ -1322,4 +1322,344 @@ export async function saveAudioCache(
 }
 
 
+// ----------------------------------------------------
+// Teachers Hub: Converts & Follow-up Helper Functions
+// ----------------------------------------------------
+
+export async function registerConvert(
+  name: string,
+  age: number | null,
+  notes: string,
+  registeredByUserId: string | null
+): Promise<any> {
+  if (isRealSupabase && supabase) {
+    try {
+      const { data: convert, error: convertError } = await supabase
+        .from('converts')
+        .insert([{
+          name,
+          age,
+          class_notes: notes,
+          registered_by: registeredByUserId
+        }])
+        .select()
+        .single();
+        
+      if (convertError) throw convertError;
+
+      // Automatically create follow-up tasks
+      const now = new Date();
+      const tasks = [
+        {
+          convert_id: convert.id,
+          task_description: 'Checklist Hour 0: Lead Altar Prayer (Confirm they filled digital Decision Card details)',
+          due_at: now.toISOString(),
+          completed: false
+        },
+        {
+          convert_id: convert.id,
+          task_description: 'Checklist Hour 24: Send Welcome SMS/Email (Share children devotion booklet)',
+          due_at: new Date(now.getTime() + 24 * 60 * 60 * 1000).toISOString(),
+          completed: false
+        },
+        {
+          convert_id: convert.id,
+          task_description: 'Checklist Day 7: Connect at Class (Confirm attendance and check understanding)',
+          due_at: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          completed: false
+        }
+      ];
+      
+      const { error: tasksError } = await supabase
+        .from('follow_up_tasks')
+        .insert(tasks);
+        
+      if (tasksError) throw tasksError;
+
+      // Update active goal count
+      if (registeredByUserId) {
+        const { data: goal } = await supabase
+          .from('class_goals')
+          .select('*')
+          .eq('teacher_id', registeredByUserId)
+          .eq('status', 'active')
+          .maybeSingle();
+
+        if (goal) {
+          await supabase
+            .from('class_goals')
+            .update({ current_count: (goal.current_count || 0) + 1 })
+            .eq('id', goal.id);
+        }
+      }
+
+      return convert;
+    } catch (e) {
+      console.error("registerConvert DB Error:", e);
+    }
+  }
+
+  // LocalStorage Mock
+  const localConvertsRaw = localStorage.getItem('ft_converts') || '[]';
+  const converts = JSON.parse(localConvertsRaw);
+  const convertId = Math.random().toString(36).substring(7);
+  const today = new Date().toISOString().split('T')[0];
+  const newConvert = {
+    id: convertId,
+    name,
+    age,
+    class_notes: notes,
+    registered_by: registeredByUserId,
+    registered_at: new Date().toISOString(),
+    follow_up_status: 'pending'
+  };
+  converts.unshift(newConvert);
+  localStorage.setItem('ft_converts', JSON.stringify(converts));
+
+  const localTasksRaw = localStorage.getItem('ft_follow_up_tasks') || '[]';
+  const tasks = JSON.parse(localTasksRaw);
+  const nowTime = new Date().getTime();
+  const newTasks = [
+    {
+      id: Math.random().toString(36).substring(7),
+      convert_id: convertId,
+      task_description: 'Checklist Hour 0: Lead Altar Prayer (Confirm they filled digital Decision Card details)',
+      due_at: new Date(nowTime).toISOString(),
+      completed: false,
+      convert_name: name
+    },
+    {
+      id: Math.random().toString(36).substring(7),
+      convert_id: convertId,
+      task_description: 'Checklist Hour 24: Send Welcome SMS/Email (Share children devotion booklet)',
+      due_at: new Date(nowTime + 24 * 3600 * 1000).toISOString(),
+      completed: false,
+      convert_name: name
+    },
+    {
+      id: Math.random().toString(36).substring(7),
+      convert_id: convertId,
+      task_description: 'Checklist Day 7: Connect at Class (Confirm attendance and check understanding)',
+      due_at: new Date(nowTime + 7 * 24 * 3600 * 1000).toISOString(),
+      completed: false,
+      convert_name: name
+    }
+  ];
+  tasks.push(...newTasks);
+  localStorage.setItem('ft_follow_up_tasks', JSON.stringify(tasks));
+
+  // Update mock class goal
+  const mockGoalRaw = localStorage.getItem('ft_mock_class_goal');
+  if (mockGoalRaw) {
+    const goal = JSON.parse(mockGoalRaw);
+    goal.current_count = (goal.current_count || 0) + 1;
+    localStorage.setItem('ft_mock_class_goal', JSON.stringify(goal));
+  } else {
+    localStorage.setItem('ft_mock_class_goal', JSON.stringify({
+      id: 'mock-goal',
+      teacher_id: registeredByUserId || 'mock-teacher',
+      goal_title: 'Evangelism Focus',
+      goal_description: 'Lead kids to make personal choices for Christ.',
+      target_count: 5,
+      current_count: 1,
+      status: 'active'
+    }));
+  }
+
+  return newConvert;
+}
+
+export async function fetchConverts(registeredByUserId: string | null): Promise<any[]> {
+  if (isRealSupabase && supabase) {
+    try {
+      const query = supabase.from('converts').select('*').order('registered_at', { ascending: false });
+      if (registeredByUserId) {
+        query.eq('registered_by', registeredByUserId);
+      }
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    } catch (e) {
+      console.error("fetchConverts DB Error:", e);
+    }
+  }
+
+  const localConvertsRaw = localStorage.getItem('ft_converts') || '[]';
+  const converts = JSON.parse(localConvertsRaw);
+  if (converts.length === 0) {
+    // Add default seeds
+    const defaultSeeds = [
+      { id: "seed-1", name: "John Doe", age: 14, class_notes: "First-time decision at Sunday service.", registered_at: new Date(Date.now() - 48*3600*1000).toISOString(), follow_up_status: "pending" },
+      { id: "seed-2", name: "Mary Smith", age: 11, class_notes: "Responded during class altar call.", registered_at: new Date(Date.now() - 24*3600*1000).toISOString(), follow_up_status: "pending" }
+    ];
+    localStorage.setItem('ft_converts', JSON.stringify(defaultSeeds));
+    return defaultSeeds;
+  }
+  return converts;
+}
+
+export async function fetchFollowUpTasks(registeredByUserId: string | null): Promise<any[]> {
+  if (isRealSupabase && supabase) {
+    try {
+      // Get all converts to join names
+      const { data: convertsList } = await supabase.from('converts').select('id, name');
+      const convertsMap = new Map((convertsList || []).map(c => [c.id, c.name]));
+
+      const { data, error } = await supabase
+        .from('follow_up_tasks')
+        .select('*')
+        .order('due_at', { ascending: true });
+        
+      if (error) throw error;
+      
+      return (data || []).map(t => ({
+        ...t,
+        convert_name: convertsMap.get(t.convert_id) || 'Unknown Convert'
+      }));
+    } catch (e) {
+      console.error("fetchFollowUpTasks DB Error:", e);
+    }
+  }
+
+  const localTasksRaw = localStorage.getItem('ft_follow_up_tasks') || '[]';
+  const tasks = JSON.parse(localTasksRaw);
+  if (tasks.length === 0) {
+    const defaultTasks = [
+      { id: "t-1", convert_id: "seed-1", task_description: "Checklist Hour 0: Lead Altar Prayer (Confirm they filled digital Decision Card details)", due_at: new Date(Date.now() - 48*3600*1000).toISOString(), completed: true, convert_name: "John Doe" },
+      { id: "t-2", convert_id: "seed-1", task_description: "Checklist Hour 24: Send Welcome SMS/Email (Share children devotion booklet)", due_at: new Date(Date.now() - 24*3600*1000).toISOString(), completed: false, convert_name: "John Doe" },
+      { id: "t-3", convert_id: "seed-1", task_description: "Checklist Day 7: Connect at Class (Confirm attendance and check understanding)", due_at: new Date(Date.now() + 5*24*3600*1000).toISOString(), completed: false, convert_name: "John Doe" }
+    ];
+    localStorage.setItem('ft_follow_up_tasks', JSON.stringify(defaultTasks));
+    return defaultTasks;
+  }
+  return tasks;
+}
+
+export async function toggleFollowUpTask(taskId: string, completed: boolean): Promise<boolean> {
+  if (isRealSupabase && supabase) {
+    try {
+      const { error } = await supabase
+        .from('follow_up_tasks')
+        .update({
+          completed,
+          completed_at: completed ? new Date().toISOString() : null
+        })
+        .eq('id', taskId);
+      if (error) throw error;
+      return true;
+    } catch (e) {
+      console.error("toggleFollowUpTask DB Error:", e);
+      return false;
+    }
+  }
+
+  const localTasksRaw = localStorage.getItem('ft_follow_up_tasks') || '[]';
+  const tasks = JSON.parse(localTasksRaw);
+  const index = tasks.findIndex((t: any) => t.id === taskId);
+  if (index !== -1) {
+    tasks[index].completed = completed;
+    tasks[index].completed_at = completed ? new Date().toISOString() : null;
+    localStorage.setItem('ft_follow_up_tasks', JSON.stringify(tasks));
+    return true;
+  }
+  return false;
+}
+
+export async function fetchActiveClassGoal(teacherId: string | null): Promise<any | null> {
+  if (isRealSupabase && supabase) {
+    try {
+      if (teacherId) {
+        const { data, error } = await supabase
+          .from('class_goals')
+          .select('*')
+          .eq('teacher_id', teacherId)
+          .eq('status', 'active')
+          .maybeSingle();
+        if (error) throw error;
+        return data;
+      }
+    } catch (e) {
+      console.error("fetchActiveClassGoal DB Error:", e);
+    }
+  }
+
+  const mockGoalRaw = localStorage.getItem('ft_mock_class_goal');
+  if (mockGoalRaw) {
+    return JSON.parse(mockGoalRaw);
+  }
+  const defaultGoal = {
+    id: 'mock-goal',
+    teacher_id: teacherId || 'mock-teacher',
+    goal_title: 'Evangelism Focus',
+    goal_description: 'Lead kids to make personal choices for Christ.',
+    target_count: 5,
+    current_count: 2,
+    status: 'active'
+  };
+  localStorage.setItem('ft_mock_class_goal', JSON.stringify(defaultGoal));
+  return defaultGoal;
+}
+
+export async function updateOrCreateClassGoal(
+  teacherId: string | null,
+  targetCount: number,
+  goalTitle: string = 'Evangelism Focus',
+  goalDescription: string = 'Lead kids to make personal choices for Christ.'
+): Promise<any> {
+  if (isRealSupabase && supabase) {
+    try {
+      if (teacherId) {
+        const active = await fetchActiveClassGoal(teacherId);
+        if (active) {
+          const { data, error } = await supabase
+            .from('class_goals')
+            .update({
+              target_count: targetCount,
+              goal_title: goalTitle,
+              goal_description: goalDescription
+            })
+            .eq('id', active.id)
+            .select()
+            .single();
+          if (error) throw error;
+          return data;
+        } else {
+          const { data, error } = await supabase
+            .from('class_goals')
+            .insert([{
+              teacher_id: teacherId,
+              goal_title: goalTitle,
+              goal_description: goalDescription,
+              target_count: targetCount,
+              current_count: 0,
+              status: 'active'
+            }])
+            .select()
+            .single();
+          if (error) throw error;
+          return data;
+        }
+      }
+    } catch (e) {
+      console.error("updateOrCreateClassGoal DB Error:", e);
+    }
+  }
+
+  const mockGoalRaw = localStorage.getItem('ft_mock_class_goal');
+  const existingGoal = mockGoalRaw ? JSON.parse(mockGoalRaw) : null;
+  const newGoal = {
+    id: existingGoal?.id || 'mock-goal',
+    teacher_id: teacherId || 'mock-teacher',
+    goal_title: goalTitle,
+    goal_description: goalDescription,
+    target_count: targetCount,
+    current_count: existingGoal?.current_count || 0,
+    status: 'active'
+  };
+  localStorage.setItem('ft_mock_class_goal', JSON.stringify(newGoal));
+  return newGoal;
+}
+
+
+
 
