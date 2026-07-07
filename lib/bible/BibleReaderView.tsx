@@ -848,7 +848,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
         {/* Search & Translation Row */}
         <div ref={translationRef} className="flex flex-col sm:flex-row items-stretch sm:items-end gap-4 sm:gap-6 w-full justify-between mb-8 pb-2">
           
-          <div className="flex items-center gap-4 flex-grow sm:flex-none">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-end gap-4 flex-grow sm:flex-none w-full sm:w-auto">
             {/* Translation/Language Dropdown */}
             <div className="flex flex-col gap-2 flex-grow sm:flex-none sm:w-64">
               <label htmlFor="version-select-button" className="text-xs font-bold text-[#372f58]/80 uppercase tracking-wider truncate">
@@ -930,13 +930,13 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
             </div>
 
             {/* Read/Listen Toggle Control */}
-            <div className="flex flex-col gap-2 shrink-0">
+            <div className="flex flex-col gap-2 shrink-0 w-full sm:w-auto">
               <span className="text-xs font-bold text-[#372f58]/80 uppercase tracking-wider">Mode</span>
-              <div className="flex bg-[#372f58]/5 p-1 rounded-2xl border border-gray-150 h-[38px] items-center">
+              <div className="flex bg-[#372f58]/5 p-1 rounded-2xl border border-gray-150 h-[38px] items-center w-full sm:w-auto">
                 <button
                   type="button"
                   onClick={() => setIsListenMode(false)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                  className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer min-w-[80px] sm:min-w-0 ${
                     !isListenMode 
                       ? 'bg-white text-[#1CABB9] shadow-sm' 
                       : 'text-gray-500 hover:text-gray-700'
@@ -948,7 +948,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
                 <button
                   type="button"
                   onClick={() => setIsListenMode(true)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                  className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer min-w-[80px] sm:min-w-0 ${
                     isListenMode 
                       ? 'bg-white text-[#1CABB9] shadow-sm' 
                       : 'text-gray-500 hover:text-gray-700'
