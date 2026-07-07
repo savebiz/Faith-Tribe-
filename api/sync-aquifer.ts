@@ -208,6 +208,8 @@ export default async function handler(req: any, res: any) {
         title: resource.localizedName || resource.name,
         content_html: resource.content, // HTML output format requested from API
         review_level: resource.reviewLevel,
+        aquifer_resource_id: resource.id,
+        aquifer_reference_id: resource.referenceId,
         resource_name: resource.name,
         resource_type: resource.grouping?.type || 'StudyNotes',
         resource_collection_code: collectionCode,
