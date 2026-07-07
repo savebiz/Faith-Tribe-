@@ -1,11 +1,11 @@
 import React, { useMemo } from 'react';
 import DOMPurify from 'isomorphic-dompurify';
-import { parseScriptureReference } from '../lib/bible/bookCodes';
+import { parseScriptureReference, BOOK_NAMES, BOOK_ABBREVIATIONS } from '../lib/bible/bookCodes';
 
 export interface StudyNoteProps {
   contentHtml: string;
   currentVersionId?: number;
-  onNavigateToPassage?: (book: string, chapter: string, versionId?: number) => void;
+  onNavigateToPassage?: (book: string, chapter: string, versionId?: number, verse?: string) => void;
   showAttribution?: boolean;
 }
 
@@ -18,9 +18,9 @@ export function convertRefLyUrl(url: string, currentVersionId?: number): { href:
   try {
     const refPath = decodeURIComponent(url.substring('https://ref.ly/'.length));
     
-    // Match book, chapter, and optional starting verse
-    // Examples: "Gen1:1", "1John4:9-1John4:10", "Ps33:6", "Prov8:22-Prov8:31"
-    const match = refPath.match(/^([1-3]?\s*[A-Za-z\s]+)(\d+)(?::(\d+))?/);
+    // Match book, chapter, and optional starting verse (allowing dot or colon separator)
+    // Examples: "Gen1:1", "Matt19.21", "Ps33:6"
+    const match = refPath.match(/^([1-3]?\s*[A-Za-z\s]+)(\d+)(?:[:.](\d+))?/);
     if (match) {
       const rawBook = match[1].trim();
       const chapter = match[2];
@@ -28,7 +28,10 @@ export function convertRefLyUrl(url: string, currentVersionId?: number): { href:
 
       const parsed = parseScriptureReference(`${rawBook} ${chapter}${verse ? ':' + verse : ''}`);
       if (parsed) {
-        const versionQuery = currentVersionId ? `?version=${currentVersionId}` : '';
+        let versionQuery = currentVersionId ? `?version=${currentVersionId}` : '';
+        if (parsed.verse) {
+          versionQuery += versionQuery ? `&verse=${parsed.verse}` : `?verse=${parsed.verse}`;
+        }
         return {
           href: `/bible/${parsed.bookCode}/${parsed.chapter}${versionQuery}`,
           isInternal: true
@@ -65,7 +68,33 @@ export function StudyNote({
       anchors.forEach((a) => {
         const href = a.getAttribute('href');
         if (href) {
-          const { href: newHref, isInternal } = convertRefLyUrl(href, currentVersionId);
+          let { href: newHref, isInternal } = convertRefLyUrl(href, currentVersionId);
+          
+          // If it wasn't matched as ref.ly, check if text content or href itself matches a Bible passage
+          if (!isInternal) {
+            const linkText = a.textContent || '';
+            const parsed = parseScriptureReference(linkText);
+            if (parsed) {
+              const versionQuery = currentVersionId ? `?version=${currentVersionId}` : '';
+              const verseQuery = parsed.verse ? `&verse=${parsed.verse}` : '';
+              newHref = `/bible/${parsed.bookCode}/${parsed.chapter}${versionQuery}${verseQuery}`;
+              isInternal = true;
+            } else {
+              // Parse URL for YouVersion patterns e.g. MAT.19.21
+              const urlMatch = href.toLowerCase().match(/\/bible\/[^/]+\/([a-z0-9]+)\.(\d+)(?:\.(\d+))?/i);
+              if (urlMatch) {
+                const rawBook = urlMatch[1].toUpperCase();
+                const bookCode = BOOK_NAMES[rawBook] ? rawBook : BOOK_ABBREVIATIONS[rawBook.toLowerCase()] || rawBook;
+                const chapter = urlMatch[2];
+                const verse = urlMatch[3] || null;
+                const versionQuery = currentVersionId ? `?version=${currentVersionId}` : '';
+                const verseQuery = verse ? `&verse=${verse}` : '';
+                newHref = `/bible/${bookCode}/${chapter}${versionQuery}${verseQuery}`;
+                isInternal = true;
+              }
+            }
+          }
+
           a.setAttribute('href', newHref);
           
           if (isInternal) {
@@ -107,8 +136,12 @@ export function StudyNote({
           const book = match[1].toUpperCase();
           const chapter = match[2];
           
+          // Parse the verse query parameter from URL
+          const urlParams = new URLSearchParams(href.split('?')[1] || '');
+          const verse = urlParams.get('verse');
+          
           if (onNavigateToPassage) {
-            onNavigateToPassage(book, chapter, currentVersionId);
+            onNavigateToPassage(book, chapter, currentVersionId, verse || undefined);
           } else {
             // Push history and dispatch event to alert components of navigation
             window.history.pushState(null, '', href);

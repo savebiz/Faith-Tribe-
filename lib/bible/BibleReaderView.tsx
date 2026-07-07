@@ -1026,10 +1026,18 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
                             <StudyNote 
                               contentHtml={note.content_html} 
                               currentVersionId={versionId}
-                              onNavigateToPassage={(newBook, newChapter) => {
+                              onNavigateToPassage={(newBook, newChapter, _, newVerse) => {
+                                let path = `/bible/${newBook}/${newChapter}?version=${versionId}`;
+                                if (newVerse) {
+                                  path += `&verse=${newVerse}`;
+                                }
+                                window.history.pushState(null, '', path);
                                 setBook(newBook);
                                 setChapter(newChapter);
                                 setIsGoDeeperOpen(true);
+                                setTimeout(() => {
+                                  window.dispatchEvent(new PopStateEvent('popstate'));
+                                }, 50);
                               }}
                             />
                           </div>

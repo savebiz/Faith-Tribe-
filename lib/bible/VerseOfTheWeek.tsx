@@ -6,6 +6,7 @@ import { BOOK_NAMES } from './bookCodes';
 import DOMPurify from 'isomorphic-dompurify';
 import { toast } from 'sonner';
 import { BookOpen } from 'lucide-react';
+import { StudyNote } from '../../components/StudyNote';
 
 function getDayOfYear(): number {
   const now = new Date();
@@ -293,11 +294,15 @@ export function VerseOfTheWeek({ versionId, showStudyNotes = false }: { versionI
           ) : (
             <div className="space-y-4">
               {filteredNotes.map((note, index) => (
-                <div key={index} className="bg-gray-50/50 p-4.5 rounded-2xl border border-gray-200/60 shadow-inner text-sm text-gray-700 leading-relaxed">
+                <div key={index} className="bg-gray-50/50 p-4.5 rounded-2xl border border-gray-200/60 shadow-inner text-sm text-gray-700 leading-relaxed text-left">
                   <h5 className="font-extrabold text-gray-900 mb-2 text-sm">{note.title}</h5>
-                  <div 
-                    className="prose prose-sm max-w-none prose-p:leading-relaxed prose-strong:text-gray-900"
-                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(note.content_html) }} 
+                  <StudyNote 
+                    contentHtml={note.content_html} 
+                    currentVersionId={overrideVersionId || versionId}
+                    showAttribution={false}
+                    onNavigateToPassage={(newBook, newChapter, _, newVerse) => {
+                      navigateToBible(newBook, newChapter, newVerse);
+                    }}
                   />
                 </div>
               ))}
