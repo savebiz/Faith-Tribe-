@@ -44,6 +44,12 @@ const ContentSection: React.FC<ContentSectionProps> = ({ title, items, colorThem
           label: 'Lesson Plan',
           badgeClass: 'bg-teal-500/10 text-teal-600 border border-teal-500/20'
         };
+      case 'DOCUMENT':
+        return {
+          icon: <FileText size={12} />,
+          label: 'Read Article',
+          badgeClass: 'bg-blue-500/10 text-blue-500 border border-blue-500/20'
+        };
       default:
         return {
           icon: <Award size={12} />,

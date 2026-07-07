@@ -228,6 +228,8 @@ export const AdminContentView: React.FC<AdminContentViewProps> = ({ currentStaff
         payload.coloring_image_url = formColoringImageUrl.trim();
       } else if (formType === 'document') {
         payload.document_url = formDocumentUrl.trim();
+        payload.duration = formDuration.trim() || null;
+        payload.story_content = formStoryContent;
       }
 
       await upsertContentItem(payload);
@@ -879,7 +881,7 @@ export const AdminContentView: React.FC<AdminContentViewProps> = ({ currentStaff
                   </div>
                 )}
 
-                {formType === 'reading' && (
+                {(formType === 'reading' || formType === 'document') && (
                   <div>
                     <div className="flex items-center justify-between mb-2">
                       <label className="block text-xs font-bold uppercase tracking-wider text-gray-500">Story Content</label>
@@ -953,15 +955,27 @@ export const AdminContentView: React.FC<AdminContentViewProps> = ({ currentStaff
                 )}
 
                 {formType === 'document' && (
-                  <div>
-                    <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Document URL / PDF File Path</label>
-                    <input
-                      type="text"
-                      value={formDocumentUrl}
-                      onChange={(e) => setFormDocumentUrl(e.target.value)}
-                      placeholder="/curriculum/kids/lesson-1.pdf"
-                      className="block w-full rounded-lg border border-gray-200 px-3 py-2 text-xs focus:border-teal-600 focus:outline-none"
-                    />
+                  <div className="grid grid-cols-3 gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-200/60">
+                    <div className="col-span-2">
+                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Document URL / PDF File Path</label>
+                      <input
+                        type="text"
+                        value={formDocumentUrl}
+                        onChange={(e) => setFormDocumentUrl(e.target.value)}
+                        placeholder="/curriculum/kids/lesson-1.pdf"
+                        className="block w-full rounded-lg border border-gray-200 px-3 py-2 text-xs focus:border-teal-600 focus:outline-none bg-white"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">Read Time / Duration</label>
+                      <input
+                        type="text"
+                        value={formDuration}
+                        onChange={(e) => setFormDuration(e.target.value)}
+                        placeholder="e.g. 4 min read"
+                        className="block w-full rounded-lg border border-gray-200 px-3 py-2 text-xs focus:border-teal-600 focus:outline-none bg-white"
+                      />
+                    </div>
                   </div>
                 )}
 
@@ -1050,11 +1064,17 @@ export const AdminContentView: React.FC<AdminContentViewProps> = ({ currentStaff
                 </div>
               )}
 
-              {previewItem.type === 'reading' && (
+              {(previewItem.type === 'reading' || previewItem.type === 'document') && (
                 <div className="prose prose-sm max-w-none text-left bg-gray-50 p-6 rounded-2xl border border-gray-200/60 max-h-96 overflow-y-auto">
                   <div className="font-semibold whitespace-pre-wrap leading-relaxed text-sm text-gray-700">
                     {previewItem.story_content || 'No story content.'}
                   </div>
+                  {previewItem.type === 'document' && previewItem.document_url && (
+                    <div className="mt-4 p-3 bg-teal-50 border border-teal-150 rounded-xl flex items-center justify-between">
+                      <span className="text-xs font-bold text-teal-800">Attached PDF: {previewItem.document_url}</span>
+                      <a href={previewItem.document_url} target="_blank" rel="noreferrer" className="text-xs font-black text-teal-700 hover:underline">Open PDF &rarr;</a>
+                    </div>
+                  )}
                 </div>
               )}
 

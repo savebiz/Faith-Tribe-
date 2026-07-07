@@ -40,7 +40,7 @@ export interface ContentItem {
   title: string;
   description: string;
   thumbnail: string;
-  type: 'VIDEO' | 'ARTICLE' | 'ACTIVITY' | 'LESSON_PLAN' | 'AUDIO';
+  type: 'VIDEO' | 'ARTICLE' | 'ACTIVITY' | 'LESSON_PLAN' | 'AUDIO' | 'DOCUMENT';
   duration?: string;
   youtubeVideoId?: string;
   articleContent?: string;

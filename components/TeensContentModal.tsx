@@ -146,6 +146,7 @@ export const TeensContentModal: React.FC<TeensContentModalProps> = ({ item, onCl
             <span className="text-xs font-bold uppercase tracking-wider text-gray-400">
               {item.type === 'VIDEO' ? 'Teens Video Drop' : 
                item.type === 'AUDIO' ? 'Teens Audio Message' : 
+               item.type === 'DOCUMENT' ? 'Teens Guide Drop' :
                'Teens Article Drop'}
             </span>
           </div>
@@ -237,13 +238,38 @@ export const TeensContentModal: React.FC<TeensContentModalProps> = ({ item, onCl
             </div>
           )}
 
-          {/* Article Viewer */}
-          {item.type === 'ARTICLE' && (
-            <div className="prose prose-invert prose-emerald max-w-none text-left leading-relaxed">
-              {item.articleContent ? (
-                <div dangerouslySetInnerHTML={renderArticleContent(item.articleContent)} />
-              ) : (
-                <p className="text-gray-500 italic text-center py-10">No article content has been written for this post yet.</p>
+          {/* Article / Document Viewer */}
+          {(item.type === 'ARTICLE' || item.type === 'DOCUMENT') && (
+            <div className="space-y-6">
+              <div className="prose prose-invert prose-emerald max-w-none text-left leading-relaxed">
+                {item.articleContent ? (
+                  <div dangerouslySetInnerHTML={renderArticleContent(item.articleContent)} />
+                ) : (
+                  <p className="text-gray-500 italic text-center py-10">No article content has been written for this post yet.</p>
+                )}
+              </div>
+
+              {item.type === 'DOCUMENT' && item.documentUrl && (
+                <div className="mt-8 pt-6 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4 bg-gray-950 p-5 rounded-2xl border border-gray-805/80">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl">
+                      <FileText size={20} />
+                    </div>
+                    <div className="text-left">
+                      <h4 className="text-sm font-bold text-white">Guide / Attachment PDF</h4>
+                      <p className="text-xs text-gray-500 mt-0.5">Access the full document guide reference</p>
+                    </div>
+                  </div>
+                  <a 
+                    href={item.documentUrl} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="w-full sm:w-auto px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 active:bg-emerald-700 text-black text-xs font-black uppercase tracking-wider rounded-xl transition-all shadow-md text-center inline-flex items-center justify-center gap-1.5 cursor-pointer decoration-none"
+                  >
+                    <span>Open Document Link</span>
+                    &rarr;
+                  </a>
+                </div>
               )}
             </div>
           )}
