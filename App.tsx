@@ -1089,7 +1089,11 @@ const App: React.FC = () => {
             onClose={() => setSelectedTeensItem(null)} 
           />
         )}
-   const TeachersView = () => {
+      </div>
+    );
+  };
+
+  const TeachersView = () => {
     // Phase 2 converts and goals states
     const [converts, setConverts] = useState<any[]>([]);
     const [tasks, setTasks] = useState<any[]>([]);
