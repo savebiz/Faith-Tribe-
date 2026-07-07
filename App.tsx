@@ -22,13 +22,13 @@ import { TeensContentModal } from './components/TeensContentModal';
 import { AdminLayout } from './components/AdminLayout';
 
 // --- Mock Data ---
-const KIDS_CONTENT: ContentItem[] = [
+export const KIDS_CONTENT: ContentItem[] = [
   { id: '1', title: 'Meet Your New Best Friend', description: 'Who is Jesus and why does He love you so much?', thumbnail: 'https://picsum.photos/seed/jesuslove/400/250', type: 'VIDEO', duration: '5:24' },
   { id: '2', title: 'David and Goliath: Tiny Courage', description: 'Learn how David faced the giant with God\'s help!', thumbnail: 'https://picsum.photos/seed/david/400/250', type: 'VIDEO', duration: '6:12' },
   { id: '3', title: 'The ABCs of Salvation', description: 'A fun activity to learn how to ask Jesus into your heart.', thumbnail: 'https://picsum.photos/seed/abc/400/250', type: 'ACTIVITY', duration: 'Activity PDF' },
 ];
 
-const TEENS_CONTENT: ContentItem[] = [
+export const TEENS_CONTENT: ContentItem[] = [
   { 
     id: '4', 
     title: 'Why Faith? Why Now?', 
@@ -75,7 +75,7 @@ When people notice you're different, they'll ask why. That's your open door!`
   },
 ];
 
-const TEACHERS_CONTENT: ContentItem[] = [
+export const TEACHERS_CONTENT: ContentItem[] = [
   { 
     id: '7', 
     title: 'The Art of the Altar Call', 

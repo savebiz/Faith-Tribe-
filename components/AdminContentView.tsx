@@ -8,6 +8,8 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { RichTextEditor } from './admin/RichTextEditor';
+import { KIDS_CONTENT, TEENS_CONTENT, TEACHERS_CONTENT } from '../App';
+import { WEEKLY_FUN_ITEMS } from '../lib/weeklyFunConfig';
 
 interface AdminContentViewProps {
   currentStaff: StaffMember;
@@ -151,28 +153,44 @@ export const AdminContentView: React.FC<AdminContentViewProps> = ({ currentStaff
       setSelectedItem(item);
       setFormZone(item.zone);
       setFormType(item.type);
+      // Resolve fallback values from hardcoded files if database fields are empty/null
+      const fallbackFromTeens = TEENS_CONTENT.find(f => f.id === item.id || f.title.toLowerCase() === item.title.toLowerCase());
+      const fallbackFromTeachers = TEACHERS_CONTENT.find(f => f.id === item.id || f.title.toLowerCase() === item.title.toLowerCase());
+      const fallbackFromWeekly = WEEKLY_FUN_ITEMS.find(f => f.id === item.id || f.title.toLowerCase() === item.title.toLowerCase());
+      const fallbackFromKids = KIDS_CONTENT.find(f => f.id === item.id || f.title.toLowerCase() === item.title.toLowerCase());
+
+      const fallbackDescription = fallbackFromTeens?.description || fallbackFromTeachers?.description || fallbackFromWeekly?.description || fallbackFromKids?.description || '';
+      const fallbackThumbnail = fallbackFromTeens?.thumbnail || fallbackFromTeachers?.thumbnail || fallbackFromWeekly?.thumbnailUrl || fallbackFromKids?.thumbnail || '';
+      const fallbackDuration = fallbackFromTeens?.duration || fallbackFromTeachers?.duration || fallbackFromWeekly?.duration || fallbackFromKids?.duration || '';
+      const fallbackStory = fallbackFromTeens?.articleContent || fallbackFromTeachers?.articleContent || fallbackFromWeekly?.storyContent || '';
+      const fallbackVideoId = fallbackFromTeens?.youtubeVideoId || fallbackFromWeekly?.youtubeVideoId || fallbackFromKids?.youtubeVideoId || '';
+      const fallbackVideoSource = fallbackFromTeens?.videoSource || fallbackFromWeekly?.videoSource || 'youtube';
+      const fallbackDocUrl = fallbackFromTeens?.documentUrl || fallbackFromWeekly?.documentUrl || '';
+
       setFormTitle(item.title);
-      setFormDescription(item.description || '');
-      setFormThumbnailUrl(item.thumbnail_url || '');
+      setFormDescription(item.description || fallbackDescription);
+      setFormThumbnailUrl(item.thumbnail_url || fallbackThumbnail);
       setFormStatus(item.status);
       setFormPublishDate(item.publish_date ? new Date(item.publish_date).toISOString().slice(0, 16) : '');
       setFormUnpublishDate(item.unpublish_date ? new Date(item.unpublish_date).toISOString().slice(0, 16) : '');
       
       // Type specific loads
       if (item.type === 'video') {
-        setVideoUrlInput(item.video_source === 'youtube' ? `https://youtube.com/watch?v=${item.video_id}` : item.video_source === 'vimeo' ? `https://vimeo.com/${item.video_id}` : '');
+        const vidId = item.video_id || fallbackVideoId;
+        const source = item.video_source || fallbackVideoSource;
+        setVideoUrlInput(source === 'youtube' ? `https://youtube.com/watch?v=${vidId}` : source === 'vimeo' ? `https://vimeo.com/${vidId}` : '');
       } else if (item.type === 'audio') {
-        setVideoUrlInput(item.video_id || '');
+        setVideoUrlInput(item.video_id || fallbackVideoId);
       } else {
         setVideoUrlInput('');
       }
-      setFormVideoSource(item.video_source || 'youtube');
-      setFormVideoId(item.video_id || '');
-      setFormDuration(item.duration || '');
-      setFormStoryContent(item.story_content || '');
-      setFormWritingPrompt(item.writing_prompt || '');
-      setFormColoringImageUrl(item.coloring_image_url || '');
-      setFormDocumentUrl(item.document_url || '');
+      setFormVideoSource(item.video_source || fallbackVideoSource);
+      setFormVideoId(item.video_id || fallbackVideoId);
+      setFormDuration(item.duration || fallbackDuration);
+      setFormStoryContent(item.story_content || fallbackStory);
+      setFormWritingPrompt(item.writing_prompt || fallbackFromWeekly?.writingPrompt || '');
+      setFormColoringImageUrl(item.coloring_image_url || fallbackFromWeekly?.coloringImageUrl || '');
+      setFormDocumentUrl(item.document_url || fallbackDocUrl);
     } else {
       setSelectedItem(null);
       setFormZone(isZoneManager && managerZone ? managerZone : 'kids');
