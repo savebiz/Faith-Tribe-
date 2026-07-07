@@ -35,6 +35,91 @@ export const TeensContentModal: React.FC<TeensContentModalProps> = ({ item, onCl
     }
   };
 
+  const renderVideoPlayer = (urlOrId: string, title: string) => {
+    const cleanUrl = urlOrId.trim();
+    
+    // 1. Check if it's a YouTube URL or YouTube ID
+    const youtubeRegExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+    const youtubeMatch = cleanUrl.match(youtubeRegExp);
+    
+    if (youtubeMatch && youtubeMatch[2].length === 11) {
+      return (
+        <iframe
+          src={`https://www.youtube.com/embed/${youtubeMatch[2]}?modestbranding=1&rel=0&autoplay=1`}
+          className="w-full h-full"
+          allow="autoplay; encrypted-media; picture-in-picture"
+          allowFullScreen
+          title={title}
+        />
+      );
+    } else if (cleanUrl.length === 11 && !cleanUrl.includes('/') && !cleanUrl.includes('.')) {
+      return (
+        <iframe
+          src={`https://www.youtube.com/embed/${cleanUrl}?modestbranding=1&rel=0&autoplay=1`}
+          className="w-full h-full"
+          allow="autoplay; encrypted-media; picture-in-picture"
+          allowFullScreen
+          title={title}
+        />
+      );
+    }
+
+    // 2. Check if it's a Vimeo URL
+    const vimeoRegExp = /(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/;
+    const vimeoMatch = cleanUrl.match(vimeoRegExp);
+    if (vimeoMatch) {
+      return (
+        <iframe
+          src={`https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`}
+          className="w-full h-full"
+          allow="autoplay; fullscreen; picture-in-picture"
+          allowFullScreen
+          title={title}
+        />
+      );
+    }
+
+    // 3. Check if it's a direct video link
+    const isDirectVideo = cleanUrl.toLowerCase().endsWith('.mp4') || 
+                          cleanUrl.toLowerCase().endsWith('.webm') || 
+                          cleanUrl.toLowerCase().endsWith('.ogg') ||
+                          cleanUrl.toLowerCase().endsWith('.mov') ||
+                          cleanUrl.includes('storage.googleapis.com') ||
+                          cleanUrl.includes('supabase.co/storage');
+    
+    if (isDirectVideo) {
+      return (
+        <video 
+          src={cleanUrl} 
+          controls 
+          autoPlay 
+          className="w-full h-full object-contain bg-black rounded-2xl" 
+        />
+      );
+    }
+
+    // 4. Fallback: treat it as a direct embed URL
+    return (
+      <iframe
+        src={cleanUrl}
+        className="w-full h-full"
+        allow="autoplay; encrypted-media; picture-in-picture"
+        allowFullScreen
+        title={title}
+      />
+    );
+  };
+
+  const getYouTubeId = (urlOrId: string) => {
+    const cleanUrl = urlOrId.trim();
+    const youtubeRegExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+    const youtubeMatch = cleanUrl.match(youtubeRegExp);
+    if (youtubeMatch && youtubeMatch[2].length === 11) {
+      return youtubeMatch[2];
+    }
+    return cleanUrl;
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
@@ -87,13 +172,7 @@ export const TeensContentModal: React.FC<TeensContentModalProps> = ({ item, onCl
           {/* Video Player */}
           {item.type === 'VIDEO' && item.youtubeVideoId && (
             <div className="aspect-video w-full rounded-2xl overflow-hidden border border-gray-800 bg-black shadow-inner">
-              <iframe
-                src={`https://www.youtube.com/embed/${item.youtubeVideoId}?modestbranding=1&rel=0&autoplay=1`}
-                className="w-full h-full"
-                allow="autoplay; encrypted-media; picture-in-picture"
-                allowFullScreen
-                title={item.title}
-              />
+              {renderVideoPlayer(item.youtubeVideoId, item.title)}
             </div>
           )}
 
@@ -147,7 +226,7 @@ export const TeensContentModal: React.FC<TeensContentModalProps> = ({ item, onCl
               {item.videoSource === 'youtube' && (
                 <div className="aspect-video w-full rounded-2xl overflow-hidden border border-gray-800 bg-black shadow-inner">
                   <iframe
-                    src={`https://www.youtube.com/embed/${item.youtubeVideoId}?modestbranding=1&rel=0`}
+                    src={`https://www.youtube.com/embed/${getYouTubeId(item.youtubeVideoId)}?modestbranding=1&rel=0`}
                     className="w-full h-full"
                     allow="encrypted-media; picture-in-picture"
                     allowFullScreen

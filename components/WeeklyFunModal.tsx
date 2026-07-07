@@ -271,6 +271,91 @@ export function WeeklyFunModal({ item, onClose }: WeeklyFunModalProps) {
     }
   }, [item]);
 
+  const getYouTubeId = (urlOrId: string) => {
+    const cleanUrl = urlOrId.trim();
+    const youtubeRegExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+    const youtubeMatch = cleanUrl.match(youtubeRegExp);
+    if (youtubeMatch && youtubeMatch[2].length === 11) {
+      return youtubeMatch[2];
+    }
+    return cleanUrl;
+  };
+
+  const renderVideoPlayer = (urlOrId: string, title: string) => {
+    const cleanUrl = urlOrId.trim();
+    
+    // 1. Check if it's a YouTube URL or YouTube ID
+    const youtubeRegExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+    const youtubeMatch = cleanUrl.match(youtubeRegExp);
+    
+    if (youtubeMatch && youtubeMatch[2].length === 11) {
+      return (
+        <iframe
+          src={`https://www.youtube.com/embed/${youtubeMatch[2]}?modestbranding=1&rel=0&autoplay=1`}
+          className="w-full h-full animate-fadeIn"
+          allow="autoplay; encrypted-media; picture-in-picture"
+          allowFullScreen
+          title={title}
+        />
+      );
+    } else if (cleanUrl.length === 11 && !cleanUrl.includes('/') && !cleanUrl.includes('.')) {
+      return (
+        <iframe
+          src={`https://www.youtube.com/embed/${cleanUrl}?modestbranding=1&rel=0&autoplay=1`}
+          className="w-full h-full animate-fadeIn"
+          allow="autoplay; encrypted-media; picture-in-picture"
+          allowFullScreen
+          title={title}
+        />
+      );
+    }
+
+    // 2. Check if it's a Vimeo URL
+    const vimeoRegExp = /(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/;
+    const vimeoMatch = cleanUrl.match(vimeoRegExp);
+    if (vimeoMatch) {
+      return (
+        <iframe
+          src={`https://player.vimeo.com/video/${vimeoMatch[1]}?autoplay=1`}
+          className="w-full h-full"
+          allow="autoplay; fullscreen; picture-in-picture"
+          allowFullScreen
+          title={title}
+        />
+      );
+    }
+
+    // 3. Check if it's a direct video link
+    const isDirectVideo = cleanUrl.toLowerCase().endsWith('.mp4') || 
+                          cleanUrl.toLowerCase().endsWith('.webm') || 
+                          cleanUrl.toLowerCase().endsWith('.ogg') ||
+                          cleanUrl.toLowerCase().endsWith('.mov') ||
+                          cleanUrl.includes('storage.googleapis.com') ||
+                          cleanUrl.includes('supabase.co/storage');
+    
+    if (isDirectVideo) {
+      return (
+        <video 
+          src={cleanUrl} 
+          controls 
+          autoPlay 
+          className="w-full h-full object-contain bg-black rounded-2xl" 
+        />
+      );
+    }
+
+    // 4. Fallback: treat it as a direct embed URL
+    return (
+      <iframe
+        src={cleanUrl}
+        className="w-full h-full"
+        allow="autoplay; encrypted-media; picture-in-picture"
+        allowFullScreen
+        title={title}
+      />
+    );
+  };
+
   if (!item) return null;
 
   return (
@@ -302,13 +387,7 @@ export function WeeklyFunModal({ item, onClose }: WeeklyFunModalProps) {
           {item.type === 'video' && (
             <div className="space-y-4">
               <div className="aspect-video w-full rounded-2xl overflow-hidden border-2 border-amber-100 bg-black shadow-inner">
-                <iframe
-                  src={`https://www.youtube.com/embed/${item.youtubeVideoId}?modestbranding=1&rel=0&autoplay=1`}
-                  className="w-full h-full"
-                  allow="autoplay; encrypted-media; picture-in-picture"
-                  allowFullScreen
-                  title={item.title}
-                />
+                {renderVideoPlayer(item.youtubeVideoId, item.title)}
               </div>
               <p className="text-xs sm:text-sm text-gray-500 leading-relaxed font-sans text-left">
                 {item.description}
@@ -365,7 +444,7 @@ export function WeeklyFunModal({ item, onClose }: WeeklyFunModalProps) {
               {item.videoSource === 'youtube' && (
                 <div className="aspect-video w-full rounded-2xl overflow-hidden border-2 border-amber-100 bg-black shadow-inner">
                   <iframe
-                    src={`https://www.youtube.com/embed/${item.youtubeVideoId}?modestbranding=1&rel=0`}
+                    src={`https://www.youtube.com/embed/${getYouTubeId(item.youtubeVideoId)}?modestbranding=1&rel=0`}
                     className="w-full h-full"
                     allow="encrypted-media; picture-in-picture"
                     allowFullScreen

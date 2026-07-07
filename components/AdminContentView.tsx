@@ -401,6 +401,90 @@ export const AdminContentView: React.FC<AdminContentViewProps> = ({ currentStaff
     }
   };
 
+  const getYouTubeId = (urlOrId: string) => {
+    const cleanUrl = urlOrId.trim();
+    const youtubeRegExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+    const youtubeMatch = cleanUrl.match(youtubeRegExp);
+    if (youtubeMatch && youtubeMatch[2].length === 11) {
+      return youtubeMatch[2];
+    }
+    return cleanUrl;
+  };
+
+  const renderVideoPlayer = (urlOrId: string, title: string) => {
+    const cleanUrl = urlOrId.trim();
+    
+    // 1. Check if it's a YouTube URL or YouTube ID
+    const youtubeRegExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
+    const youtubeMatch = cleanUrl.match(youtubeRegExp);
+    
+    if (youtubeMatch && youtubeMatch[2].length === 11) {
+      return (
+        <iframe
+          src={`https://www.youtube.com/embed/${youtubeMatch[2]}?modestbranding=1&rel=0`}
+          className="w-full h-full border-0"
+          allow="autoplay; encrypted-media; picture-in-picture"
+          allowFullScreen
+          title={title}
+        />
+      );
+    } else if (cleanUrl.length === 11 && !cleanUrl.includes('/') && !cleanUrl.includes('.')) {
+      return (
+        <iframe
+          src={`https://www.youtube.com/embed/${cleanUrl}?modestbranding=1&rel=0`}
+          className="w-full h-full border-0"
+          allow="autoplay; encrypted-media; picture-in-picture"
+          allowFullScreen
+          title={title}
+        />
+      );
+    }
+
+    // 2. Check if it's a Vimeo URL
+    const vimeoRegExp = /(?:vimeo\.com\/|player\.vimeo\.com\/video\/)(\d+)/;
+    const vimeoMatch = cleanUrl.match(vimeoRegExp);
+    if (vimeoMatch) {
+      return (
+        <iframe
+          src={`https://player.vimeo.com/video/${vimeoMatch[1]}`}
+          className="w-full h-full border-0"
+          allow="autoplay; fullscreen; picture-in-picture"
+          allowFullScreen
+          title={title}
+        />
+      );
+    }
+
+    // 3. Check if it's a direct video link
+    const isDirectVideo = cleanUrl.toLowerCase().endsWith('.mp4') || 
+                          cleanUrl.toLowerCase().endsWith('.webm') || 
+                          cleanUrl.toLowerCase().endsWith('.ogg') ||
+                          cleanUrl.toLowerCase().endsWith('.mov') ||
+                          cleanUrl.includes('storage.googleapis.com') ||
+                          cleanUrl.includes('supabase.co/storage');
+    
+    if (isDirectVideo) {
+      return (
+        <video 
+          src={cleanUrl} 
+          controls 
+          className="w-full h-full object-contain bg-black rounded-2xl" 
+        />
+      );
+    }
+
+    // 4. Fallback: treat it as a direct embed URL
+    return (
+      <iframe
+        src={cleanUrl}
+        className="w-full h-full border-0"
+        allow="autoplay; encrypted-media; picture-in-picture"
+        allowFullScreen
+        title={title}
+      />
+    );
+  };
+
   return (
     <div className="space-y-8 text-gray-700 font-sans text-left">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -960,21 +1044,7 @@ export const AdminContentView: React.FC<AdminContentViewProps> = ({ currentStaff
               {previewItem.type === 'video' && (
                 <div className="space-y-3">
                   <div className="aspect-video w-full rounded-2xl overflow-hidden bg-black shadow-sm">
-                    {previewItem.video_source === 'youtube' ? (
-                      <iframe
-                        src={`https://www.youtube.com/embed/${previewItem.video_id}?modestbranding=1&rel=0`}
-                        title={previewItem.title}
-                        className="w-full h-full border-0"
-                        allowFullScreen
-                      />
-                    ) : (
-                      <iframe
-                        src={`https://player.vimeo.com/video/${previewItem.video_id}`}
-                        title={previewItem.title}
-                        className="w-full h-full border-0"
-                        allowFullScreen
-                      />
-                    )}
+                    {renderVideoPlayer(previewItem.video_id || '', previewItem.title)}
                   </div>
                   {previewItem.description && <p className="text-sm font-semibold text-gray-600">{previewItem.description}</p>}
                 </div>

@@ -217,17 +217,17 @@ export const AdminHomepageView: React.FC<AdminHomepageViewProps> = ({ currentSta
 
               <div className="md:col-span-2">
                 <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">
-                  YouTube Video ID (Watch Message)
+                  Watch Message Video URL / ID
                 </label>
                 <input
                   type="text"
                   required
                   value={teensTopicVideoId}
                   onChange={(e) => setTeensTopicVideoId(e.target.value)}
-                  placeholder="e.g. dQw4w9WgXcQ"
+                  placeholder="e.g. https://www.youtube.com/watch?v=klkEKMTe3OY"
                   className="block w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-teal-600 focus:outline-none font-mono"
                 />
-                <p className="text-[10px] text-gray-400 mt-1">Provide only the 11-character YouTube video ID (e.g. the part after watch?v=).</p>
+                <p className="text-[10px] text-gray-400 mt-1">Paste any complete YouTube link, Vimeo link, direct MP4 link, or raw video ID.</p>
               </div>
             </div>
           </div>
