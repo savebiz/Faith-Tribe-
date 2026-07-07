@@ -1206,4 +1206,120 @@ export async function logAnalyticsEvent(
   }
 }
 
+// ------------------------------------------------------------------------------------------------
+// Audio Bible Filesets & Cache
+// ------------------------------------------------------------------------------------------------
+
+import { AudioFileset } from '../types';
+
+export async function fetchAudioFilesets(): Promise<AudioFileset[]> {
+  if (isRealSupabase && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('audio_filesets')
+        .select('*')
+        .order('id', { ascending: true });
+      if (!error && data) return data;
+    } catch (e) {
+      console.warn("Error fetching audio filesets from DB, falling back to local:", e);
+    }
+  }
+  return JSON.parse(localStorage.getItem('ft_mock_audio_filesets') || '[]');
+}
+
+export async function saveAudioFilesets(filesets: AudioFileset[]): Promise<void> {
+  if (isRealSupabase && supabase) {
+    try {
+      const { error } = await supabase
+        .from('audio_filesets')
+        .upsert(filesets, { onConflict: 'fileset_id' });
+      if (!error) return;
+    } catch (e) {
+      console.warn("Error saving audio filesets to DB, falling back to local:", e);
+    }
+  }
+  
+  const current = JSON.parse(localStorage.getItem('ft_mock_audio_filesets') || '[]');
+  const merged = [...current];
+  for (const item of filesets) {
+    const idx = merged.findIndex(x => x.fileset_id === item.fileset_id);
+    if (idx >= 0) {
+      merged[idx] = item;
+    } else {
+      merged.push(item);
+    }
+  }
+  localStorage.setItem('ft_mock_audio_filesets', JSON.stringify(merged));
+}
+
+export async function fetchAudioCache(
+  filesetId: string,
+  book: string,
+  chapter: number
+): Promise<{ audioUrl: string; timestamps: any; copyrightText: string | null } | null> {
+  if (isRealSupabase && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('audio_chapter_cache')
+        .select('*')
+        .eq('fileset_id', filesetId)
+        .eq('book', book.toUpperCase())
+        .eq('chapter', chapter)
+        .single();
+      if (!error && data) {
+        return {
+          audioUrl: data.audio_url,
+          timestamps: data.timestamps,
+          copyrightText: data.copyright_text
+        };
+      }
+    } catch (e) {
+      console.warn("Error fetching audio cache from DB, falling back to local:", e);
+    }
+  }
+  
+  const cacheKey = `ft_audio_cache_${filesetId}_${book.toUpperCase()}_${chapter}`;
+  const local = localStorage.getItem(cacheKey);
+  if (local) {
+    return JSON.parse(local);
+  }
+  return null;
+}
+
+export async function saveAudioCache(
+  filesetId: string,
+  book: string,
+  chapter: number,
+  audioUrl: string,
+  timestamps: any,
+  copyrightText: string | null
+): Promise<void> {
+  if (isRealSupabase && supabase) {
+    try {
+      const { error } = await supabase
+        .from('audio_chapter_cache')
+        .upsert({
+          fileset_id: filesetId,
+          book: book.toUpperCase(),
+          chapter: chapter,
+          audio_url: audioUrl,
+          timestamps: timestamps || null,
+          copyright_text: copyrightText,
+          cached_at: new Date().toISOString()
+        }, { onConflict: 'fileset_id,book,chapter' });
+      if (!error) return;
+    } catch (e) {
+      console.warn("Error saving audio cache to DB, falling back to local:", e);
+    }
+  }
+  
+  const cacheKey = `ft_audio_cache_${filesetId}_${book.toUpperCase()}_${chapter}`;
+  localStorage.setItem(cacheKey, JSON.stringify({
+    audioUrl,
+    timestamps,
+    copyrightText
+  }));
+}
+
+
 

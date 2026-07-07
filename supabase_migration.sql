@@ -480,3 +480,44 @@ ALTER TABLE broadcast_status ADD COLUMN IF NOT EXISTS teens_topic_video_id TEXT 
 -- Add audio value to content_type enum
 ALTER TYPE content_type ADD VALUE IF NOT EXISTS 'audio';
 
+-- ----------------------------------------------------
+-- Audio Bible Filesets & Cache
+-- ----------------------------------------------------
+CREATE TABLE IF NOT EXISTS audio_filesets (
+  id serial PRIMARY KEY,
+  fileset_id text NOT NULL UNIQUE,
+  language_code text NOT NULL,  -- 'eng', 'yor', 'ibo', 'hau'
+  language_name text NOT NULL,  -- 'English', 'Yoruba', 'Igbo', 'Hausa'
+  bible_name text NOT NULL,
+  media_type text NOT NULL,     -- 'DA' or 'SA'
+  is_verified boolean DEFAULT false,
+  discovered_at timestamptz DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS audio_chapter_cache (
+  id serial PRIMARY KEY,
+  fileset_id text NOT NULL,
+  book text NOT NULL,
+  chapter integer NOT NULL,
+  audio_url text NOT NULL,       -- streaming URL only
+  timestamps jsonb,             -- verse timings
+  copyright_text text,          -- copyright metadata
+  cached_at timestamptz DEFAULT now(),
+  UNIQUE (fileset_id, book, chapter)
+);
+
+-- RLS for audio_filesets
+ALTER TABLE audio_filesets ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "allow public read audio_filesets" ON audio_filesets;
+CREATE POLICY "allow public read audio_filesets" ON audio_filesets FOR SELECT USING (true);
+DROP POLICY IF EXISTS "allow anyone manage audio_filesets" ON audio_filesets;
+CREATE POLICY "allow anyone manage audio_filesets" ON audio_filesets FOR ALL USING (true) WITH CHECK (true);
+
+-- RLS for audio_chapter_cache
+ALTER TABLE audio_chapter_cache ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "allow public read audio_chapter_cache" ON audio_chapter_cache;
+CREATE POLICY "allow public read audio_chapter_cache" ON audio_chapter_cache FOR SELECT USING (true);
+DROP POLICY IF EXISTS "allow anyone manage audio_chapter_cache" ON audio_chapter_cache;
+CREATE POLICY "allow anyone manage audio_chapter_cache" ON audio_chapter_cache FOR ALL USING (true) WITH CHECK (true);
+
+

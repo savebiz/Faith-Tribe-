@@ -132,3 +132,21 @@ export interface AnalyticsEvent {
   metadata?: any;
   created_at?: string;
 }
+
+export interface AudioFileset {
+  id?: number;
+  fileset_id: string;
+  language_code: string;  // 'eng', 'yor', 'ibo', 'hau'
+  language_name: string;  // 'English', 'Yoruba', 'Igbo', 'Hausa'
+  bible_name: string;
+  media_type: string;     // 'DA' or 'SA'
+  is_verified: boolean;
+  discovered_at?: string;
+}
+
+export interface AudioChapterInfo {
+  audioUrl: string;
+  timestamps: any[] | null;
+  copyrightText: string | null;
+}
+

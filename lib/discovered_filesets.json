@@ -1,0 +1,482 @@
+[
+  {
+    "fileset_id": "AUSWBTP1DA-opus16",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "English - Aboriginal Translators Version",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "AUSWBTP1DA",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "English - Aboriginal Translators Version",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGESHO1DA",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "English Standard Version® - Hear the Word Audio Bible",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGESHO1DA-opus16",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "English Standard Version® - Hear the Word Audio Bible",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGESHN1DA-opus16",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "English Standard Version® - Hear the Word Audio Bible",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGESHN1DA",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "English Standard Version® - Hear the Word Audio Bible",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGBERN1DA",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "English - Berean Standard",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGBERN1DA-opus16",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "English - Berean Standard",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGBERO1DA",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "English - Berean Standard",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGBERO1DA-opus16",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "English - Berean Standard",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGCSBO1DA-opus16",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "English - Christian Standard Bible ",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGCSBN1DA-opus16",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "English - Christian Standard Bible ",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGCSBO1DA",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "English - Christian Standard Bible ",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGCSBN1DA",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "English - Christian Standard Bible ",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGESVN1DA-opus16",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "English Standard Version®",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGESVO1DA-opus16",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "English Standard Version®",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGESVO1DA",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "English Standard Version®",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGESVN1DA",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "English Standard Version®",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGGIDN1DA-opus16",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "English Standard Version (Gideons)",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGGIDN1DA",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "English Standard Version (Gideons)",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGKJVO1DA-opus16",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "King James Version",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGKJVN1DA-opus16",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "King James Version",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGKJVN1DA",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "King James Version",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGKJVO1DA",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "King James Version",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGNKJN1DA-opus16",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "New King James Version",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGNKJN1DA",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "New King James Version",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGNLHO1DA",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "New Living Translation® - her.BIBLE (women’s voices)",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGNLHO1DA-opus16",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "New Living Translation® - her.BIBLE (women’s voices)",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGNLHN1DA-opus16",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "New Living Translation® - her.BIBLE (women’s voices)",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGNLHN1DA",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "New Living Translation® - her.BIBLE (women’s voices)",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGNLVN1DA",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "English: Liberian Standard - New Life Version (Easy to Read)",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENGNLVN1DA-opus16",
+    "language_code": "eng",
+    "language_name": "English",
+    "bible_name": "English: Liberian Standard - New Life Version (Easy to Read)",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "YORDOAP1DA",
+    "language_code": "yor",
+    "language_name": "Yoruba",
+    "bible_name": "Awori - Diocese of Awori, Church of Nigeria, Anglican Communion",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "YORDOAP1DA-opus16",
+    "language_code": "yor",
+    "language_name": "Yoruba",
+    "bible_name": "Awori - Diocese of Awori, Church of Nigeria, Anglican Communion",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "YORDPIO1DA-opus16",
+    "language_code": "yor",
+    "language_name": "Yoruba",
+    "bible_name": "Yoruba - Contemporary Bible (Davar Audio)",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "YORDPIN1DA-opus16",
+    "language_code": "yor",
+    "language_name": "Yoruba",
+    "bible_name": "Yoruba - Contemporary Bible (Davar Audio)",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "YORDPIO1DA",
+    "language_code": "yor",
+    "language_name": "Yoruba",
+    "bible_name": "Yoruba - Contemporary Bible (Davar Audio)",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "YORDPIN1DA",
+    "language_code": "yor",
+    "language_name": "Yoruba",
+    "bible_name": "Yoruba - Contemporary Bible (Davar Audio)",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "YORNBTP1DA",
+    "language_code": "yor",
+    "language_name": "Yoruba",
+    "bible_name": "Egba - Nigeria Bible Translation Trust (NBTT)",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "YORNBTP1DA-opus16",
+    "language_code": "yor",
+    "language_name": "Yoruba",
+    "bible_name": "Egba - Nigeria Bible Translation Trust (NBTT)",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "YOROBVN1DA-opus16",
+    "language_code": "yor",
+    "language_name": "Yoruba",
+    "bible_name": "Nigeria, Bible Society of",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "YOROBVN1DA",
+    "language_code": "yor",
+    "language_name": "Yoruba",
+    "bible_name": "Nigeria, Bible Society of",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "YORTAMP1DA",
+    "language_code": "yor",
+    "language_name": "Yoruba",
+    "bible_name": "LLaje - The Evangelical Apostolos Ministry (TEAM)",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "YORTAMP1DA-opus16",
+    "language_code": "yor",
+    "language_name": "Yoruba",
+    "bible_name": "LLaje - The Evangelical Apostolos Ministry (TEAM)",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "YORTEMP1DA",
+    "language_code": "yor",
+    "language_name": "Yoruba",
+    "bible_name": "Ikale - The Evangelical Apostolos Ministry (TEAM)",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "YORTEMP1DA-opus16",
+    "language_code": "yor",
+    "language_name": "Yoruba",
+    "bible_name": "Ikale - The Evangelical Apostolos Ministry (TEAM)",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENIMLTN1DA-opus16",
+    "language_code": "ibo",
+    "language_name": "Igbo",
+    "bible_name": "2021 Mission for Language Translation",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "ENIMLTN1DA",
+    "language_code": "ibo",
+    "language_name": "Igbo",
+    "bible_name": "2021 Mission for Language Translation",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "IBOBIBN1DA",
+    "language_code": "ibo",
+    "language_name": "Igbo",
+    "bible_name": "Biblica® Open Igbo Contemporary Bible 2020",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "IBOBIBO1DA",
+    "language_code": "ibo",
+    "language_name": "Igbo",
+    "bible_name": "Biblica® Open Igbo Contemporary Bible 2020",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "IBOBIBO1DA-opus16",
+    "language_code": "ibo",
+    "language_name": "Igbo",
+    "bible_name": "Biblica® Open Igbo Contemporary Bible 2020",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "IBOBIBN1DA-opus16",
+    "language_code": "ibo",
+    "language_name": "Igbo",
+    "bible_name": "Biblica® Open Igbo Contemporary Bible 2020",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "IGRNBTN1DA-opus16",
+    "language_code": "ibo",
+    "language_name": "Igbo",
+    "bible_name": "Ehugbo - Nigeria Bible Translation Trust (NBTT)",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "IGRNBTN1DA",
+    "language_code": "ibo",
+    "language_name": "Igbo",
+    "bible_name": "Ehugbo - Nigeria Bible Translation Trust (NBTT)",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "HAUCLVN1DA-opus16",
+    "language_code": "hau",
+    "language_name": "Hausa",
+    "bible_name": "Hausa - Common Language Version (FCBH Audio)",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "HAUCLVN1DA",
+    "language_code": "hau",
+    "language_name": "Hausa",
+    "bible_name": "Hausa - Common Language Version (FCBH Audio)",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "HAUDPIO1DA-opus16",
+    "language_code": "hau",
+    "language_name": "Hausa",
+    "bible_name": "Hausa - Biblica® Open Hausa Contemporary Bible 2020",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "HAUDPIN1DA-opus16",
+    "language_code": "hau",
+    "language_name": "Hausa",
+    "bible_name": "Hausa - Biblica® Open Hausa Contemporary Bible 2020",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "HAUDPIO1DA",
+    "language_code": "hau",
+    "language_name": "Hausa",
+    "bible_name": "Hausa - Biblica® Open Hausa Contemporary Bible 2020",
+    "media_type": "DA",
+    "is_verified": true
+  },
+  {
+    "fileset_id": "HAUDPIN1DA",
+    "language_code": "hau",
+    "language_name": "Hausa",
+    "bible_name": "Hausa - Biblica® Open Hausa Contemporary Bible 2020",
+    "media_type": "DA",
+    "is_verified": true
+  }
+]

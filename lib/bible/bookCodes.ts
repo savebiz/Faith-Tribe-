@@ -198,7 +198,10 @@ export function parseScriptureReference(input: string): { bookCode: string; chap
   if (!matchedBookKey) return null;
   
   const bookCode = BOOK_ABBREVIATIONS[matchedBookKey];
-  const remaining = clean.slice(matchedBookKey.length).trim();
+  let remaining = clean.slice(matchedBookKey.length).trim();
+  if (remaining.startsWith('.')) {
+    remaining = remaining.substring(1).trim();
+  }
   
   // Matches chapter and optional verse (e.g., "3", "3:16", "3:16-18")
   const match = remaining.match(/^(\d+)(?:\s*:\s*(\d+)(?:\s*-\s*(\d+))?)?$/);

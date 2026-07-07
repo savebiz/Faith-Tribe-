@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { BibleReader } from '@youversion/platform-react-ui';
-import { ArrowLeft, Book, BookOpen, Flame, Share2, MoreVertical, Copy, AlertTriangle, Check, Award, Download, Highlighter, Trash2, X, ArrowRight, Search } from 'lucide-react';
+import { ArrowLeft, Book, BookOpen, Flame, Share2, MoreVertical, Copy, AlertTriangle, Check, Award, Download, Highlighter, Trash2, X, ArrowRight, Search, Volume2, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { fetchReactionCount, incrementReactionCount, hasReacted, fetchStudyNotesForChapter, BibleStudyNote, fetchActiveBibleVersions, fetchZoneDefaultVersions, logAnalyticsEvent } from '../supabase';
 import { StudyNote } from '../../components/StudyNote';
@@ -144,6 +144,62 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
   // Study Notes states
   const [studyNotes, setStudyNotes] = useState<BibleStudyNote[]>([]);
   const [isGoDeeperOpen, setIsGoDeeperOpen] = useState(false);
+
+  // Audio Bible states
+  const [isListenMode, setIsListenMode] = useState(false);
+  const [audioLang, setAudioLang] = useState('eng');
+  const [audioInfo, setAudioInfo] = useState<{ audioUrl: string; copyrightText: string | null; timestamps: any[] | null } | null>(null);
+  const [isAudioLoading, setIsAudioLoading] = useState(false);
+  const [audioError, setAudioError] = useState<string | null>(null);
+
+  const AUDIO_LANGUAGES = [
+    { code: 'eng', label: 'English (ESV)' },
+    { code: 'yor', label: 'Yoruba (YCB)' },
+    { code: 'ibo', label: 'Igbo (ICB)' },
+    { code: 'hau', label: 'Hausa (HCB)' }
+  ];
+
+  // Auto reset selection in listen mode
+  useEffect(() => {
+    if (isListenMode) {
+      setSelectedVerses([]);
+    }
+  }, [isListenMode]);
+
+  // Load Audio
+  useEffect(() => {
+    if (!isListenMode) return;
+    
+    let active = true;
+    const loadAudio = async () => {
+      setIsAudioLoading(true);
+      setAudioError(null);
+      try {
+        const res = await fetch(`/api/bible-audio?lang=${audioLang}&book=${book}&chapter=${chapter}`);
+        if (!res.ok) {
+          throw new Error('Audio not available for this passage yet.');
+        }
+        const data = await res.json();
+        if (active) {
+          setAudioInfo(data);
+        }
+      } catch (err: any) {
+        if (active) {
+          setAudioError(err.message || 'Audio not available for this passage yet.');
+          setAudioInfo(null);
+        }
+      } finally {
+        if (active) {
+          setIsAudioLoading(false);
+        }
+      }
+    };
+
+    loadAudio();
+    return () => {
+      active = false;
+    };
+  }, [isListenMode, audioLang, book, chapter]);
 
   // Load study notes on book/chapter change
   useEffect(() => {
@@ -790,53 +846,118 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
         </div>
 
         {/* Search & Translation Row */}
-        <div ref={translationRef} className="flex items-end gap-3 sm:gap-6 w-full justify-between mb-8 pb-2">
-          {/* Translation Dropdown */}
-          <div className="flex flex-col gap-2 flex-1 min-w-0 sm:flex-none sm:w-full sm:max-w-xs">
-            <label htmlFor="version-select-button" className="text-xs font-bold text-[#372f58]/80 uppercase tracking-wider truncate">
-              Translation
-            </label>
-            <div ref={topDropdownRef} className="relative w-full">
-              <button
-                type="button"
-                id="version-select-button"
-                onClick={handleTopSelectorClick}
-                className="w-full flex items-center justify-between bg-white/80 border border-gray-200 text-[#372f58] font-bold text-sm px-4 py-2.5 rounded-2xl shadow-sm hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#1CABB9] cursor-pointer transition-colors min-w-0"
-              >
-                <span className="truncate pr-1">{currentVersion.label}</span>
-                <svg className={`fill-[#372f58]/60 h-4 w-4 transition-transform duration-200 shrink-0 ml-2 ${isTopDropdownOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                </svg>
-              </button>
+        <div ref={translationRef} className="flex flex-col sm:flex-row items-stretch sm:items-end gap-4 sm:gap-6 w-full justify-between mb-8 pb-2">
+          
+          <div className="flex items-center gap-4 flex-grow sm:flex-none">
+            {/* Translation/Language Dropdown */}
+            <div className="flex flex-col gap-2 flex-grow sm:flex-none sm:w-64">
+              <label htmlFor="version-select-button" className="text-xs font-bold text-[#372f58]/80 uppercase tracking-wider truncate">
+                {isListenMode ? 'Audio Language' : 'Translation'}
+              </label>
+              <div ref={topDropdownRef} className="relative w-full">
+                <button
+                  type="button"
+                  id="version-select-button"
+                  onClick={handleTopSelectorClick}
+                  className="w-full flex items-center justify-between bg-white/80 border border-gray-200 text-[#372f58] font-bold text-sm px-4 py-2.5 rounded-2xl shadow-sm hover:bg-white focus:outline-none focus:ring-2 focus:ring-[#1CABB9] cursor-pointer transition-colors min-w-0"
+                >
+                  <span className="truncate pr-1">
+                    {isListenMode 
+                      ? (AUDIO_LANGUAGES.find(l => l.code === audioLang)?.label || 'English (ESV)')
+                      : currentVersion.label
+                    }
+                  </span>
+                  <svg className={`fill-[#372f58]/60 h-4 w-4 transition-transform duration-200 shrink-0 ml-2 ${isTopDropdownOpen ? 'rotate-180' : ''}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                  </svg>
+                </button>
 
-              {/* Custom Desktop/Tablet Dropdown Menu */}
-              {isTopDropdownOpen && (
-                <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-white/95 backdrop-blur-md rounded-3xl border border-gray-200/80 shadow-2xl p-2.5 flex flex-col gap-1 w-full max-w-sm sm:max-w-xs animate-in fade-in slide-in-from-top-2 duration-200">
-                  {approvedVersions.map((v) => {
-                    const isSelected = v.id === versionId;
-                    return (
-                      <button
-                        key={v.id}
-                        type="button"
-                        onClick={() => {
-                          handleVersionChange(v.id);
-                          setIsTopDropdownOpen(false);
-                        }}
-                        className={`w-full flex items-center justify-between text-left px-4 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
-                          isSelected 
-                            ? 'bg-[#1CABB9]/10 text-[#1CABB9]' 
-                            : 'text-[#372f58] hover:bg-gray-50 hover:text-[#1CABB9]'
-                        }`}
-                      >
-                        <span className="truncate pr-2">{v.label}</span>
-                        {isSelected && (
-                          <Check size={12} className="text-[#1CABB9] shrink-0" />
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+                {/* Custom Desktop/Tablet Dropdown Menu */}
+                {isTopDropdownOpen && (
+                  <div className="absolute top-full left-0 right-0 mt-2 z-50 bg-white/95 backdrop-blur-md rounded-3xl border border-gray-200/80 shadow-2xl p-2.5 flex flex-col gap-1 w-full max-w-sm sm:max-w-xs animate-in fade-in slide-in-from-top-2 duration-200">
+                    {isListenMode ? (
+                      AUDIO_LANGUAGES.map((langOpt) => {
+                        const isSelected = langOpt.code === audioLang;
+                        return (
+                          <button
+                            key={langOpt.code}
+                            type="button"
+                            onClick={() => {
+                              setAudioLang(langOpt.code);
+                              setIsTopDropdownOpen(false);
+                            }}
+                            className={`w-full flex items-center justify-between text-left px-4 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                              isSelected 
+                                ? 'bg-[#1CABB9]/10 text-[#1CABB9]' 
+                                : 'text-[#372f58] hover:bg-gray-50 hover:text-[#1CABB9]'
+                            }`}
+                          >
+                            <span className="truncate pr-2">{langOpt.label}</span>
+                            {isSelected && (
+                              <Check size={12} className="text-[#1CABB9] shrink-0" />
+                            )}
+                          </button>
+                        );
+                      })
+                    ) : (
+                      approvedVersions.map((v) => {
+                        const isSelected = v.id === versionId;
+                        return (
+                          <button
+                            key={v.id}
+                            type="button"
+                            onClick={() => {
+                              handleVersionChange(v.id);
+                              setIsTopDropdownOpen(false);
+                            }}
+                            className={`w-full flex items-center justify-between text-left px-4 py-2 rounded-2xl text-xs font-bold transition-all cursor-pointer ${
+                              isSelected 
+                                ? 'bg-[#1CABB9]/10 text-[#1CABB9]' 
+                                : 'text-[#372f58] hover:bg-gray-50 hover:text-[#1CABB9]'
+                            }`}
+                          >
+                            <span className="truncate pr-2">{v.label}</span>
+                            {isSelected && (
+                              <Check size={12} className="text-[#1CABB9] shrink-0" />
+                            )}
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Read/Listen Toggle Control */}
+            <div className="flex flex-col gap-2 shrink-0">
+              <span className="text-xs font-bold text-[#372f58]/80 uppercase tracking-wider">Mode</span>
+              <div className="flex bg-[#372f58]/5 p-1 rounded-2xl border border-gray-150 h-[38px] items-center">
+                <button
+                  type="button"
+                  onClick={() => setIsListenMode(false)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                    !isListenMode 
+                      ? 'bg-white text-[#1CABB9] shadow-sm' 
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  <BookOpen size={14} />
+                  <span>READ</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsListenMode(true)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer ${
+                    isListenMode 
+                      ? 'bg-white text-[#1CABB9] shadow-sm' 
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  <Volume2 size={14} />
+                  <span>LISTEN</span>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -918,17 +1039,68 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
             fontFamily={effectiveFontFamily as any}
             lineSpacing={effectiveLineHeight}
           >
-            <div 
-              className="bible-text-content-area"
-              style={{
-                '--reader-font-family': effectiveFontFamily,
-                '--reader-font-size': `${effectiveFontSize}px`,
-                '--reader-line-height': effectiveLineHeight,
-                '--reader-letter-spacing': isKidsMode ? '0.04em' : 'normal'
-              } as React.CSSProperties}
-            >
-              <BibleReader.Content />
-            </div>
+            {isListenMode ? (
+              <div className="py-8 px-4 flex flex-col items-center justify-center text-center space-y-6 w-full">
+                {isAudioLoading ? (
+                  <div className="flex flex-col items-center justify-center space-y-4 py-8">
+                    <Loader2 className="h-10 w-10 text-[#1CABB9] animate-spin" />
+                    <p className="text-sm font-bold text-gray-500">Retrieving audio stream...</p>
+                  </div>
+                ) : audioError ? (
+                  <div className="flex flex-col items-center justify-center space-y-3 py-8 max-w-sm">
+                    <AlertTriangle size={36} className="text-red-500" />
+                    <p className="text-sm font-bold text-gray-700">{audioError}</p>
+                    <p className="text-xs text-gray-400">Please choose another language or chapter combination.</p>
+                  </div>
+                ) : audioInfo ? (
+                  <div className="w-full max-w-lg bg-gray-50/50 p-6 rounded-3xl border border-gray-150 shadow-sm flex flex-col items-center space-y-5">
+                    <div className="flex items-center gap-3">
+                      <div className="p-3 bg-[#1CABB9]/10 text-[#1CABB9] rounded-2xl animate-pulse">
+                        <Volume2 size={24} />
+                      </div>
+                      <div className="text-left">
+                        <h4 className="text-sm font-black text-[#372f58] uppercase tracking-wider">
+                          {AUDIO_LANGUAGES.find(l => l.code === audioLang)?.label}
+                        </h4>
+                        <p className="text-xs text-gray-500">
+                          {BOOK_NAMES[book] || book} Chapter {chapter}
+                        </p>
+                      </div>
+                    </div>
+
+                    <audio
+                      src={audioInfo.audioUrl}
+                      controls
+                      controlsList="nodownload"
+                      className="w-full h-12 rounded-xl accent-[#1CABB9]"
+                      style={{ outline: 'none' }}
+                    />
+
+                    {audioInfo.copyrightText && (
+                      <p className="text-[10px] text-gray-400 font-bold leading-relaxed text-center px-4 pt-3 border-t border-gray-100 w-full select-none">
+                        {audioInfo.copyrightText}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center space-y-4 py-8">
+                    <p className="text-sm font-bold text-gray-500">Audio not loaded.</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div 
+                className="bible-text-content-area"
+                style={{
+                  '--reader-font-family': effectiveFontFamily,
+                  '--reader-font-size': `${effectiveFontSize}px`,
+                  '--reader-line-height': effectiveLineHeight,
+                  '--reader-letter-spacing': isKidsMode ? '0.04em' : 'normal'
+                } as React.CSSProperties}
+              >
+                <BibleReader.Content />
+              </div>
+            )}
 
             {/* Custom Engagement Layer */}
             <div className="mt-8 pt-6 border-t border-[#372f58]/15 flex flex-wrap items-center justify-between gap-4">
@@ -988,7 +1160,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
             </div>
 
             {/* Go Deeper Section (Bible Study Notes for Teens/Teachers) */}
-            {!isKidsMode && studyNotes.length > 0 && (
+            {!isListenMode && !isKidsMode && studyNotes.length > 0 && (
               <div className="mt-6 pt-5 border-t border-[#372f58]/10 animate-in fade-in duration-300">
                 <button
                   onClick={() => setIsGoDeeperOpen(!isGoDeeperOpen)}
@@ -1117,21 +1289,39 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
       {isBottomPickerOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm">
           <div className="bg-white rounded-[2.5rem] p-6 w-full max-w-sm border border-gray-100 shadow-2xl relative">
-            <h3 className="text-lg font-black text-[#372f58] mb-4">Select Translation</h3>
+            <h3 className="text-lg font-black text-[#372f58] mb-4">
+              {isListenMode ? 'Select Language' : 'Select Translation'}
+            </h3>
             <div className="space-y-2">
-              {approvedVersions.map((v) => (
-                <button
-                  key={v.id}
-                  onClick={() => {
-                    handleVersionChange(v.id);
-                    setIsBottomPickerOpen(false);
-                  }}
-                  className={`w-full text-left px-4 py-3 rounded-2xl font-bold text-sm transition-colors cursor-pointer flex items-center justify-between ${versionId === v.id ? 'bg-[#1CABB9]/10 text-[#1CABB9]' : 'hover:bg-gray-50 text-[#372f58]'}`}
-                >
-                  <span>{v.label}</span>
-                  {versionId === v.id && <Check size={16} />}
-                </button>
-              ))}
+              {isListenMode ? (
+                AUDIO_LANGUAGES.map((langOpt) => (
+                  <button
+                    key={langOpt.code}
+                    onClick={() => {
+                      setAudioLang(langOpt.code);
+                      setIsBottomPickerOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-3 rounded-2xl font-bold text-sm transition-colors cursor-pointer flex items-center justify-between ${audioLang === langOpt.code ? 'bg-[#1CABB9]/10 text-[#1CABB9]' : 'hover:bg-gray-50 text-[#372f58]'}`}
+                  >
+                    <span>{langOpt.label}</span>
+                    {audioLang === langOpt.code && <Check size={16} />}
+                  </button>
+                ))
+              ) : (
+                approvedVersions.map((v) => (
+                  <button
+                    key={v.id}
+                    onClick={() => {
+                      handleVersionChange(v.id);
+                      setIsBottomPickerOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-3 rounded-2xl font-bold text-sm transition-colors cursor-pointer flex items-center justify-between ${versionId === v.id ? 'bg-[#1CABB9]/10 text-[#1CABB9]' : 'hover:bg-gray-50 text-[#372f58]'}`}
+                  >
+                    <span>{v.label}</span>
+                    {versionId === v.id && <Check size={16} />}
+                  </button>
+                ))
+              )}
             </div>
             <button
               onClick={() => setIsBottomPickerOpen(false)}

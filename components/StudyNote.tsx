@@ -19,8 +19,8 @@ export function convertRefLyUrl(url: string, currentVersionId?: number): { href:
     const refPath = decodeURIComponent(url.substring('https://ref.ly/'.length));
     
     // Match book, chapter, and optional starting verse (allowing dot or colon separator)
-    // Examples: "Gen1:1", "Matt19.21", "Ps33:6"
-    const match = refPath.match(/^([1-3]?\s*[A-Za-z\s]+)(\d+)(?:[:.](\d+))?/);
+    // Examples: "Gen1:1", "Matt19.21", "Ps33:6", "Matt.19.21"
+    const match = refPath.match(/^([1-3]?\s*[A-Za-z\s]+?)\.?\s*(\d+)(?:[:.](\d+))?/);
     if (match) {
       const rawBook = match[1].trim();
       const chapter = match[2];
