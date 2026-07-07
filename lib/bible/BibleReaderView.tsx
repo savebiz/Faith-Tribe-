@@ -929,33 +929,49 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
               </div>
             </div>
 
-            {/* Read/Listen Toggle Control */}
-            <div className="flex flex-col gap-2 shrink-0 w-full sm:w-auto">
-              <span className="text-xs font-bold text-[#372f58]/80 uppercase tracking-wider">Mode</span>
-              <div className="flex bg-[#372f58]/5 p-1 rounded-2xl border border-gray-150 h-[38px] items-center w-full sm:w-auto">
+            {/* Mode & Mobile Search row */}
+            <div className="flex items-end gap-3 w-full sm:w-auto">
+              {/* Read/Listen Toggle Control */}
+              <div className="flex flex-col gap-2 flex-grow sm:flex-grow-0 sm:w-auto">
+                <span className="text-xs font-bold text-[#372f58]/80 uppercase tracking-wider">Mode</span>
+                <div className="flex bg-[#372f58]/5 p-1 rounded-2xl border border-gray-150 h-[38px] items-center w-full sm:w-auto">
+                  <button
+                    type="button"
+                    onClick={() => setIsListenMode(false)}
+                    className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer min-w-[80px] sm:min-w-0 ${
+                      !isListenMode 
+                        ? 'bg-white text-[#1CABB9] shadow-sm' 
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    <BookOpen size={14} />
+                    <span>READ</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsListenMode(true)}
+                    className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer min-w-[80px] sm:min-w-0 ${
+                      isListenMode 
+                        ? 'bg-white text-[#1CABB9] shadow-sm' 
+                        : 'text-gray-500 hover:text-gray-700'
+                    }`}
+                  >
+                    <Volume2 size={14} />
+                    <span>LISTEN</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Search Trigger Icon for Mobile */}
+              <div className="sm:hidden shrink-0">
                 <button
-                  type="button"
-                  onClick={() => setIsListenMode(false)}
-                  className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer min-w-[80px] sm:min-w-0 ${
-                    !isListenMode 
-                      ? 'bg-white text-[#1CABB9] shadow-sm' 
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
+                  onClick={() => setIsSearchOverlayOpen(true)}
+                  className="w-10 h-[38px] flex items-center justify-center bg-white border border-gray-200 text-[#372f58] hover:text-[#1CABB9] rounded-2xl shadow-sm cursor-pointer transition-colors shrink-0"
+                  aria-label="Search scripture"
                 >
-                  <BookOpen size={14} />
-                  <span>READ</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsListenMode(true)}
-                  className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer min-w-[80px] sm:min-w-0 ${
-                    isListenMode 
-                      ? 'bg-white text-[#1CABB9] shadow-sm' 
-                      : 'text-gray-500 hover:text-gray-700'
-                  }`}
-                >
-                  <Volume2 size={14} />
-                  <span>LISTEN</span>
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                  </svg>
                 </button>
               </div>
             </div>
@@ -1008,19 +1024,6 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
                 ))}
               </div>
             )}
-          </div>
-
-          {/* Search Trigger Icon for Mobile */}
-          <div className="sm:hidden shrink-0">
-            <button
-              onClick={() => setIsSearchOverlayOpen(true)}
-              className="w-10 h-10 flex items-center justify-center bg-white border border-gray-200 text-[#372f58] hover:text-[#1CABB9] rounded-2xl shadow-sm cursor-pointer transition-colors shrink-0"
-              aria-label="Search scripture"
-            >
-              <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
-            </button>
           </div>
         </div>
 
