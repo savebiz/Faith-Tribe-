@@ -1117,6 +1117,7 @@ const App: React.FC = () => {
     const [curriculumResults, setCurriculumResults] = useState<any[]>([]);
     const [isLoadingCurriculum, setIsLoadingCurriculum] = useState(false);
     const [curriculumSearchSearched, setCurriculumSearchSearched] = useState(false);
+    const [curriculumTrack, setCurriculumTrack] = useState<'kids' | 'teens'>('kids');
 
     const [evangelismResources, setEvangelismResources] = useState<any[]>([]);
     const [isLoadingEvangelism, setIsLoadingEvangelism] = useState(false);
