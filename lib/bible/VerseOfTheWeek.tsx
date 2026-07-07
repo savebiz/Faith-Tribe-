@@ -166,9 +166,9 @@ export function VerseOfTheWeek({ versionId, showStudyNotes = false }: { versionI
 
   // Filter notes based on toggle and specific verse
   const filteredNotes = studyNotes.filter(note => {
-    // 1. Filter by tier / source (Go Deeper is aquifer_api or advanced tier)
-    const isAquifer = note.source === 'aquifer_api' || note.tier === 'advanced';
-    const matchesTier = goDeeper ? isAquifer : !isAquifer;
+    // 1. Filter by tier
+    const noteTier = note.tier || 'basic';
+    const matchesTier = goDeeper ? noteTier === 'advanced' : noteTier === 'basic';
     if (!matchesTier) return false;
 
     // 2. Filter by specific verse
@@ -263,7 +263,7 @@ export function VerseOfTheWeek({ versionId, showStudyNotes = false }: { versionI
               <button
                 type="button"
                 onClick={() => {
-                  const flagEnabled = import.meta.env.VITE_ENABLE_AQUIFER_TEENS !== 'false';
+                  const flagEnabled = import.meta.env.VITE_ENABLE_AQUIFER_TEENS === 'true';
                   if (flagEnabled) {
                     setGoDeeper(true);
                   } else {
@@ -275,7 +275,7 @@ export function VerseOfTheWeek({ versionId, showStudyNotes = false }: { versionI
                 }`}
               >
                 <span>Go Deeper</span>
-                {import.meta.env.VITE_ENABLE_AQUIFER_TEENS === 'false' && (
+                {import.meta.env.VITE_ENABLE_AQUIFER_TEENS !== 'true' && (
                   <span className="text-[8px] bg-amber-500 text-white px-1.5 rounded-full font-black scale-90">SOON</span>
                 )}
               </button>
@@ -299,8 +299,7 @@ export function VerseOfTheWeek({ versionId, showStudyNotes = false }: { versionI
                   <StudyNote 
                     contentHtml={note.content_html} 
                     currentVersionId={overrideVersionId || versionId}
-                    showAttribution={true}
-                    attribution={note.resource_collection_attribution}
+                    showAttribution={false}
                     onNavigateToPassage={(newBook, newChapter, _, newVerse) => {
                       navigateToBible(newBook, newChapter, newVerse);
                     }}
