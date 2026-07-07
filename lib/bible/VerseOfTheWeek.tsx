@@ -164,14 +164,9 @@ export function VerseOfTheWeek({ versionId, showStudyNotes = false }: { versionI
     }
   }
 
-  // Filter notes based on toggle and specific verse
+  // Filter notes based on specific verse
   const filteredNotes = studyNotes.filter(note => {
-    // 1. Filter by tier
-    const noteTier = note.tier || 'basic';
-    const matchesTier = goDeeper ? noteTier === 'advanced' : noteTier === 'basic';
-    if (!matchesTier) return false;
-
-    // 2. Filter by specific verse
+    // 1. Filter by specific verse
     if (!note.usfm_start) return false;
     const noteRefParts = note.usfm_start.split(' '); // e.g. ["PRO", "19:17"]
     if (noteRefParts.length >= 2) {
