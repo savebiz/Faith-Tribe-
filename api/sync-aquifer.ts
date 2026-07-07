@@ -120,10 +120,7 @@ export default async function handler(req: any, res: any) {
   const authHeader = req.headers.authorization || '';
   const token = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : '';
 
-  const isAuth = hasCronHeader || reqApiKey === apiKey || token === apiKey;
-  if (!isAuth && process.env.NODE_ENV === 'production') {
-    return res.status(401).json({ error: 'Unauthorized call to Aquifer sync handler' });
-  }
+  let isAuth = hasCronHeader || reqApiKey === apiKey || token === apiKey;
 
   const supabaseUrl = process.env.VITE_SUPABASE_URL || '';
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || '';
@@ -135,6 +132,29 @@ export default async function handler(req: any, res: any) {
   const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
     auth: { autoRefreshToken: false, persistSession: false }
   });
+
+  // Verify if it is a logged in staff member
+  if (!isAuth && token) {
+    try {
+      const { data: { user }, error: userErr } = await supabaseAdmin.auth.getUser(token);
+      if (!userErr && user) {
+        const { data: staff } = await supabaseAdmin
+          .from('staff')
+          .select('role')
+          .eq('id', user.id)
+          .maybeSingle();
+        if (staff && ['super_admin', 'admin', 'editor'].includes(staff.role)) {
+          isAuth = true;
+        }
+      }
+    } catch (err) {
+      console.warn('Supabase token verification failed:', err);
+    }
+  }
+
+  if (!isAuth && process.env.NODE_ENV === 'production') {
+    return res.status(401).json({ error: 'Unauthorized call to Aquifer sync handler' });
+  }
 
   // Local collection metadata caching to avoid repeating collection fetches
   const collectionAttributionCache: Record<string, string> = {};
