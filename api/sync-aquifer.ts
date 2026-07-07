@@ -201,12 +201,49 @@ export default async function handler(req: any, res: any) {
         return false;
       }
 
+      let contentHtml = '';
+      if (Array.isArray(resource.content)) {
+        contentHtml = resource.content.map(p => {
+          if (typeof p === 'string') {
+            const trimmed = p.trim();
+            if (trimmed.startsWith('<p') || trimmed.startsWith('<div')) return trimmed;
+            return `<p class="mb-3 font-sans text-gray-700 text-sm leading-relaxed">${trimmed}</p>`;
+          }
+          return '';
+        }).join('\n');
+      } else if (typeof resource.content === 'string') {
+        const trimmed = resource.content.trim();
+        if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+          try {
+            const parsed = JSON.parse(trimmed);
+            if (Array.isArray(parsed)) {
+              contentHtml = parsed.map(p => {
+                if (typeof p === 'string') {
+                  const trimmedItem = p.trim();
+                  if (trimmedItem.startsWith('<p') || trimmedItem.startsWith('<div')) return trimmedItem;
+                  return `<p class="mb-3 font-sans text-gray-700 text-sm leading-relaxed">${trimmedItem}</p>`;
+                }
+                return '';
+              }).join('\n');
+            } else {
+              contentHtml = resource.content;
+            }
+          } catch (e) {
+            contentHtml = resource.content;
+          }
+        } else {
+          contentHtml = resource.content;
+        }
+      } else {
+        contentHtml = String(resource.content || '');
+      }
+
       const { data, error } = await supabaseAdmin.from('bible_study_notes').upsert({
         ref: parsedRef.ref,
         usfm_start: parsedRef.usfmStart,
         usfm_end: parsedRef.usfmEnd,
         title: resource.localizedName || resource.name,
-        content_html: resource.content, // HTML output format requested from API
+        content_html: contentHtml, // Cleaned HTML output format
         review_level: resource.reviewLevel,
         aquifer_resource_id: resource.id,
         aquifer_reference_id: resource.referenceId,

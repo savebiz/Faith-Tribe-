@@ -46,6 +46,42 @@ export function convertRefLyUrl(url: string, currentVersionId?: number): { href:
   return { href: url, isInternal: false };
 }
 
+export function cleanContentHtml(rawHtml: string): string {
+  if (!rawHtml) return '';
+  const trimmed = rawHtml.trim();
+  
+  if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        return parsed
+          .map(item => {
+            if (typeof item === 'string') {
+              const cleanedItem = item.trim();
+              if (cleanedItem.startsWith('<p') || cleanedItem.startsWith('<div')) {
+                return cleanedItem;
+              }
+              return `<p class="mb-3 font-sans text-gray-700 text-sm leading-relaxed">${cleanedItem}</p>`;
+            }
+            return '';
+          })
+          .join('\n');
+      }
+    } catch (e) {
+      // ignore parsing error, fallback below
+    }
+  }
+  
+  let result = rawHtml;
+  if (result.startsWith('["') && result.endsWith('"]')) {
+    result = result.substring(2, result.length - 2);
+  } else if (result.startsWith('[\'') && result.endsWith('\']')) {
+    result = result.substring(2, result.length - 2);
+  }
+  
+  return result;
+}
+
 export function StudyNote({
   contentHtml,
   currentVersionId,
@@ -56,10 +92,11 @@ export function StudyNote({
   
   // Sanitize and re-route links on render
   const processedHtml = useMemo(() => {
-    if (!contentHtml) return '';
+    const rawClean = cleanContentHtml(contentHtml);
+    if (!rawClean) return '';
 
     // Step 1: Clean HTML via DOMPurify
-    const clean = DOMPurify.sanitize(contentHtml);
+    const clean = DOMPurify.sanitize(rawClean);
 
     // Step 2: Use DOMParser to process links
     try {
