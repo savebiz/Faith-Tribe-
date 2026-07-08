@@ -10,6 +10,7 @@ import { ChapterSelector } from './ChapterSelector';
 import { ReaderSettings } from './ReaderSettings';
 
 const APPROVED_VERSIONS = [
+  { id: 1, label: 'King James Version (KJV)' },
   { id: 3034, label: 'Berean Standard Bible (BSB)' },
   { id: 1932, label: 'Free Bible Version (FBV)' },
   { id: 1588, label: 'Amplified Bible (AMP)' },
@@ -74,6 +75,46 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
   const [versionId, setVersionId] = useState(initial.versionId);
   const [isBottomPickerOpen, setIsBottomPickerOpen] = useState(false);
   const [approvedVersions, setApprovedVersions] = useState<{ id: number; label: string }[]>(APPROVED_VERSIONS);
+
+  const [kjvData, setKjvData] = useState<any>(null);
+  const [isKjvLoading, setIsKjvLoading] = useState(false);
+  const [kjvError, setKjvError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (versionId === 1) {
+      setIsKjvLoading(true);
+      setKjvError(null);
+      setKjvData(null);
+      
+      const normalizedBook = book.toUpperCase();
+      // Try short format first as we validated it works: /api/eng_kjv/GEN/1.json
+      fetch(`https://bible.helloao.org/api/eng_kjv/${normalizedBook}/${chapter}.json`)
+        .then(res => {
+          if (!res.ok) throw new Error(`Could not load KJV text for ${book} ${chapter}`);
+          return res.json();
+        })
+        .then(data => {
+          setKjvData(data);
+          setIsKjvLoading(false);
+        })
+        .catch(err => {
+          console.warn("HelloAO short URL failed, trying standard API structure:", err);
+          fetch(`https://bible.helloao.org/api/eng_kjv/books/${normalizedBook}/chapters/${chapter}.json`)
+            .then(res => {
+              if (!res.ok) throw new Error(`Could not load KJV text for ${book} ${chapter}`);
+              return res.json();
+            })
+            .then(data => {
+              setKjvData(data);
+              setIsKjvLoading(false);
+            })
+            .catch(err2 => {
+              setKjvError(err2.message || String(err2));
+              setIsKjvLoading(false);
+            });
+        });
+    }
+  }, [book, chapter, versionId]);
 
   useEffect(() => {
     async function loadVersionsAndDefaults() {
@@ -1101,7 +1142,47 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
                   '--reader-letter-spacing': isKidsMode ? '0.04em' : 'normal'
                 } as React.CSSProperties}
               >
-                <BibleReader.Content />
+                {versionId === 1 ? (
+                  isKjvLoading ? (
+                    <div className="flex flex-col items-center justify-center space-y-4 py-16">
+                      <Loader2 className="h-10 w-10 text-[#1CABB9] animate-spin" />
+                      <p className="text-sm font-bold text-gray-500">Loading King James Version...</p>
+                    </div>
+                  ) : kjvError ? (
+                    <div className="flex flex-col items-center justify-center space-y-3 py-12 max-w-md mx-auto text-center">
+                      <AlertTriangle size={36} className="text-red-500" />
+                      <p className="text-sm font-bold text-gray-700">{kjvError}</p>
+                      <p className="text-xs text-gray-400">Please choose another version or chapter combination.</p>
+                    </div>
+                  ) : kjvData?.chapter?.content ? (
+                    <div className="space-y-6 select-text max-w-none">
+                      {kjvData.chapter.content.map((verse: any, index: number) => {
+                        if (verse.type === 'verse') {
+                          // Clean content array from HelloAO
+                          const text = verse.content
+                            .filter((c: any) => typeof c === 'string')
+                            .join(' ');
+                          return (
+                            <p key={index} className="text-base sm:text-lg leading-relaxed text-gray-800 font-serif">
+                              <sup className="text-xs font-black text-[#1CABB9] mr-2 select-none">{verse.number}</sup>
+                              {text}
+                            </p>
+                          );
+                        }
+                        return null;
+                      })}
+                      <div className="mt-8 pt-4 border-t border-gray-100 text-[10px] text-gray-400 font-bold select-none text-center uppercase tracking-wider">
+                        King James Version (KJV) • Free Use Bible API
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-center py-12 text-gray-400 text-sm font-bold">
+                      No text available.
+                    </div>
+                  )
+                ) : (
+                  <BibleReader.Content />
+                )}
               </div>
             )}
 

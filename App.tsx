@@ -14,6 +14,9 @@ import { Toaster, toast } from 'sonner';
 import { VerseOfTheWeek } from './lib/bible/VerseOfTheWeek';
 import { BibleReaderView } from './lib/bible/BibleReaderView';
 import { StudyNote } from './components/StudyNote';
+import { KidsLibraryView } from './components/library/KidsLibraryView';
+import { TeensLibraryView } from './components/library/TeensLibraryView';
+import { TeachersLibraryView } from './components/library/TeachersLibraryView';
 import { parseScriptureReference } from './lib/bible/bookCodes';
 import { getCurriculumCache, saveCurriculumCache, fetchCustomVerse, updateCustomVerse, fetchStudyNotesForChapter, signInStaff, signOutStaff, getCurrentStaff, fetchBroadcastStatus, fetchContentItems, supabase, registerConvert, fetchConverts, fetchFollowUpTasks, toggleFollowUpTask, fetchActiveClassGoal, updateOrCreateClassGoal, isRealSupabase } from './lib/supabase';
 import { WEEKLY_FUN_ITEMS, WeeklyFunItem } from './lib/weeklyFunConfig';
@@ -122,12 +125,21 @@ const App: React.FC = () => {
 
     if (path.startsWith('/about')) {
       return { view: Audience.ABOUT, book: 'GEN', chapter: '1', versionId };
+    } else if (path.startsWith('/kids/library') || path === '/kids/library') {
+      localStorage.setItem('ft_current_zone', 'kids');
+      return { view: Audience.KIDS_LIBRARY, book: 'GEN', chapter: '1', versionId };
     } else if (path.startsWith('/kids')) {
       localStorage.setItem('ft_current_zone', 'kids');
       return { view: Audience.KIDS, book: 'GEN', chapter: '1', versionId };
+    } else if (path.startsWith('/teens/library') || path === '/teens/library') {
+      localStorage.setItem('ft_current_zone', 'teens');
+      return { view: Audience.TEENS_LIBRARY, book: 'GEN', chapter: '1', versionId };
     } else if (path.startsWith('/teens')) {
       localStorage.setItem('ft_current_zone', 'teens');
       return { view: Audience.TEENS, book: 'GEN', chapter: '1', versionId };
+    } else if (path.startsWith('/teachers/library') || path === '/teachers/library') {
+      localStorage.setItem('ft_current_zone', 'teachers');
+      return { view: Audience.TEACHERS_LIBRARY, book: 'GEN', chapter: '1', versionId };
     } else if (path.startsWith('/teachers')) {
       localStorage.setItem('ft_current_zone', 'teachers');
       return { view: Audience.TEACHERS, book: 'GEN', chapter: '1', versionId };
@@ -153,12 +165,24 @@ const App: React.FC = () => {
       path = '/kids';
       localStorage.setItem('ft_current_zone', 'kids');
     }
+    else if (view === Audience.KIDS_LIBRARY) {
+      path = '/kids/library';
+      localStorage.setItem('ft_current_zone', 'kids');
+    }
     else if (view === Audience.TEENS) {
       path = '/teens';
       localStorage.setItem('ft_current_zone', 'teens');
     }
+    else if (view === Audience.TEENS_LIBRARY) {
+      path = '/teens/library';
+      localStorage.setItem('ft_current_zone', 'teens');
+    }
     else if (view === Audience.TEACHERS) {
       path = '/teachers';
+      localStorage.setItem('ft_current_zone', 'teachers');
+    }
+    else if (view === Audience.TEACHERS_LIBRARY) {
+      path = '/teachers/library';
       localStorage.setItem('ft_current_zone', 'teachers');
     }
     else if (view === Audience.ADMIN) {
@@ -800,14 +824,46 @@ const App: React.FC = () => {
               </button>
             </div>
 
+            {/* Kids Library Teaser Banner */}
+            <div className="bg-gradient-to-r from-teal-500 to-emerald-500 p-6 sm:p-8 rounded-[2.5rem] shadow-lg border-b-4 border-teal-600 text-white text-left flex flex-col sm:flex-row items-center justify-between gap-6 mb-6">
+              <div className="space-y-2">
+                <span className="bg-white/20 text-white text-[10px] font-black uppercase px-3 py-1 rounded-full tracking-wider">
+                  NEW LIBRARY
+                </span>
+                <h3 className="text-xl sm:text-2xl font-black uppercase tracking-wide">
+                  Explore Kids Tribe Library
+                </h3>
+                <p className="text-xs text-teal-100 font-bold max-w-sm leading-relaxed">
+                  Unlock beautiful illustrated storybooks, worship songs, and coloring activities.
+                </p>
+              </div>
+              <button
+                onClick={() => navigateToView(Audience.KIDS_LIBRARY)}
+                className="flex items-center gap-2 bg-white text-teal-800 font-black px-6 py-3.5 rounded-2xl text-xs uppercase tracking-wider hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer shrink-0"
+              >
+                <span>OPEN LIBRARY</span>
+                <ArrowRight size={14} />
+              </button>
+            </div>
+
             {/* This Week's Fun Section */}
             <div className="py-6">
-              <h2 className="text-2xl font-black mb-6 tracking-tight text-amber-500 flex items-center gap-2 font-display text-left">
-                <span className="w-1.5 h-6 rounded-full bg-amber-400 opacity-70"></span>
-                This Week's Fun
-              </h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-black tracking-tight text-amber-500 flex items-center gap-2 font-display text-left">
+                  <span className="w-1.5 h-6 rounded-full bg-amber-400 opacity-70"></span>
+                  Featured Weekly Activities
+                </h2>
+                <button 
+                  onClick={() => navigateToView(Audience.KIDS_LIBRARY)}
+                  className="text-xs font-black text-amber-500 hover:text-amber-600 uppercase tracking-wider flex items-center gap-1 cursor-pointer"
+                >
+                  <span>SEE ALL ({weeklyFunItems.length})</span>
+                  <ChevronRight size={14} />
+                </button>
+              </div>
+              
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {weeklyFunItems.map((item) => {
+                {weeklyFunItems.slice(0, 2).map((item) => {
                   const badgeText = item.type === 'video' ? 'Watch Video' : item.type === 'reading' ? 'Read Story' : item.type === 'writing' ? 'Writing Activity' : 'Coloring Paint';
                   const badgeClass = item.type === 'video' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : item.type === 'reading' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' : item.type === 'writing' ? 'bg-purple-500/10 text-purple-600 border border-purple-500/20' : 'bg-teal-500/10 text-teal-600 border border-teal-500/20';
                   
@@ -1041,17 +1097,53 @@ const App: React.FC = () => {
               </div>
             </div>
 
+            {/* Teens Library Teaser Card */}
+            <div className="bg-gradient-to-r from-violet-950 via-[#1C1642] to-fuchsia-950 p-6 sm:p-8 rounded-3xl border border-violet-500/20 shadow-xl text-left flex flex-col sm:flex-row items-center justify-between gap-6 mb-6">
+              <div className="space-y-1.5">
+                <span className="bg-violet-500/25 border border-violet-500/30 text-violet-300 text-[9px] font-black uppercase px-2.5 py-0.5 rounded-lg tracking-wider">
+                  COLLECTION
+                </span>
+                <h3 className="text-xl font-black text-white">
+                  TEENS DISCUSSION LIBRARY
+                </h3>
+                <p className="text-xs text-gray-400 font-bold max-w-sm leading-relaxed">
+                  Search topics like Doubt, Identity, and Friendships. Includes inline study notes.
+                </p>
+              </div>
+              <button
+                onClick={() => navigateToView(Audience.TEENS_LIBRARY)}
+                className="flex items-center gap-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-black px-5 py-3 rounded-2xl text-xs uppercase tracking-wider transition-all hover:scale-105 active:scale-95 shadow-md cursor-pointer shrink-0"
+              >
+                <span>BROWSE LIBRARY</span>
+                <ArrowRight size={14} />
+              </button>
+            </div>
+
             {isLoadingTeens ? (
               <div className="bg-gray-900/60 p-12 rounded-3xl border border-gray-800 text-center">
                 <p className="text-sm text-gray-400 animate-pulse">Loading latest drops...</p>
               </div>
             ) : (
-              <ContentSection 
-                title="Latest Drops" 
-                items={teensContentItems} 
-                colorTheme="text-emerald-400" 
-                onItemClick={(item) => setSelectedTeensItem(item)}
-              />
+              <div className="space-y-4">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-black uppercase tracking-wider text-violet-400">
+                    Latest Drops
+                  </h3>
+                  <button 
+                    onClick={() => navigateToView(Audience.TEENS_LIBRARY)}
+                    className="text-xs font-black text-gray-400 hover:text-white uppercase tracking-wider flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>EXPLORE ALL ({teensContentItems.length})</span>
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+                <ContentSection 
+                  title="" 
+                  items={teensContentItems.slice(0, 2)} 
+                  colorTheme="text-emerald-400" 
+                  onItemClick={(item) => setSelectedTeensItem(item)}
+                />
+              </div>
             )}
 
             {/* Bible Verse Spotlight */}
@@ -1475,154 +1567,39 @@ const App: React.FC = () => {
 
             </div>
 
-            {/* Phase 3: Aquifer-powered Synced Curriculum Library */}
-            <div className="bg-white p-6 sm:p-8 rounded-[2rem] border border-gray-150 shadow-sm space-y-6">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h3 className="text-2xl font-black text-teal-800 tracking-tight flex items-center gap-2">
-                    <BookOpen size={24} className="text-teal-650" /> Curriculum Library
-                    <span className="text-[9px] font-black tracking-widest text-[#1CABB9] bg-[#1CABB9]/10 px-2.5 py-0.5 rounded-full border border-[#1CABB9]/25 animate-pulse">AQUIFER POWERED</span>
-                  </h3>
-                  <p className="text-xs text-gray-500 mt-1">Browse study resources synchronized directly from the local database</p>
-                </div>
-
-                <div className="flex bg-gray-100 p-1 rounded-xl self-start sm:self-auto">
-                  <button
-                    onClick={() => setCurriculumTrack('kids')}
-                    className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${curriculumTrack === 'kids' ? 'bg-teal-700 text-white shadow-sm' : 'text-gray-655 hover:text-teal-800'}`}
-                  >
-                    Kids Zone (2-12)
-                  </button>
-                  <button
-                    onClick={() => setCurriculumTrack('teens')}
-                    className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${curriculumTrack === 'teens' ? 'bg-teal-700 text-white shadow-sm' : 'text-gray-655 hover:text-teal-800'}`}
-                  >
-                    Teens Tribe (13-15)
-                  </button>
-                </div>
-              </div>
-
-              <form onSubmit={handleSearchCurriculum} className="flex gap-2">
-                <input
-                  type="text"
-                  required
-                  value={curriculumSearchText}
-                  onChange={e => setCurriculumSearchText(e.target.value)}
-                  placeholder={`Search scripture or topic for ${curriculumTrack === 'kids' ? 'Kids' : 'Teens'} curriculum...`}
-                  className="flex-grow text-xs border border-gray-250 rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
-                />
-                <button
-                  type="submit"
-                  disabled={isLoadingCurriculum}
-                  className="bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all cursor-pointer shadow-sm disabled:opacity-50"
-                >
-                  {isLoadingCurriculum ? 'Searching...' : 'Search'}
-                </button>
-              </form>
-
-              {curriculumResults.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {curriculumResults.map((item, idx) => (
-                    <div key={idx} className="p-4 bg-gray-50 border border-gray-150 rounded-2xl flex flex-col justify-between">
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-[9px] font-mono bg-teal-100 text-teal-700 px-2 py-0.5 rounded-full">{item.usfm_start || item.ref}</span>
-                          <span className="text-[10px] text-gray-400 font-bold uppercase">{item.tier || 'Curriculum'}</span>
-                        </div>
-                        <h4 className="font-bold text-sm text-teal-900">{item.title}</h4>
-                        <div className="text-xs text-gray-600 mt-2 line-clamp-3 leading-relaxed font-sans prose prose-sm" dangerouslySetInnerHTML={{ __html: item.content_html }}></div>
-                      </div>
-                      <div className="mt-4 pt-3 border-t border-gray-200/60 flex items-center justify-between text-[10px] text-gray-400">
-                        <span>Tyndale Open Study Notes</span>
-                        <button
-                          onClick={() => {
-                            setStudyNotesResults([item]);
-                            setStudyNotesQuery(item.usfm_start || item.ref);
-                            setStudyNotesSearched(true);
-                            toast.success("Loaded note in detail search viewer below! 📖");
-                          }}
-                          className="text-teal-700 hover:underline font-black cursor-pointer"
-                        >
-                          View Details &rarr;
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : curriculumSearchSearched && !isLoadingCurriculum ? (
-                <p className="text-xs italic text-gray-400 text-center py-4">No specific curriculum matches found in this search query.</p>
-              ) : (
-                <div className="p-6 bg-teal-50/20 border border-dashed border-teal-200 rounded-2xl text-center text-xs text-teal-800">
-                  Type a reference or topic to view corresponding study guides, lessons, and tools.
-                </div>
-              )}
-            </div>
-
-            {/* Bible Study Notes Search Panel for Teachers */}
-            <div className="bg-white p-6 sm:p-8 rounded-[2rem] border border-gray-150 shadow-sm space-y-4 text-left animate-in fade-in duration-300">
-              <h3 className="text-xl font-black text-teal-800 tracking-tight flex items-center gap-2">
-                <BookOpen size={22} className="text-teal-650" /> Lesson Preparation Study Notes
-              </h3>
-              <p className="text-xs text-gray-500">
-                Search any book, chapter, or verse (e.g. <code className="bg-gray-50 px-1 py-0.5 rounded text-teal-755 font-bold font-mono">John 3:16</code> or <code className="bg-gray-50 px-1 py-0.5 rounded text-teal-755 font-bold font-mono">Luke 15</code>) to load contextual study notes from the Tyndale collection.
-              </p>
-
-              <form onSubmit={handleSearchStudyNotes} className="flex gap-2">
-                <input
-                  type="text"
-                  required
-                  value={studyNotesQuery}
-                  onChange={e => setStudyNotesQuery(e.target.value)}
-                  placeholder="e.g. John 3:16"
-                  className="flex-grow text-xs border border-gray-255 rounded-xl px-4 py-2.5 focus:outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
-                />
-                <button
-                  type="submit"
-                  disabled={isLoadingNotes}
-                  className="bg-teal-700 hover:bg-teal-800 text-white font-bold text-xs px-5 py-2.5 rounded-xl transition-all cursor-pointer shadow-sm disabled:opacity-50"
-                >
-                  {isLoadingNotes ? 'Loading...' : 'Find Notes'}
-                </button>
-              </form>
-
-              {studyNotesResults.length > 0 && (
-                <div className="space-y-4 max-h-[300px] overflow-y-auto border border-gray-100 rounded-2xl p-4 bg-gray-50/50">
-                  {studyNotesResults.map((note, index) => (
-                    <div key={index} className="space-y-2 border-b border-gray-100 pb-3 last:border-0 last:pb-0">
-                      <h4 className="font-sans font-bold text-sm text-teal-800 flex items-center gap-1.5 text-left">
-                        <span className="bg-teal-100 text-teal-700 text-[10px] px-2 py-0.5 rounded-md font-mono">{note.usfm_start || note.ref}</span>
-                        {note.title}
-                      </h4>
-                      <div className="text-xs text-gray-700 leading-relaxed font-sans prose prose-sm max-w-none">
-                        <StudyNote 
-                          contentHtml={note.content_html} 
-                          showAttribution={true}
-                          attribution={note.resource_collection_attribution}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                  
-                  {!studyNotesResults.some(note => note.source === 'aquifer_api') && (
-                    <div className="text-[10px] text-gray-400 italic pt-2 mt-2 border-t border-gray-100 text-left">
-                      Tyndale Open Study Notes &copy; 2019 Tyndale House Publishers. Used under CC BY-SA 4.0.
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {studyNotesSearched && studyNotesResults.length === 0 && !isLoadingNotes && (
-                <p className="text-xs italic text-gray-400 text-center py-2">
-                  No study notes found for this reference. Please check your spelling and formatting (e.g. John 3:16).
+            {/* Teachers Library Teaser Banner */}
+            <div className="bg-gradient-to-r from-teal-800 to-cyan-900 p-6 sm:p-8 rounded-[2rem] shadow-lg border-b-4 border-teal-950 text-white text-left flex flex-col sm:flex-row items-center justify-between gap-6 mb-6">
+              <div className="space-y-2">
+                <span className="bg-white/20 text-white text-[9px] font-black uppercase px-3 py-1 rounded-full tracking-wider border border-white/10">
+                  NEW STUDY ENGINE
+                </span>
+                <h3 className="text-xl sm:text-2xl font-black uppercase tracking-wide">
+                  Teachers Resource Library
+                </h3>
+                <p className="text-xs text-teal-100 font-bold max-w-sm leading-relaxed">
+                  Access lesson plans, student guides, and commentaries by Matthew Henry, Adam Clarke, and Aquifer.
                 </p>
-              )}
+              </div>
+              <button
+                onClick={() => navigateToView(Audience.TEACHERS_LIBRARY)}
+                className="flex items-center gap-2 bg-white text-teal-900 font-black px-6 py-3.5 rounded-2xl text-xs uppercase tracking-wider hover:scale-105 active:scale-95 transition-all shadow-md cursor-pointer shrink-0"
+              >
+                <span>OPEN RESOURCE BROWSER</span>
+                <ArrowRight size={14} />
+              </button>
             </div>
 
             {/* Dynamic, Auto-populated Evangelism Resources */}
             <div className="space-y-4">
               <div className="flex justify-between items-center">
                 <h3 className="text-2xl font-black text-teal-800 tracking-tight">Evangelism Resources</h3>
-                <span className="text-[10px] text-gray-400 italic font-medium">Auto-populated from Aquifer sync</span>
+                <button 
+                  onClick={() => navigateToView(Audience.TEACHERS_LIBRARY)}
+                  className="text-xs font-black text-teal-700 hover:text-teal-800 uppercase tracking-wider flex items-center gap-1 cursor-pointer"
+                >
+                  <span>SEE ALL IN LIBRARY</span>
+                  <ChevronRight size={14} />
+                </button>
               </div>
               {isLoadingEvangelism ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1631,7 +1608,7 @@ const App: React.FC = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {evangelismResources.map((res, i) => (
+                  {evangelismResources.slice(0, 2).map((res, i) => (
                     <div key={i} className="p-5 bg-white border border-gray-150 rounded-2xl hover:border-teal-500 transition-all shadow-sm flex flex-col justify-between">
                       <div>
                         <div className="flex justify-between items-start mb-2">
@@ -1643,13 +1620,8 @@ const App: React.FC = () => {
                       <div className="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between text-[10px] text-teal-750 font-bold">
                         <span>Tyndale Guide Collection</span>
                         <button
-                          onClick={() => {
-                            setStudyNotesResults([res]);
-                            setStudyNotesQuery(res.usfm_start || res.ref);
-                            setStudyNotesSearched(true);
-                            toast.success("Loaded note in detail search viewer below! 📖");
-                          }}
-                          className="hover:underline font-black cursor-pointer"
+                          onClick={() => navigateToView(Audience.TEACHERS_LIBRARY)}
+                          className="hover:underline font-black cursor-pointer text-teal-700"
                         >
                           Read Guide &rarr;
                         </button>
@@ -1978,7 +1950,9 @@ const App: React.FC = () => {
         {currentView === Audience.HOME && <HomeView />}
         {currentView === Audience.ABOUT && <AboutView />}
         {currentView === Audience.KIDS && <KidsView />}
+        {currentView === Audience.KIDS_LIBRARY && <KidsLibraryView onBack={() => navigateToView(Audience.KIDS)} />}
         {currentView === Audience.TEENS && <TeensView />}
+        {currentView === Audience.TEENS_LIBRARY && <TeensLibraryView onBack={() => navigateToView(Audience.TEENS)} />}
         {currentView === Audience.TEACHERS && !isTeacherLoggedIn && (
           <div className="min-h-[100dvh] bg-gray-50 flex flex-col justify-center py-6 sm:px-6 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-md px-4">
@@ -2044,6 +2018,7 @@ const App: React.FC = () => {
           </div>
         )}
         {currentView === Audience.TEACHERS && isTeacherLoggedIn && <TeachersView />}
+        {currentView === Audience.TEACHERS_LIBRARY && isTeacherLoggedIn && <TeachersLibraryView onBack={() => navigateToView(Audience.TEACHERS)} />}
         {currentView === Audience.BIBLE && <BibleReaderView onBack={() => navigateToView(Audience.HOME)} />}
       </main>
 

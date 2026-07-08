@@ -319,6 +319,7 @@ CREATE POLICY "content staff manage zone defaults"
 -- Seed default Bible Versions
 INSERT INTO bible_versions (bible_id, label, short_code, display_order, is_active, is_verified, last_verified_at)
 VALUES 
+  (1, 'King James Version (KJV)', 'KJV', 0, true, true, now()),
   (3034, 'Berean Standard Bible (BSB)', 'BSB', 1, true, true, now()),
   (1932, 'Free Bible Version (FBV)', 'FBV', 2, true, true, now()),
   (1588, 'Amplified Bible (AMP)', 'AMP', 3, true, true, now()),
@@ -620,5 +621,47 @@ CREATE POLICY "allow public read aquifer_sync_state" ON aquifer_sync_state FOR S
 
 DROP POLICY IF EXISTS "allow anyone manage aquifer_sync_state" ON aquifer_sync_state;
 CREATE POLICY "allow anyone manage aquifer_sync_state" ON aquifer_sync_state FOR ALL USING (true) WITH CHECK (true);
+
+-- Create bible_commentaries table
+CREATE TABLE IF NOT EXISTS bible_commentaries (
+  id serial PRIMARY KEY,
+  commentary_id text NOT NULL,      -- e.g. "adam-clarke"
+  commentary_name text NOT NULL,
+  license_url text NOT NULL,        -- REQUIRED, shown per commentary
+  book text NOT NULL,
+  chapter integer NOT NULL,
+  content text NOT NULL,            -- HTML/formatted content
+  last_synced_at timestamptz DEFAULT now(),
+  UNIQUE (commentary_id, book, chapter)
+);
+
+-- Enable RLS for bible_commentaries
+ALTER TABLE bible_commentaries ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "public read commentaries" ON bible_commentaries;
+CREATE POLICY "public read commentaries" ON bible_commentaries FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "staff manage commentaries" ON bible_commentaries;
+CREATE POLICY "staff manage commentaries" ON bible_commentaries FOR ALL USING (current_staff_role() IN ('super_admin', 'content_editor'));
+
+-- Create bloom_books table
+CREATE TABLE IF NOT EXISTS bloom_books (
+  id serial PRIMARY KEY,
+  title text NOT NULL,
+  cover_url text,
+  pdf_url text,
+  description text,
+  age_group text, -- e.g. "Toddlers", "5-7", "8-11"
+  created_at timestamptz DEFAULT now()
+);
+
+-- Enable RLS for bloom_books
+ALTER TABLE bloom_books ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "public read bloom_books" ON bloom_books;
+CREATE POLICY "public read bloom_books" ON bloom_books FOR SELECT USING (true);
+
+DROP POLICY IF EXISTS "staff manage bloom_books" ON bloom_books;
+CREATE POLICY "staff manage bloom_books" ON bloom_books FOR ALL USING (current_staff_role() IN ('super_admin', 'content_editor'));
 
 

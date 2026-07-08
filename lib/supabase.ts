@@ -92,6 +92,7 @@ if (typeof window !== 'undefined') {
 
   if (!localStorage.getItem('ft_mock_bible_versions')) {
     const defaultVersions: BibleVersion[] = [
+      { bible_id: 1, label: 'King James Version (KJV)', short_code: 'KJV', display_order: 0, is_active: true, is_verified: true },
       { bible_id: 3034, label: 'Berean Standard Bible (BSB)', short_code: 'BSB', display_order: 1, is_active: true, is_verified: true },
       { bible_id: 1932, label: 'Free Bible Version (FBV)', short_code: 'FBV', display_order: 2, is_active: true, is_verified: true },
       { bible_id: 1588, label: 'Amplified Bible (AMP)', short_code: 'AMP', display_order: 3, is_active: true, is_verified: true },
@@ -112,6 +113,30 @@ if (typeof window !== 'undefined') {
       teachers: 3034
     };
     localStorage.setItem('ft_mock_zone_defaults', JSON.stringify(defaultDefaults));
+  }
+
+  if (!localStorage.getItem('ft_mock_bloom_books')) {
+    const initialBloomBooks = [
+      { id: 1, title: 'The Story of Creation', cover_url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=400&q=80', description: 'A beautifully illustrated storybook showing the seven days of Creation in simple words.', age_group: 'Toddlers' },
+      { id: 2, title: 'Noah and the Big Boat', cover_url: 'https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&w=400&q=80', description: 'Follow Noah as he builds the ark and cares for all the animals during the great flood.', age_group: '5-7' },
+      { id: 3, title: 'David and the Giant', cover_url: 'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=400&q=80', description: 'How a young shepherd boy defeated a giant champion with just a sling and absolute faith.', age_group: '8-11' }
+    ];
+    localStorage.setItem('ft_mock_bloom_books', JSON.stringify(initialBloomBooks));
+  }
+
+  if (!localStorage.getItem('ft_mock_bible_commentaries')) {
+    const initialCommentaries = [
+      {
+        id: 1,
+        commentary_id: 'matthew-henry',
+        commentary_name: 'Matthew Henry Bible Commentary',
+        license_url: 'https://creativecommons.org/publicdomain/mark/1.0/',
+        book: 'MAT',
+        chapter: 19,
+        content: '<div class="commentary-verse" data-verse="26"><h5 class="text-xs font-bold text-teal-600 mb-2">Verse 26</h5><p class="text-sm text-gray-700 leading-relaxed">With men this is impossible, but with God all things are possible. God can work a saving change in the hearts of the wealthiest. His grace is almighty and sufficient for all things.</p></div>'
+      }
+    ];
+    localStorage.setItem('ft_mock_bible_commentaries', JSON.stringify(initialCommentaries));
   }
 }
 
@@ -363,6 +388,27 @@ export interface BibleStudyNote {
   resource_collection_code?: string;
   resource_collection_attribution?: string;
   last_synced_at?: string;
+}
+
+export interface BibleCommentary {
+  id?: number;
+  commentary_id: string;      // e.g. "adam-clarke"
+  commentary_name: string;
+  license_url: string;
+  book: string;
+  chapter: number;
+  content: string;            // HTML/formatted content
+  last_synced_at?: string;
+}
+
+export interface BloomBook {
+  id?: number;
+  title: string;
+  cover_url?: string;
+  pdf_url?: string;
+  description?: string;
+  age_group?: string;
+  created_at?: string;
 }
 
 const USFM_BOOK_ORDER = [
@@ -1666,6 +1712,74 @@ export async function updateOrCreateClassGoal(
   };
   localStorage.setItem('ft_mock_class_goal', JSON.stringify(newGoal));
   return newGoal;
+}
+
+export async function fetchCommentariesForChapter(
+  book: string,
+  chapter: number,
+  commentaryId?: string
+): Promise<BibleCommentary[]> {
+  const normalizedBook = book.toUpperCase();
+  
+  if (isRealSupabase && supabase) {
+    try {
+      let query = supabase
+        .from('bible_commentaries')
+        .select('*')
+        .eq('book', normalizedBook)
+        .eq('chapter', chapter);
+        
+      if (commentaryId) {
+        query = query.eq('commentary_id', commentaryId);
+      }
+      
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    } catch (e) {
+      console.warn("Supabase fetchCommentariesForChapter failed, falling back to local files:", e);
+    }
+  }
+
+  // Local storage fallback
+  try {
+    let list: BibleCommentary[] = JSON.parse(localStorage.getItem('ft_mock_bible_commentaries') || '[]');
+    list = list.filter(c => c.book === normalizedBook && c.chapter === Number(chapter));
+    if (commentaryId) {
+      list = list.filter(c => c.commentary_id === commentaryId);
+    }
+    return list;
+  } catch (e) {
+    console.warn("Failed to load local commentaries cache:", e);
+  }
+
+  return [];
+}
+
+export async function fetchBloomBooks(): Promise<BloomBook[]> {
+  if (isRealSupabase && supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('bloom_books')
+        .select('*')
+        .order('created_at', { ascending: false });
+        
+      if (error) throw error;
+      return data || [];
+    } catch (e) {
+      console.warn("Supabase fetchBloomBooks failed, falling back to local files:", e);
+    }
+  }
+
+  // Local storage fallback
+  try {
+    const list: BloomBook[] = JSON.parse(localStorage.getItem('ft_mock_bloom_books') || '[]');
+    return list;
+  } catch (e) {
+    console.warn("Failed to load local bloom books cache:", e);
+  }
+
+  return [];
 }
 
 
