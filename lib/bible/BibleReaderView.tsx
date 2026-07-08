@@ -1132,6 +1132,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
                   </div>
                 )}
               </div>
+            ) : (
               <div 
                 className="bible-text-content-area"
                 style={{
