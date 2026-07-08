@@ -200,6 +200,33 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
     { code: 'hau', label: 'Hausa (HCB)' }
   ];
 
+  // Keep KJV label in sync in the floating toolbar
+  useEffect(() => {
+    const updateToolbarLabel = () => {
+      const elements = document.querySelectorAll('.desktop-floating-nav, .mobile-floating-nav');
+      elements.forEach(nav => {
+        const buttons = nav.querySelectorAll('button');
+        buttons.forEach(btn => {
+          if (btn.textContent === 'FBV') {
+            if (versionId === 1) {
+              btn.textContent = 'KJV';
+            }
+          } else if (btn.textContent === 'KJV') {
+            if (versionId !== 1) {
+              const currentVersionCode = APPROVED_VERSIONS.find(v => v.id === versionId)?.label.match(/\(([^)]+)\)/)?.[1] || 'AMP';
+              btn.textContent = currentVersionCode;
+            }
+          }
+        });
+      });
+    };
+
+    updateToolbarLabel();
+    const observer = new MutationObserver(updateToolbarLabel);
+    observer.observe(document.body, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, [versionId, book, chapter]);
+
   // Auto reset selection in listen mode
   useEffect(() => {
     if (isListenMode) {
@@ -1146,10 +1173,6 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
                 <div className="flex flex-col items-center justify-center text-center py-6 mb-8 border-b border-[#372f58]/10 animate-in fade-in duration-300 relative select-none">
                   {/* Subtle decorative background gradient glow */}
                   <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-40 h-40 bg-gradient-to-br from-[#1CABB9]/10 to-[#372f58]/5 rounded-full blur-2xl pointer-events-none"></div>
-                  
-                  <span className="relative z-10 bg-gradient-to-r from-[#1CABB9] to-indigo-650 text-white text-[10px] font-black uppercase px-3.5 py-1 rounded-full tracking-wider shadow-sm mb-3">
-                    {APPROVED_VERSIONS.find(v => v.id === versionId)?.label || 'Scripture'}
-                  </span>
                   
                   <h2 className="relative z-10 text-3xl sm:text-4xl font-black text-[#372f58] tracking-tight font-display uppercase">
                     {BOOK_NAMES[book] || book}
