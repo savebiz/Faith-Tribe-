@@ -225,3 +225,15 @@
   opacity: 0.65 !important;
 }
 
+/* Hide YouVersion's default book name and chapter titles to prevent double header */
+.yv-reader-wrapper .chapter .label,
+.yv-reader-wrapper [data-slot="chapter-label"],
+.yv-reader-wrapper .chapter-label,
+.yv-reader-wrapper [class*="chapter-label"],
+.yv-reader-wrapper [class*="ChapterLabel"],
+.yv-reader-wrapper .heading,
+.yv-reader-wrapper h1.chapter-label {
+  display: none !important;
+}
+
+

@@ -1132,7 +1132,6 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
                   </div>
                 )}
               </div>
-            ) : (
               <div 
                 className="bible-text-content-area"
                 style={{
@@ -1142,6 +1141,28 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
                   '--reader-letter-spacing': isKidsMode ? '0.04em' : 'normal'
                 } as React.CSSProperties}
               >
+                {/* Premium Custom Book & Chapter Header */}
+                <div className="flex flex-col items-center justify-center text-center py-6 mb-8 border-b border-[#372f58]/10 animate-in fade-in duration-300 relative select-none">
+                  {/* Subtle decorative background gradient glow */}
+                  <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-40 h-40 bg-gradient-to-br from-[#1CABB9]/10 to-[#372f58]/5 rounded-full blur-2xl pointer-events-none"></div>
+                  
+                  <span className="relative z-10 bg-gradient-to-r from-[#1CABB9] to-indigo-650 text-white text-[10px] font-black uppercase px-3.5 py-1 rounded-full tracking-wider shadow-sm mb-3">
+                    {APPROVED_VERSIONS.find(v => v.id === versionId)?.label || 'Scripture'}
+                  </span>
+                  
+                  <h2 className="relative z-10 text-3xl sm:text-4xl font-black text-[#372f58] tracking-tight font-display uppercase">
+                    {BOOK_NAMES[book] || book}
+                  </h2>
+                  
+                  <div className="relative z-10 flex items-center justify-center gap-2.5 mt-2">
+                    <span className="w-6 h-[1.5px] bg-gradient-to-r from-transparent to-[#1CABB9]/60 rounded-full"></span>
+                    <span className="text-base font-extrabold text-gray-500 font-mono tracking-wide uppercase">
+                      Chapter {chapter}
+                    </span>
+                    <span className="w-6 h-[1.5px] bg-gradient-to-r from-[#1CABB9]/60 to-transparent rounded-full"></span>
+                  </div>
+                </div>
+
                 {versionId === 1 ? (
                   isKjvLoading ? (
                     <div className="flex flex-col items-center justify-center space-y-4 py-16">
@@ -1171,9 +1192,6 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
                         }
                         return null;
                       })}
-                      <div className="mt-8 pt-4 border-t border-gray-100 text-[10px] text-gray-400 font-bold select-none text-center uppercase tracking-wider">
-                        King James Version (KJV) • Free Use Bible API
-                      </div>
                     </div>
                   ) : (
                     <div className="text-center py-12 text-gray-400 text-sm font-bold">
