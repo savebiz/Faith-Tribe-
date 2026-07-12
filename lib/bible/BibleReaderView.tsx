@@ -499,26 +499,30 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
 
   // Apply Highlight and Selection Styling via MutationObserver
   const applyHighlightsAndStyles = () => {
-    // Hide YouVersion default book/chapter headers dynamically (bypassing obfuscated/CSS-module class names)
+    // Safely hide YouVersion default book/chapter headers.
+    // Only target LEAF elements (no children elements) whose trimmed text
+    // is exactly the book name or chapter number — this avoids hiding containers.
     const readerContainer = document.querySelector('.yv-reader-wrapper');
     if (readerContainer) {
       const bookName = BOOK_NAMES[book] || book;
       const bookNameLower = bookName.toLowerCase();
-      const chapterLower = String(chapter).toLowerCase();
-      
+      const chapterStr = String(chapter);
+
       const allEls = readerContainer.querySelectorAll('*');
       allEls.forEach((el) => {
-        const text = el.textContent?.trim();
+        // Only consider leaf nodes (elements with NO child elements)
+        if (el.children.length > 0) return;
+
+        const text = el.textContent?.trim() ?? '';
         if (!text) return;
-        const textLower = text.toLowerCase();
-        
-        if (textLower === bookNameLower || textLower === chapterLower) {
-          // Double-check this is a header and not a verse or verse label
-          const isVerse = el.closest('.yv-v') || el.classList.contains('yv-v') || el.closest('[class*="verse"]') || el.closest('[class*="Verse"]');
-          const isLabel = el.closest('.yv-v-label') || el.closest('[class*="label"]') || el.closest('[class*="Label"]');
-          const isInteractive = el.tagName === 'SUP' || el.tagName === 'SUB' || el.tagName === 'A' || el.tagName === 'BUTTON';
-          
-          if (!isVerse && !isLabel && !isInteractive) {
+
+        const isBookMatch = text.toLowerCase() === bookNameLower;
+        const isChapterMatch = text === chapterStr;
+
+        if (isBookMatch || isChapterMatch) {
+          // Don't hide verse numbers (sup/span inside .yv-v)
+          const isInsideVerse = el.closest('.yv-v');
+          if (!isInsideVerse) {
             (el as HTMLElement).style.setProperty('display', 'none', 'important');
           }
         }
