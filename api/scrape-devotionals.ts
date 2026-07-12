@@ -22,11 +22,33 @@ export default async function handler(req: any, res: any) {
     auth: { autoRefreshToken: false, persistSession: false }
   });
 
-  // Verify auth (Vercel Cron header or token)
+  // Verify auth: Vercel Cron header, service key, or authenticated staff member JWT
   const hasCronHeader = !!req.headers['x-vercel-cron'];
   const authHeader = req.headers.authorization || '';
   const token = authHeader.startsWith('Bearer ') ? authHeader.substring(7) : '';
-  const isAuth = hasCronHeader || token === supabaseServiceKey;
+  const isServiceKeyAuth = token === supabaseServiceKey;
+
+  let isAuth = hasCronHeader || isServiceKeyAuth;
+
+  // If not cron or service key, try to verify as a staff JWT from the admin panel
+  if (!isAuth && token) {
+    try {
+      const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token);
+      if (user && !userError) {
+        // Confirm user is a staff member
+        const { data: staffRecord } = await supabaseAdmin
+          .from('staff')
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (staffRecord) {
+          isAuth = true;
+        }
+      }
+    } catch (e) {
+      // JWT verification failed, isAuth stays false
+    }
+  }
 
   if (!isAuth && process.env.NODE_ENV === 'production') {
     return res.status(401).json({ error: 'Unauthorized call to scrape devotionals' });

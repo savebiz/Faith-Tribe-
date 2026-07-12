@@ -94,10 +94,15 @@ export const AdminDevotionalsView: React.FC<{ currentStaff: StaffMember }> = ({ 
   const handleScrapeToday = async () => {
     setScraping(true);
     try {
+      // Get the current user's session token for server-side auth verification
+      const { data: { session } } = await supabase!.auth.getSession();
+      const accessToken = session?.access_token || '';
+
       const res = await fetch('/api/scrape-devotionals', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {})
         }
       });
       const data = await res.json();
@@ -117,10 +122,14 @@ export const AdminDevotionalsView: React.FC<{ currentStaff: StaffMember }> = ({ 
   const handleGenerateMedia = async (id: string) => {
     setGeneratingMediaId(id);
     try {
+      const { data: { session } } = await supabase!.auth.getSession();
+      const accessToken = session?.access_token || '';
+
       const res = await fetch(`/api/generate-devotional-video?devotionalId=${id}`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {})
         }
       });
       const data = await res.json();
