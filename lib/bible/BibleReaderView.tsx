@@ -499,77 +499,39 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
 
   // Apply Highlight and Selection Styling via MutationObserver
   const applyHighlightsAndStyles = () => {
-    // Safely hide YouVersion default book/chapter headers AND their empty ancestor
-    // containers, so that no residual padding/margin space is left behind.
+    // ── Positional approach to hide YouVersion's internal book/chapter header ──
+    // Instead of matching text (which is fragile and can accidentally match verse
+    // numbers), we find the first actual verse element (.yv-v) and hide every
+    // sibling container that appears BEFORE it in the DOM tree.
+    // This is safe for all versions — it never touches verse content.
     const readerContainer = document.querySelector('.yv-reader-wrapper');
     if (readerContainer) {
-      const bookName = BOOK_NAMES[book] || book;
-      const bookNameLower = bookName.toLowerCase();
-      const chapterStr = String(chapter);
-
-      /**
-       * hideWithEmptyAncestors:
-       * Hides `leafEl`, then walks UP the DOM tree hiding each ancestor
-       * that no longer has any visible text content — collapsing the spacing
-       * those wrapper divs/paragraphs would otherwise leave behind.
-       * Stops at `.yv-reader-wrapper` or `[data-custom-header]` boundaries.
-       */
-      const hideWithEmptyAncestors = (leafEl: HTMLElement) => {
-        leafEl.style.setProperty('display', 'none', 'important');
-
-        let parent = leafEl.parentElement;
-        while (parent) {
-          // Never collapse our own custom header or the root reader wrapper
-          if (
-            parent.classList.contains('yv-reader-wrapper') ||
-            parent.hasAttribute('data-custom-header')
-          ) break;
-
-          // Check if every child is now invisible / empty
-          const hasVisibleContent = Array.from(parent.childNodes).some((node) => {
-            if (node.nodeType === Node.TEXT_NODE) {
-              return (node.textContent?.trim() ?? '').length > 0;
-            }
-            if (node.nodeType === Node.ELEMENT_NODE) {
-              const childEl = node as HTMLElement;
-              // A child is "visible" if it's not hidden and has some text
-              return (
-                childEl.style.display !== 'none' &&
-                (childEl.textContent?.trim() ?? '').length > 0
-              );
-            }
-            return false;
-          });
-
-          if (!hasVisibleContent) {
-            (parent as HTMLElement).style.setProperty('display', 'none', 'important');
-            parent = parent.parentElement;
-          } else {
-            break; // Stop — this ancestor still has other visible content
-          }
+      // Find the first verse rendered by YouVersion SDK
+      const firstVerse = readerContainer.querySelector('.yv-v');
+      if (firstVerse) {
+        // Walk up from the first verse to find its ancestor that is a direct child
+        // of the reader container (or one level below it if BibleReader.Root adds
+        // an intermediate wrapper). We stop one level below .yv-reader-wrapper.
+        let topAncestor = firstVerse as HTMLElement;
+        while (
+          topAncestor.parentElement &&
+          !topAncestor.parentElement.classList.contains('yv-reader-wrapper') &&
+          !topAncestor.parentElement.hasAttribute('data-custom-header')
+        ) {
+          topAncestor = topAncestor.parentElement;
         }
-      };
 
-      const allEls = readerContainer.querySelectorAll('*');
-      allEls.forEach((el) => {
-        // Only consider leaf nodes (elements with NO child elements)
-        if (el.children.length > 0) return;
-
-        const text = el.textContent?.trim() ?? '';
-        if (!text) return;
-
-        const isBookMatch = text.toLowerCase() === bookNameLower;
-        const isChapterMatch = text === chapterStr;
-
-        if (isBookMatch || isChapterMatch) {
-          // Never touch our own custom header or verse numbers
-          const isOurCustomHeader = el.closest('[data-custom-header]');
-          const isInsideVerse = el.closest('.yv-v');
-          if (!isOurCustomHeader && !isInsideVerse) {
-            hideWithEmptyAncestors(el as HTMLElement);
+        // topAncestor is now the top-level content block containing the verses.
+        // Hide every preceding sibling — those are YouVersion's header blocks.
+        let sibling = topAncestor.previousElementSibling as HTMLElement | null;
+        while (sibling) {
+          // Never hide our own custom header
+          if (!sibling.hasAttribute('data-custom-header')) {
+            sibling.style.setProperty('display', 'none', 'important');
           }
+          sibling = sibling.previousElementSibling as HTMLElement | null;
         }
-      });
+      }
     }
 
     const verses = document.querySelectorAll('.yv-v');
