@@ -232,7 +232,14 @@
 .yv-reader-wrapper [class*="chapter-label"],
 .yv-reader-wrapper [class*="ChapterLabel"],
 .yv-reader-wrapper .heading,
-.yv-reader-wrapper h1.chapter-label {
+.yv-reader-wrapper h1.chapter-label,
+.yv-reader-wrapper .mt,
+.yv-reader-wrapper .mt1,
+.yv-reader-wrapper .mt2,
+.yv-reader-wrapper .cl,
+.yv-reader-wrapper .c,
+.yv-reader-wrapper .bk,
+.yv-reader-wrapper .h {
   display: none !important;
 }
 
