@@ -520,9 +520,10 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
         const isChapterMatch = text === chapterStr;
 
         if (isBookMatch || isChapterMatch) {
-          // Don't hide verse numbers (sup/span inside .yv-v)
+          // Don't hide our own custom header or verse numbers
+          const isOurCustomHeader = el.closest('[data-custom-header]');
           const isInsideVerse = el.closest('.yv-v');
-          if (!isInsideVerse) {
+          if (!isOurCustomHeader && !isInsideVerse) {
             (el as HTMLElement).style.setProperty('display', 'none', 'important');
           }
         }
@@ -1200,7 +1201,7 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
                 } as React.CSSProperties}
               >
                 {/* Premium Custom Book & Chapter Header */}
-                <div className="flex flex-col items-center justify-center text-center py-6 mb-8 border-b border-[#372f58]/10 animate-in fade-in duration-300 relative select-none">
+                <div data-custom-header="true" className="flex flex-col items-center justify-center text-center py-6 mb-8 border-b border-[#372f58]/10 animate-in fade-in duration-300 relative select-none">
                   {/* Subtle decorative background gradient glow */}
                   <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-40 h-40 bg-gradient-to-br from-[#1CABB9]/10 to-[#372f58]/5 rounded-full blur-2xl pointer-events-none"></div>
                   
