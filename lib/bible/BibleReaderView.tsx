@@ -499,14 +499,56 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
 
   // Apply Highlight and Selection Styling via MutationObserver
   const applyHighlightsAndStyles = () => {
-    // Safely hide YouVersion default book/chapter headers.
-    // Only target LEAF elements (no children elements) whose trimmed text
-    // is exactly the book name or chapter number — this avoids hiding containers.
+    // Safely hide YouVersion default book/chapter headers AND their empty ancestor
+    // containers, so that no residual padding/margin space is left behind.
     const readerContainer = document.querySelector('.yv-reader-wrapper');
     if (readerContainer) {
       const bookName = BOOK_NAMES[book] || book;
       const bookNameLower = bookName.toLowerCase();
       const chapterStr = String(chapter);
+
+      /**
+       * hideWithEmptyAncestors:
+       * Hides `leafEl`, then walks UP the DOM tree hiding each ancestor
+       * that no longer has any visible text content — collapsing the spacing
+       * those wrapper divs/paragraphs would otherwise leave behind.
+       * Stops at `.yv-reader-wrapper` or `[data-custom-header]` boundaries.
+       */
+      const hideWithEmptyAncestors = (leafEl: HTMLElement) => {
+        leafEl.style.setProperty('display', 'none', 'important');
+
+        let parent = leafEl.parentElement;
+        while (parent) {
+          // Never collapse our own custom header or the root reader wrapper
+          if (
+            parent.classList.contains('yv-reader-wrapper') ||
+            parent.hasAttribute('data-custom-header')
+          ) break;
+
+          // Check if every child is now invisible / empty
+          const hasVisibleContent = Array.from(parent.childNodes).some((node) => {
+            if (node.nodeType === Node.TEXT_NODE) {
+              return (node.textContent?.trim() ?? '').length > 0;
+            }
+            if (node.nodeType === Node.ELEMENT_NODE) {
+              const childEl = node as HTMLElement;
+              // A child is "visible" if it's not hidden and has some text
+              return (
+                childEl.style.display !== 'none' &&
+                (childEl.textContent?.trim() ?? '').length > 0
+              );
+            }
+            return false;
+          });
+
+          if (!hasVisibleContent) {
+            (parent as HTMLElement).style.setProperty('display', 'none', 'important');
+            parent = parent.parentElement;
+          } else {
+            break; // Stop — this ancestor still has other visible content
+          }
+        }
+      };
 
       const allEls = readerContainer.querySelectorAll('*');
       allEls.forEach((el) => {
@@ -520,11 +562,11 @@ export function BibleReaderView({ onBack }: { onBack: () => void }) {
         const isChapterMatch = text === chapterStr;
 
         if (isBookMatch || isChapterMatch) {
-          // Don't hide our own custom header or verse numbers
+          // Never touch our own custom header or verse numbers
           const isOurCustomHeader = el.closest('[data-custom-header]');
           const isInsideVerse = el.closest('.yv-v');
           if (!isOurCustomHeader && !isInsideVerse) {
-            (el as HTMLElement).style.setProperty('display', 'none', 'important');
+            hideWithEmptyAncestors(el as HTMLElement);
           }
         }
       });
