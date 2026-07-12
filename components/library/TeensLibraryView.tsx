@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, BookOpen, Hash, ArrowUpRight, Search, Play, FileText, ChevronDown } from 'lucide-react';
 import { getZoneLibrary, ZoneLibraryResult } from '../../lib/library/getZoneLibrary';
 import { StudyNote } from '../StudyNote';
+import { supabase } from '../../lib/supabase';
 
 interface TeensLibraryViewProps {
   onBack: () => void;
@@ -14,10 +15,12 @@ export const TeensLibraryView: React.FC<TeensLibraryViewProps> = ({ onBack }) =>
     contentItems: [],
     bloomBooks: [],
     commentaries: [],
-    studyNotes: []
+    studyNotes: [],
+    devotionals: []
   });
   const [isLoading, setIsLoading] = useState(true);
   const [expandedNoteId, setExpandedNoteId] = useState<number | null>(null);
+  const [expandedDevotionalId, setExpandedDevotionalId] = useState<string | null>(null);
 
   // Hardcoded popular topics for Teens
   const popularTopics = [
@@ -200,7 +203,125 @@ export const TeensLibraryView: React.FC<TeensLibraryViewProps> = ({ onBack }) =>
               </div>
             )}
 
-            {libraryData.contentItems.length === 0 && libraryData.studyNotes.length === 0 && (
+            {/* Daily Teen Devotionals (Open Heavens) */}
+            {libraryData.devotionals.length > 0 && (
+              <div className="space-y-6">
+                <h2 className="text-lg font-black uppercase tracking-wider text-violet-400">
+                  Daily Open Heavens Devotional
+                </h2>
+                <div className="space-y-4">
+                  {libraryData.devotionals.map((dev) => {
+                    const isExpanded = expandedDevotionalId === dev.id;
+                    const videoUrl = dev.video_path && supabase
+                      ? supabase.storage.from('devotional-media').getPublicUrl(dev.video_path).data.publicUrl
+                      : null;
+                    const audioUrl = dev.audio_path && supabase
+                      ? supabase.storage.from('devotional-media').getPublicUrl(dev.audio_path).data.publicUrl
+                      : null;
+
+                    return (
+                      <div 
+                        key={dev.id} 
+                        className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:border-violet-500/30 transition-all text-left"
+                      >
+                        <div 
+                          className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 cursor-pointer"
+                          onClick={() => setExpandedDevotionalId(isExpanded ? null : dev.id)}
+                        >
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[10px] font-black text-violet-400 uppercase tracking-widest bg-violet-950/40 px-2 py-0.5 rounded-md border border-violet-900/30">
+                                DEVOTIONAL
+                              </span>
+                              <span className="text-xs text-gray-400 font-bold">
+                                {new Date(dev.devotional_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                              </span>
+                            </div>
+                            <h3 className="text-base font-black text-white">
+                              {dev.title}
+                            </h3>
+                          </div>
+                          <button className="self-end sm:self-auto p-1.5 bg-white/5 rounded-lg text-gray-400 hover:text-white">
+                            <ChevronDown size={16} className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                          </button>
+                        </div>
+                        
+                        {isExpanded && (
+                          <div className="mt-4 pt-4 border-t border-white/10 space-y-6 animate-in fade-in duration-200">
+                            {/* Media Section: Split grid for video/audio */}
+                            {(videoUrl || audioUrl) && (
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {videoUrl && (
+                                  <div className="space-y-2">
+                                    <span className="text-xs font-black uppercase text-violet-450 tracking-wider">Video Narration & Scenes</span>
+                                    <div className="aspect-video rounded-xl overflow-hidden bg-black border border-white/10 shadow-lg">
+                                      <video src={videoUrl} controls className="w-full h-full object-cover" />
+                                    </div>
+                                  </div>
+                                )}
+                                {audioUrl && (
+                                  <div className="space-y-2">
+                                    <span className="text-xs font-black uppercase text-violet-450 tracking-wider">Audio Narration Only</span>
+                                    <div className="bg-white/5 border border-white/10 p-4 rounded-xl flex flex-col justify-center h-full max-h-[120px] shadow-lg">
+                                      <audio src={audioUrl} controls className="w-full" />
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Devotional Text Info */}
+                            {dev.memory_verse && (
+                              <div className="bg-violet-950/20 border border-violet-900/30 p-4 rounded-xl">
+                                <span className="text-[10px] font-black text-violet-400 uppercase tracking-widest block mb-1">
+                                  Memory Verse ({dev.memory_verse_ref})
+                                </span>
+                                <p className="text-sm font-semibold text-gray-250 italic">
+                                  "{dev.memory_verse}"
+                                </p>
+                              </div>
+                            )}
+
+                            {dev.bible_reading_ref && (
+                              <div className="bg-white/5 border border-white/10 p-4 rounded-xl">
+                                <span className="text-[10px] font-black text-violet-400 uppercase tracking-widest block mb-1">
+                                  Bible Reading
+                                </span>
+                                <p className="text-sm font-extrabold text-white">
+                                  {dev.bible_reading_ref}
+                                </p>
+                              </div>
+                            )}
+
+                            <div className="space-y-2">
+                              <span className="text-[10px] font-black text-violet-400 uppercase tracking-widest block">
+                                Today's Message
+                              </span>
+                              <p className="text-sm text-gray-300 leading-relaxed font-serif whitespace-pre-line select-text">
+                                {dev.body_content}
+                              </p>
+                            </div>
+
+                            {dev.prayer_point && (
+                              <div className="bg-fuchsia-950/20 border border-fuchsia-900/30 p-4 rounded-xl">
+                                <span className="text-[10px] font-black text-fuchsia-400 uppercase tracking-widest block mb-1">
+                                  Prayer Point
+                                </span>
+                                <p className="text-sm font-bold text-gray-200 italic">
+                                  {dev.prayer_point}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {libraryData.contentItems.length === 0 && libraryData.studyNotes.length === 0 && libraryData.devotionals.length === 0 && (
               <div className="text-center py-20 bg-white/5 rounded-2xl border border-dashed border-white/10 max-w-sm mx-auto">
                 <span className="text-3xl block mb-2">🔭</span>
                 <h3 className="text-sm font-black text-gray-300 uppercase tracking-wider">No matching teen content</h3>

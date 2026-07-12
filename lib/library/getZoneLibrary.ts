@@ -3,10 +3,12 @@ import {
   fetchBloomBooks, 
   fetchCommentariesForChapter, 
   fetchStudyNotesForChapter,
+  fetchPublishedDevotionals,
   DbContentItem, 
   BloomBook, 
   BibleCommentary, 
-  BibleStudyNote 
+  BibleStudyNote,
+  Devotional
 } from '../supabase';
 
 export interface LibraryFilters {
@@ -23,6 +25,7 @@ export interface ZoneLibraryResult {
   bloomBooks: BloomBook[];
   commentaries: BibleCommentary[];
   studyNotes: BibleStudyNote[];
+  devotionals: Devotional[];
 }
 
 export async function getZoneLibrary(
@@ -33,10 +36,28 @@ export async function getZoneLibrary(
     contentItems: [],
     bloomBooks: [],
     commentaries: [],
-    studyNotes: []
+    studyNotes: [],
+    devotionals: []
   };
 
   try {
+    // Fetch devotionals if zone is teens or teachers
+    if (zone === 'teens') {
+      const devs = await fetchPublishedDevotionals('open_heavens_teens');
+      result.devotionals = devs;
+    } else if (zone === 'teachers') {
+      const devs = await fetchPublishedDevotionals('open_heavens_general');
+      result.devotionals = devs;
+    }
+
+    if (filters.search && result.devotionals.length > 0) {
+      const searchLower = filters.search.toLowerCase();
+      result.devotionals = result.devotionals.filter(d => 
+        d.title.toLowerCase().includes(searchLower) ||
+        (d.body_content && d.body_content.toLowerCase().includes(searchLower)) ||
+        (d.memory_verse && d.memory_verse.toLowerCase().includes(searchLower))
+      );
+    }
     // 1. Fetch content items for specified zone
     let contentStatus: 'published' = 'published';
     const rawItems = await fetchContentItems(zone, undefined, contentStatus);

@@ -1782,6 +1782,61 @@ export async function fetchBloomBooks(): Promise<BloomBook[]> {
   return [];
 }
 
+export interface Devotional {
+  id: string;
+  devotional_type: 'open_heavens_teens' | 'open_heavens_general';
+  zone: 'teens' | 'teachers';
+  devotional_date: string;
+  title: string;
+  memory_verse: string | null;
+  memory_verse_ref: string | null;
+  bible_reading_ref: string | null;
+  body_content: string;
+  prayer_point: string | null;
+  source_url: string;
+  video_path: string | null;
+  audio_path: string | null;
+  status: 'draft' | 'approved' | 'published' | 'rejected';
+}
+
+export async function fetchPublishedDevotionals(
+  devotionalType?: 'open_heavens_teens' | 'open_heavens_general'
+): Promise<Devotional[]> {
+  if (isRealSupabase && supabase) {
+    try {
+      let query = supabase
+        .from('devotionals')
+        .select('*')
+        .eq('status', 'published')
+        .order('devotional_date', { ascending: false });
+
+      if (devotionalType) {
+        query = query.eq('devotional_type', devotionalType);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data || [];
+    } catch (e) {
+      console.warn("Supabase fetchPublishedDevotionals failed, falling back to local: ", e);
+    }
+  }
+
+  try {
+    let list: Devotional[] = JSON.parse(localStorage.getItem('ft_mock_devotionals') || '[]');
+    list = list.filter(d => d.status === 'published');
+    if (devotionalType) {
+      list = list.filter(d => d.devotional_type === devotionalType);
+    }
+    return list.sort((a, b) => b.devotional_date.localeCompare(a.devotional_date));
+  } catch (e) {
+    console.warn("Failed to load local devotionals cache:", e);
+  }
+
+  return [];
+}
+
+
 
 
 

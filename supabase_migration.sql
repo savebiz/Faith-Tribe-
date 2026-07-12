@@ -664,4 +664,38 @@ CREATE POLICY "public read bloom_books" ON bloom_books FOR SELECT USING (true);
 DROP POLICY IF EXISTS "staff manage bloom_books" ON bloom_books;
 CREATE POLICY "staff manage bloom_books" ON bloom_books FOR ALL USING (current_staff_role() IN ('super_admin', 'content_editor'));
 
+-- Create devotionals table
+CREATE TABLE IF NOT EXISTS devotionals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  devotional_type TEXT NOT NULL,         -- 'open_heavens_teens' | 'open_heavens_general'
+  zone TEXT NOT NULL,                    -- 'teens' | 'teachers'
+  devotional_date DATE NOT NULL,
+  title TEXT NOT NULL,
+  memory_verse TEXT,
+  memory_verse_ref TEXT,
+  bible_reading_ref TEXT,
+  body_content TEXT NOT NULL,
+  prayer_point TEXT,
+  source_url TEXT NOT NULL,
+  status TEXT DEFAULT 'draft',           -- 'draft' | 'approved' | 'published'
+  reviewed_by UUID REFERENCES staff(id),
+  reviewed_at TIMESTAMPTZ,
+  scraped_at TIMESTAMPTZ DEFAULT now(),
+  video_path TEXT,
+  audio_path TEXT,
+  UNIQUE (devotional_type, devotional_date)
+);
+
+-- Enable RLS for devotionals
+ALTER TABLE devotionals ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "public read devotionals" ON devotionals;
+CREATE POLICY "public read devotionals" ON devotionals 
+  FOR SELECT USING (status = 'published');
+
+DROP POLICY IF EXISTS "staff manage devotionals" ON devotionals;
+CREATE POLICY "staff manage devotionals" ON devotionals 
+  FOR ALL USING (current_staff_role()::text IN ('super_admin', 'zone_manager', 'content_editor', 'reviewer'));
+
+
 

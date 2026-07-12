@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, BookOpen, Search, Download, HelpCircle, FileText, Filter, Book, AlertCircle, ExternalLink } from 'lucide-react';
+import { ArrowLeft, BookOpen, Search, Download, HelpCircle, FileText, Filter, Book, AlertCircle, ExternalLink, ChevronDown } from 'lucide-react';
 import { getZoneLibrary, ZoneLibraryResult } from '../../lib/library/getZoneLibrary';
 import { BOOK_NAMES } from '../../lib/bible/bookCodes';
+import { supabase } from '../../lib/supabase';
 
 interface TeachersLibraryViewProps {
   onBack: () => void;
@@ -11,16 +12,18 @@ export const TeachersLibraryView: React.FC<TeachersLibraryViewProps> = ({ onBack
   const [search, setSearch] = useState('');
   const [selectedBook, setSelectedBook] = useState('MAT');
   const [selectedChapter, setSelectedChapter] = useState(1);
-  const [resourceType, setResourceType] = useState<'all' | 'video' | 'reading' | 'document' | 'commentary' | 'note'>('all');
+  const [resourceType, setResourceType] = useState<'all' | 'video' | 'reading' | 'document' | 'commentary' | 'note' | 'devotional'>('all');
   const [commentaryId, setCommentaryId] = useState<string>('all');
   
   const [libraryData, setLibraryData] = useState<ZoneLibraryResult>({
     contentItems: [],
     bloomBooks: [],
     commentaries: [],
-    studyNotes: []
+    studyNotes: [],
+    devotionals: []
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [expandedDevotionalId, setExpandedDevotionalId] = useState<string | null>(null);
 
   // List of active commentary sources
   const commentarySources = [
@@ -138,7 +141,8 @@ export const TeachersLibraryView: React.FC<TeachersLibraryViewProps> = ({ onBack
                 { id: 'all', label: 'All Formats' },
                 { id: 'document', label: 'Lesson Documents' },
                 { id: 'commentary', label: 'Commentary Content' },
-                { id: 'note', label: 'Study & Engagement Notes' }
+                { id: 'note', label: 'Study & Engagement Notes' },
+                { id: 'devotional', label: 'OH Daily Devotionals' }
               ].map(type => (
                 <button
                   key={type.id}
@@ -285,7 +289,118 @@ export const TeachersLibraryView: React.FC<TeachersLibraryViewProps> = ({ onBack
                 </div>
               )}
 
-              {libraryData.commentaries.length === 0 && libraryData.studyNotes.length === 0 && libraryData.contentItems.length === 0 && (
+              {/* Open Heavens Devotionals Section */}
+              {(resourceType === 'all' || resourceType === 'devotional') && libraryData.devotionals.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="text-xs font-black uppercase tracking-wider text-teal-800 flex items-center gap-1.5">
+                    <BookOpen size={14} />
+                    <span>Open Heavens Daily Devotionals</span>
+                  </h3>
+                  
+                  {libraryData.devotionals.map((dev) => {
+                    const isExpanded = expandedDevotionalId === dev.id;
+                    const videoUrl = dev.video_path && supabase
+                      ? supabase.storage.from('devotional-media').getPublicUrl(dev.video_path).data.publicUrl
+                      : null;
+                    const audioUrl = dev.audio_path && supabase
+                      ? supabase.storage.from('devotional-media').getPublicUrl(dev.audio_path).data.publicUrl
+                      : null;
+
+                    return (
+                      <div key={dev.id} className="bg-white p-6 rounded-3xl border border-gray-200 shadow-sm space-y-4 text-left">
+                        <div 
+                          className="flex items-center justify-between cursor-pointer"
+                          onClick={() => setExpandedDevotionalId(isExpanded ? null : dev.id)}
+                        >
+                          <div>
+                            <span className="bg-teal-100 text-teal-800 text-[9px] font-black uppercase px-2.5 py-1 rounded-full">
+                              Devotional
+                            </span>
+                            <span className="text-[10px] font-bold text-gray-400 ml-2">
+                              {new Date(dev.devotional_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                            </span>
+                            <h4 className="text-sm font-black text-gray-900 mt-1">{dev.title}</h4>
+                          </div>
+                          <button className="p-1.5 bg-gray-50 rounded-lg text-gray-400 hover:text-gray-700">
+                            <ChevronDown size={16} className={`transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
+                          </button>
+                        </div>
+
+                        {isExpanded && (
+                          <div className="mt-4 pt-4 border-t border-gray-150 space-y-6 animate-in fade-in duration-200">
+                            {/* Media Player */}
+                            {(videoUrl || audioUrl) && (
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {videoUrl && (
+                                  <div className="space-y-2">
+                                    <span className="text-xs font-black uppercase text-teal-700 tracking-wider">Video Narration & Scenes</span>
+                                    <div className="aspect-video rounded-xl overflow-hidden bg-black border border-gray-200 shadow-sm">
+                                      <video src={videoUrl} controls className="w-full h-full object-cover" />
+                                    </div>
+                                  </div>
+                                )}
+                                {audioUrl && (
+                                  <div className="space-y-2">
+                                    <span className="text-xs font-black uppercase text-teal-700 tracking-wider">Audio Narration Only</span>
+                                    <div className="bg-gray-50 border border-gray-200 p-4 rounded-xl flex flex-col justify-center h-full max-h-[120px] shadow-sm">
+                                      <audio src={audioUrl} controls className="w-full" />
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+
+                            {/* Devotional Info */}
+                            {dev.memory_verse && (
+                              <div className="bg-amber-50/50 border border-amber-100 p-4 rounded-2xl">
+                                <span className="text-[10px] font-black text-amber-700 uppercase tracking-widest block mb-1">
+                                  Memory Verse ({dev.memory_verse_ref})
+                                </span>
+                                <p className="text-sm font-semibold text-gray-750 italic">
+                                  "{dev.memory_verse}"
+                                </p>
+                              </div>
+                            )}
+
+                            {dev.bible_reading_ref && (
+                              <div className="bg-blue-50/30 border border-blue-100/60 p-4 rounded-2xl">
+                                <span className="text-[10px] font-black text-blue-600 tracking-wider block mb-1">
+                                  Bible Reading
+                                </span>
+                                <p className="text-sm font-extrabold text-gray-800">
+                                  {dev.bible_reading_ref}
+                                </p>
+                              </div>
+                            )}
+
+                            <div className="space-y-2">
+                              <span className="text-[10px] font-black text-gray-450 tracking-wider block">
+                                Message Body
+                              </span>
+                              <p className="text-sm text-gray-700 leading-relaxed font-serif whitespace-pre-line select-text">
+                                {dev.body_content}
+                              </p>
+                            </div>
+
+                            {dev.prayer_point && (
+                              <div className="bg-red-50/30 border border-red-100/60 p-4 rounded-2xl">
+                                <span className="text-[10px] font-black text-red-650 tracking-wider block mb-1">
+                                  Prayer Point
+                                </span>
+                                <p className="text-sm font-bold text-gray-700 italic">
+                                  {dev.prayer_point}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {libraryData.commentaries.length === 0 && libraryData.studyNotes.length === 0 && libraryData.contentItems.length === 0 && libraryData.devotionals.length === 0 && (
                 <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-200">
                   <AlertCircle size={32} className="mx-auto text-gray-300 mb-2" />
                   <h3 className="text-xs font-black text-gray-800 uppercase tracking-wider">No resources matched</h3>

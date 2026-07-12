@@ -12,6 +12,7 @@ import { AdminBibleVersionsView } from './AdminBibleVersionsView';
 import { AdminReviewView } from './AdminReviewView';
 import { AdminEscalationsView } from './AdminEscalationsView';
 import { AdminAnalyticsView } from './AdminAnalyticsView';
+import { AdminDevotionalsView } from './AdminDevotionalsView';
 
 interface AdminLayoutProps {
   currentStaff: StaffMember;
@@ -28,6 +29,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentStaff, onSignOu
     if (path.endsWith('/homepage') && ['super_admin', 'content_editor'].includes(currentStaff.role)) return 'homepage';
     if (path.endsWith('/bible') && ['super_admin', 'content_editor'].includes(currentStaff.role)) return 'bible';
     if (path.endsWith('/review') && ['super_admin', 'reviewer'].includes(currentStaff.role)) return 'review';
+    if (path.endsWith('/devotionals') && ['super_admin', 'content_editor', 'zone_manager', 'reviewer'].includes(currentStaff.role)) return 'devotionals';
     if (path.endsWith('/escalations') && ['super_admin', 'teacher_volunteer'].includes(currentStaff.role)) return 'escalations';
     if (path.endsWith('/analytics') && ['super_admin', 'content_editor', 'zone_manager'].includes(currentStaff.role)) return 'analytics';
     return 'dashboard';
@@ -43,6 +45,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentStaff, onSignOu
     { id: 'homepage', label: 'Homepage Control', icon: Radio, roles: ['super_admin', 'content_editor'] },
     { id: 'bible', label: 'Bible Config', icon: Book, roles: ['super_admin', 'content_editor'] },
     { id: 'review', label: 'Review Queue', icon: ClipboardList, roles: ['super_admin', 'reviewer'] },
+    { id: 'devotionals', label: 'OH Devotionals', icon: Sparkles, roles: ['super_admin', 'content_editor', 'zone_manager', 'reviewer'] },
     { id: 'escalations', label: 'Escalations', icon: AlertCircle, roles: ['super_admin', 'teacher_volunteer'] },
     { id: 'analytics', label: 'Analytics', icon: LayoutDashboard, roles: ['super_admin', 'content_editor', 'zone_manager'] },
   ].filter(item => item.roles.includes(currentStaff.role));
@@ -299,6 +302,7 @@ export const AdminLayout: React.FC<AdminLayoutProps> = ({ currentStaff, onSignOu
           {activeTab === 'homepage' && <AdminHomepageView currentStaff={currentStaff} />}
           {activeTab === 'bible' && <AdminBibleVersionsView />}
           {activeTab === 'review' && <AdminReviewView currentStaff={currentStaff} />}
+          {activeTab === 'devotionals' && <AdminDevotionalsView currentStaff={currentStaff} />}
           {activeTab === 'escalations' && <AdminEscalationsView currentStaff={currentStaff} />}
           {activeTab === 'analytics' && <AdminAnalyticsView currentStaff={currentStaff} />}
         </main>
